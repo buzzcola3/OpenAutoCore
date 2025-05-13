@@ -1,0 +1,3 @@
+[submodule "OpenAutoSDK"]
+	path = OpenAutoSDK
+	url = https://github.com/buzzcola3/OpenAutoSDK.git
