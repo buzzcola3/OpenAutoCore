@@ -18,10 +18,10 @@
 
 #pragma once
 
-#include <aasdk/Channel/NavigationStatus/NavigationStatusService.hpp>
+#include <Channel/NavigationStatus/NavigationStatusService.hpp>
 #include <f1x/openauto/autoapp/Service/IService.hpp>
 #include <boost/asio/io_service.hpp>
-#include <aasdk/Messenger/IMessenger.hpp>
+#include <Messenger/IMessenger.hpp>
 
 namespace f1x {
   namespace openauto {

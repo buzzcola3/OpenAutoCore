@@ -16,7 +16,7 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <aasdk/Channel/MediaSink/Video/Channel/VideoChannel.hpp>
+#include <Channel/MediaSink/Video/Channel/VideoChannel.hpp>
 #include <f1x/openauto/autoapp/Service/MediaSink/VideoService.hpp>
 
 namespace f1x {

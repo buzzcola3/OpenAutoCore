@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <aasdk/Channel/Bluetooth/BluetoothService.hpp>
+#include <Channel/Bluetooth/BluetoothService.hpp>
 #include <f1x/openauto/autoapp/Projection/IBluetoothDevice.hpp>
 #include <f1x/openauto/autoapp/Service/IService.hpp>
 

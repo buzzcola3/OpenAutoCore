@@ -23,7 +23,7 @@
 #include <QBluetoothServer>
 #include <f1x/openauto/btservice/IAndroidBluetoothServer.hpp>
 #include <f1x/openauto/autoapp/Configuration/IConfiguration.hpp>
-#include <aasdk/Messenger/Message.hpp>
+#include <Messenger/Message.hpp>
 #include <aap_protobuf/aaw/MessageId.pb.h>
 #include <aap_protobuf/aaw/Status.pb.h>
 #include <aap_protobuf/aaw/WifiConnectionStatus.pb.h>

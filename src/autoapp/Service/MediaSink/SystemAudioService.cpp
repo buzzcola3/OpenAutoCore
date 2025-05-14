@@ -16,7 +16,7 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <aasdk/Channel/MediaSink/Audio/Channel/SystemAudioChannel.hpp>
+#include <Channel/MediaSink/Audio/Channel/SystemAudioChannel.hpp>
 #include <f1x/openauto/autoapp/Service/MediaSink/SystemAudioService.hpp>
 
 

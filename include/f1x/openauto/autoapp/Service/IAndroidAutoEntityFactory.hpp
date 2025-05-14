@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <aasdk/TCP/ITCPEndpoint.hpp>
-#include <aasdk/USB/IAOAPDevice.hpp>
+#include <TCP/ITCPEndpoint.hpp>
+#include <USB/IAOAPDevice.hpp>
 #include <f1x/openauto/autoapp/Service/IAndroidAutoEntity.hpp>
 
 namespace f1x

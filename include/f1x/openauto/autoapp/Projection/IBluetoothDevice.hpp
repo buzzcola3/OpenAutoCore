@@ -16,7 +16,7 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <aasdk/IO/Promise.hpp>
+#include <IO/Promise.hpp>
 
 #pragma once
 

@@ -19,7 +19,7 @@
 #pragma once
 
 #include <f1x/openauto/autoapp/Service/MediaSink/AudioMediaSinkService.hpp>
-#include <aasdk/Channel/MediaSink/Audio/Channel/SystemAudioChannel.hpp>
+#include <Channel/MediaSink/Audio/Channel/SystemAudioChannel.hpp>
 
 namespace f1x {
   namespace openauto {

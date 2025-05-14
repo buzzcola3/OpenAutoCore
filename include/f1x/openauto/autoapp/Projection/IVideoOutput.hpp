@@ -20,8 +20,8 @@
 
 #include <memory>
 #include <QRect>
-#include <aasdk/Common/Data.hpp>
-#include <aasdk/Messenger/Timestamp.hpp>
+#include <Common/Data.hpp>
+#include <Messenger/Timestamp.hpp>
 #include <aap_protobuf/service/media/sink/message/VideoFrameRateType.pb.h>
 #include <aap_protobuf/service/media/sink/message/VideoCodecResolutionType.pb.h>
 

@@ -19,7 +19,7 @@
 #pragma once
 
 #include <f1x/openauto/autoapp/Service/MediaSink/VideoMediaSinkService.hpp>
-#include <aasdk/Channel/MediaSink/Video/Channel/VideoChannel.hpp>
+#include <Channel/MediaSink/Video/Channel/VideoChannel.hpp>
 
 
 namespace f1x {

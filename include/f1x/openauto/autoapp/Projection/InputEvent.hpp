@@ -20,7 +20,7 @@
 
 #include <aap_protobuf/service/media/sink/message/KeyCode.pb.h>
 #include <aap_protobuf/service/inputsource/message/PointerAction.pb.h>
-#include <aasdk/IO/Promise.hpp>
+#include <IO/Promise.hpp>
 
 namespace f1x
 {

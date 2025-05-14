@@ -18,11 +18,11 @@
 
 #pragma once
 
-#include <aasdk/USB/IUSBHub.hpp>
-#include <aasdk/USB/IConnectedAccessoriesEnumerator.hpp>
-#include <aasdk/USB/USBWrapper.hpp>
-#include <aasdk/TCP/ITCPWrapper.hpp>
-#include <aasdk/TCP/ITCPEndpoint.hpp>
+#include <USB/IUSBHub.hpp>
+#include <USB/IConnectedAccessoriesEnumerator.hpp>
+#include <USB/USBWrapper.hpp>
+#include <TCP/ITCPWrapper.hpp>
+#include <TCP/ITCPEndpoint.hpp>
 #include <f1x/openauto/autoapp/Service/IAndroidAutoEntityEventHandler.hpp>
 #include <f1x/openauto/autoapp/Service/IAndroidAutoEntityFactory.hpp>
 

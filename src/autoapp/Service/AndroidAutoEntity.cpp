@@ -16,7 +16,7 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <aasdk/Channel/Control/ControlServiceChannel.hpp>
+#include <Channel/Control/ControlServiceChannel.hpp>
 #include <f1x/openauto/autoapp/Service/AndroidAutoEntity.hpp>
 #include <f1x/openauto/Common/Log.hpp>
 

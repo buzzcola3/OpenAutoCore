@@ -3,8 +3,8 @@
 #include <QDialog>
 #include <QStringListModel>
 #include <QKeyEvent>
-#include <aasdk/TCP/ITCPEndpoint.hpp>
-#include <aasdk/TCP/ITCPWrapper.hpp>
+#include <TCP/ITCPEndpoint.hpp>
+#include <TCP/ITCPWrapper.hpp>
 #include <f1x/openauto/autoapp/Configuration/IRecentAddressesList.hpp>
 
 namespace Ui {

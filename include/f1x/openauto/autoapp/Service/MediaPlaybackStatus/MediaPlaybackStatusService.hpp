@@ -18,10 +18,10 @@
 
 #pragma once
 
-#include <aasdk/Channel/MediaPlaybackStatus/MediaPlaybackStatusService.hpp>
+#include <Channel/MediaPlaybackStatus/MediaPlaybackStatusService.hpp>
 #include <f1x/openauto/autoapp/Service/IService.hpp>
 #include <boost/asio/io_service.hpp>
-#include <aasdk/Messenger/IMessenger.hpp>
+#include <Messenger/IMessenger.hpp>
 
 namespace f1x {
   namespace openauto {

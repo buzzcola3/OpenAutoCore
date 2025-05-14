@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <aasdk/Messenger/IMessenger.hpp>
+#include <Messenger/IMessenger.hpp>
 #include <f1x/openauto/autoapp/Service/IService.hpp>
 
 namespace f1x

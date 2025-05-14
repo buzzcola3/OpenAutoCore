@@ -16,7 +16,7 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <aasdk/Channel/MediaSource/Audio/MicrophoneAudioChannel.hpp>
+#include <Channel/MediaSource/Audio/MicrophoneAudioChannel.hpp>
 #include <f1x/openauto/autoapp/Service/MediaSource/MicrophoneMediaSourceService.hpp>
 
 namespace f1x::openauto::autoapp::service::mediasource {

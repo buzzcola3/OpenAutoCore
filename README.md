@@ -51,6 +51,30 @@ Copyrights (c) 2018 f1x.studio (Michal Szwaj)
  - OpenMAX IL API
 
 ### Building
+
+sudo apt-get install -y \
+    cmake \
+    g++ \
+    qtbase5-dev \
+    libqt5serialport5-dev \
+    libssl-dev \
+    libcurl4-openssl-dev \
+    pulseaudio libusb-1.0-0-dev \
+    libasound2-dev \
+    libprotobuf-dev \
+    protobuf-compiler \
+    qtbase5-dev \
+    qttools5-dev \
+    qttools5-dev-tools \
+    qtmultimedia5-dev \
+    libqt5bluetooth5 \
+    libqt5bluetooth5-bin \
+    qtconnectivity5-dev \
+    qml-module-qtbluetooth \
+    librtaudio-dev \
+    libboost-all-dev
+
+
 #### Amd64
 Install the packages specified in the [prebuilts](https://github.com/opencardev/prebuilts) repository. Qt5 is required, versions packaged in modern Ubuntu and Debian
 seem to work fine.

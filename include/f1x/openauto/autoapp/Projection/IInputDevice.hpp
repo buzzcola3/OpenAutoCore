@@ -19,7 +19,7 @@
 #pragma once
 
 #include <QRect>
-#include <aasdk/IO/Promise.hpp>
+#include <IO/Promise.hpp>
 #include <f1x/openauto/autoapp/Projection/InputEvent.hpp>
 
 namespace f1x

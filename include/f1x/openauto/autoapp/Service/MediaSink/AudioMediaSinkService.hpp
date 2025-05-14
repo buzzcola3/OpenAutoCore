@@ -17,9 +17,9 @@
 */
 
 #pragma once
-#include <aasdk/Messenger/IMessenger.hpp>
-#include <aasdk/Channel/MediaSink/Audio/IAudioMediaSinkService.hpp>
-#include <aasdk/Channel/MediaSink/Audio/IAudioMediaSinkServiceEventHandler.hpp>
+#include <Messenger/IMessenger.hpp>
+#include <Channel/MediaSink/Audio/IAudioMediaSinkService.hpp>
+#include <Channel/MediaSink/Audio/IAudioMediaSinkServiceEventHandler.hpp>
 #include <f1x/openauto/autoapp/Projection/IAudioOutput.hpp>
 #include <f1x/openauto/autoapp/Service/IService.hpp>
 

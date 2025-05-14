@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include <aasdk/Channel/MediaSource/IMediaSourceService.hpp>
-#include <aasdk/Channel/MediaSource/MediaSourceService.hpp>
-#include <aasdk/Channel/MediaSource/IMediaSourceServiceEventHandler.hpp>
+#include <Channel/MediaSource/IMediaSourceService.hpp>
+#include <Channel/MediaSource/MediaSourceService.hpp>
+#include <Channel/MediaSource/IMediaSourceServiceEventHandler.hpp>
 #include <f1x/openauto/autoapp/Service/IService.hpp>
 #include <f1x/openauto/autoapp/Projection/IAudioInput.hpp>
 

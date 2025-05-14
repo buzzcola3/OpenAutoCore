@@ -19,10 +19,10 @@
 #include <QApplication>
 #include <QScreen>
 
-#include <aasdk/Channel/MediaSink/Audio/Channel/MediaAudioChannel.hpp>
-#include <aasdk/Channel/MediaSink/Audio/Channel/SystemAudioChannel.hpp>
-#include <aasdk/Channel/MediaSink/Audio/Channel/GuidanceAudioChannel.hpp>
-#include <aasdk/Channel/MediaSink/Audio/Channel/TelephonyAudioChannel.hpp>
+#include <Channel/MediaSink/Audio/Channel/MediaAudioChannel.hpp>
+#include <Channel/MediaSink/Audio/Channel/SystemAudioChannel.hpp>
+#include <Channel/MediaSink/Audio/Channel/GuidanceAudioChannel.hpp>
+#include <Channel/MediaSink/Audio/Channel/TelephonyAudioChannel.hpp>
 
 #include <f1x/openauto/autoapp/Service/ServiceFactory.hpp>
 

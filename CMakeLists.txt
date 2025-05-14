@@ -45,6 +45,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules/")
 
+set(AAP_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/OpenAutoSDK")
+set(AASDK_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/OpenAutoSDK/include/aasdk")
+
+
 # Configure Boost
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
@@ -86,10 +90,13 @@ else ()
     find_package(Protobuf REQUIRED)
 endif ()
 
-find_package(aap_protobuf REQUIRED)
-find_package(aasdk REQUIRED)
+add_subdirectory(aasdk/protobuf)
+add_subdirectory(aasdk)
+
+
+
 find_package(Boost REQUIRED COMPONENTS system log_setup log OPTIONAL_COMPONENTS unit_test_framework)
-find_package(libusb-1.0 REQUIRED)
+#find_package(libusb-1.0 REQUIRED)
 find_package(Qt5 COMPONENTS DBus Multimedia MultimediaWidgets Bluetooth Network)
 find_package(OpenSSL REQUIRED)
 find_package(rtaudio REQUIRED)
@@ -126,10 +133,13 @@ file(GLOB_RECURSE autoapp_source_files ${autoapp_sources_directory}/*.ui ${autoa
 
 add_executable(autoapp ${autoapp_source_files})
 
+add_dependencies(autoapp aasdk)
 target_include_directories(autoapp PUBLIC ${AAP_PROTOBUF_INCLUDE_DIR} ${AASDK_INCLUDE_DIR})
 
 target_link_libraries(autoapp PUBLIC
         libusb
+        aasdk
+        aap_protobuf
         ${Boost_LIBRARIES}
         ${Qt5DBus_LIBRARIES}
         ${Qt5Multimedia_LIBRARIES}
@@ -143,9 +153,7 @@ target_link_libraries(autoapp PUBLIC
         ${TAGLIB_LIBRARIES}
         ${BLKID_LIBRARIES}
         ${GPS_LIBRARIES}
-        ${PROTOBUF_LIBRARIES}
-        ${AAP_PROTOBUF_LIB_DIR}
-        ${AASDK_LIB_DIR})
+        ${PROTOBUF_LIBRARIES})
 
 set(PROGRAM_VERSION_STRING "${OPENAUTO_BUILD_MAJOR_RELEASE}.${OPENAUTO_BUILD_MINOR_RELEASE}.${OPENAUTO_BUILD_INCREMENTAL}+${OPENAUTO_BUILD_DATE}")
 
@@ -160,12 +168,12 @@ add_executable(btservice ${btservice_source_files}
         src/btservice/BluetoothHandler.cpp)
 
 target_link_libraries(btservice PUBLIC
+        aap_protobuf
         ${Boost_LIBRARIES}
         ${Qt5Bluetooth_LIBRARIES}
         ${Qt5Network_LIBRARIES}
         ${Qt5MultimediaWidgets_LIBRARIES}
-        ${PROTOBUF_LIBRARIES}
-        ${AAP_PROTOBUF_LIB_DIR})
+        ${PROTOBUF_LIBRARIES})
 
 set_target_properties(autoapp
         PROPERTIES VERSION ${PROGRAM_VERSION_STRING} SOVERSION ${OPENAUTO_BUILD_INCREMENTAL})

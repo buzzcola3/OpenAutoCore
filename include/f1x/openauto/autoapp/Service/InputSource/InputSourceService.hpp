@@ -19,7 +19,7 @@
 #pragma once
 
 #include <aap_protobuf/service/media/sink/message/KeyCode.pb.h>
-#include <aasdk/Channel/InputSource/InputSourceService.hpp>
+#include <Channel/InputSource/InputSourceService.hpp>
 #include <f1x/openauto/autoapp/Service/IService.hpp>
 #include <f1x/openauto/autoapp/Projection/IInputDevice.hpp>
 #include <f1x/openauto/autoapp/Projection/IInputDeviceEventHandler.hpp>
