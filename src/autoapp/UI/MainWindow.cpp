@@ -144,26 +144,6 @@ void f1x::openauto::autoapp::ui::MainWindow::updateBG()
     }
 }
 
-void f1x::openauto::autoapp::ui::MainWindow::createDebuglog()
-{
-    system("/usr/local/bin/crankshaft debuglog &");
-}
-
-void f1x::openauto::autoapp::ui::MainWindow::setPairable()
-{
-    system("/usr/local/bin/crankshaft bluetooth pairable &");
-}
-
-void f1x::openauto::autoapp::ui::MainWindow::setMute()
-{
-    system("/usr/local/bin/autoapp_helper setmute &");
-}
-
-void f1x::openauto::autoapp::ui::MainWindow::setUnMute()
-{
-    system("/usr/local/bin/autoapp_helper setunmute &");
-}
-
 void f1x::openauto::autoapp::ui::MainWindow::on_StateChanged(QMediaPlayer::State state)
 {
     if (state == QMediaPlayer::StoppedState || state == QMediaPlayer::PausedState) {

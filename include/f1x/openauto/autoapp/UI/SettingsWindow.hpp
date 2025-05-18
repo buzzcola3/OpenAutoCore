@@ -23,10 +23,8 @@
 #include <QFileDialog>
 #include <QComboBox>
 #include <QKeyEvent>
-#ifdef MAC_OS
-#else
-  #include <sys/sysinfo.h>
-#endif
+#include <sys/sysinfo.h>
+
 
 class QCheckBox;
 class QTimer;

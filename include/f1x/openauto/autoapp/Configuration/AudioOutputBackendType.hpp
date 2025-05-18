@@ -29,7 +29,6 @@ namespace configuration
 
 enum class AudioOutputBackendType
 {
-    RTAUDIO,
     QT
 };
 

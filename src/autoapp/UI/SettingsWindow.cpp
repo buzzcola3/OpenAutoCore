@@ -54,7 +54,6 @@ namespace f1x::openauto::autoapp::ui {
     ui_->setupUi(this);
     connect(ui_->pushButtonCancel, &QPushButton::clicked, this, &SettingsWindow::close);
     connect(ui_->pushButtonSave, &QPushButton::clicked, this, &SettingsWindow::onSave);
-    connect(ui_->pushButtonUnpair, &QPushButton::clicked, this, &SettingsWindow::close);
     connect(ui_->horizontalSliderScreenDPI, &QSlider::valueChanged, this, &SettingsWindow::onUpdateScreenDPI);
 
     connect(ui_->pushButtonClearSelection, &QPushButton::clicked,
@@ -66,80 +65,24 @@ namespace f1x::openauto::autoapp::ui {
             &SettingsWindow::onUpdateSystemVolume);
     connect(ui_->horizontalSliderSystemCapture, &QSlider::valueChanged, this,
             &SettingsWindow::onUpdateSystemCapture);
-    connect(ui_->pushButtonNetwork0, &QPushButton::clicked, this, &SettingsWindow::on_pushButtonNetwork0_clicked);
-    connect(ui_->pushButtonNetwork1, &QPushButton::clicked, this, &SettingsWindow::on_pushButtonNetwork1_clicked);
 
     // menu
     ui_->tab2->hide();
     ui_->tab3->hide();
     ui_->tab4->hide();
-    ui_->tab5->hide();
-
 
     ui_->labelTestInProgress->hide();
 
     connect(ui_->pushButtonTab2, &QPushButton::clicked, this, &SettingsWindow::show_tab2);
     connect(ui_->pushButtonTab3, &QPushButton::clicked, this, &SettingsWindow::show_tab3);
     connect(ui_->pushButtonTab4, &QPushButton::clicked, this, &SettingsWindow::show_tab4);
-    connect(ui_->pushButtonTab5, &QPushButton::clicked, this, &SettingsWindow::show_tab5);
-    connect(ui_->pushButtonTab5, &QPushButton::clicked, this, &SettingsWindow::updateNetworkInfo);
 
     QTime time = QTime::currentTime();
     QString time_text_hour = time.toString("hh");
     QString time_text_minute = time.toString("mm");
-    ui_->label_modeswitchprogress->setText("Ok");
-    ui_->label_notavailable->hide();
 
     QString wifi_ssid = configuration_->getCSValue("WIFI_SSID");
     QString wifi2_ssid = configuration_->getCSValue("WIFI2_SSID");
-
-    ui_->pushButtonNetwork0->setText(wifi_ssid);
-    ui_->pushButtonNetwork1->setText(wifi2_ssid);
-
-    if (!std::ifstream("/boot/crankshaft/network1.conf")) {
-      ui_->pushButtonNetwork1->hide();
-      ui_->pushButtonNetwork0->show();
-    }
-    if (!std::ifstream("/boot/crankshaft/network0.conf")) {
-      ui_->pushButtonNetwork1->hide();
-      ui_->pushButtonNetwork0->setText(configuration_->getCSValue("WIFI2_SSID"));
-    }
-    if (!std::ifstream("/boot/crankshaft/network0.conf") && !std::ifstream("/boot/crankshaft/network1.conf")) {
-      ui_->pushButtonNetwork0->hide();
-      ui_->pushButtonNetwork1->hide();
-      ui_->pushButtonNetworkAuto->hide();
-      ui_->label_notavailable->show();
-    }
-
-    if (std::ifstream("/tmp/hotspot_active")) {
-      ui_->radioButtonClient->setChecked(0);
-      ui_->radioButtonHotspot->setChecked(1);
-      ui_->lineEditWifiSSID->setText(configuration_->getParamFromFile("/etc/hostapd/hostapd.conf", "ssid"));
-      ui_->lineEditPassword->show();
-      ui_->label_password->show();
-      ui_->lineEditPassword->setText("1234567890");
-      ui_->clientNetworkSelect->hide();
-      ui_->label_notavailable->show();
-    } else {
-      ui_->radioButtonClient->setChecked(1);
-      ui_->radioButtonHotspot->setChecked(0);
-      ui_->lineEditWifiSSID->setText(configuration_->readFileContent("/tmp/wifi_ssid"));
-      ui_->lineEditPassword->hide();
-      ui_->label_password->hide();
-      ui_->lineEditPassword->setText("");
-      ui_->clientNetworkSelect->hide();
-      ui_->label_notavailable->show();
-    }
-
-    if (std::ifstream("/tmp/samba_running")) {
-      ui_->labelSambaStatus->setText("running");
-      ui_->pushButtonSambaStart->hide();
-      ui_->pushButtonSambaStop->show();
-    } else {
-      ui_->labelSambaStatus->setText("stopped");
-      ui_->pushButtonSambaStop->hide();
-      ui_->pushButtonSambaStart->show();
-    }
 
     QTimer *refresh = new QTimer(this);
     connect(refresh, SIGNAL(timeout()), this, SLOT(updateInfo()));
@@ -169,11 +112,6 @@ namespace f1x::openauto::autoapp::ui {
     }
   }
 
-  void SettingsWindow::updateInfo() {
-    if (ui_->tab5->isVisible() == true) {
-      updateNetworkInfo();
-    }
-  }
 
   void SettingsWindow::onSave() {
 
@@ -195,59 +133,17 @@ namespace f1x::openauto::autoapp::ui {
 
     configuration_->setScreenDPI(static_cast<size_t>(ui_->horizontalSliderScreenDPI->value()));
 
-    QRect videoMargins(0, 0, ui_->spinBoxVideoMarginWidth->value(), ui_->spinBoxVideoMarginHeight->value());
-    configuration_->setVideoMargins(std::move(videoMargins));
-
     configuration_->setTouchscreenEnabled(ui_->checkBoxEnableTouchscreen->isChecked());
     this->saveButtonCheckBoxes();
 
     configuration_->playerButtonControl(ui_->checkBoxPlayerControl->isChecked());
 
-    if (ui_->disableProjectionButton->isChecked()) {
-        configuration_->setWirelessProjectionEnabled(false);
-    } else {
-        configuration_->setWirelessProjectionEnabled(true);
-    }
-
     configuration_->setMusicAudioChannelEnabled(ui_->checkBoxMusicAudioChannel->isChecked());
     configuration_->setGuidanceAudioChannelEnabled(ui_->checkBoxSpeechAudioChannel->isChecked());
     configuration_->setTelephonyAudioChannelEnabled(true);
-    configuration_->setAudioOutputBackendType(
-        ui_->radioButtonRtAudio->isChecked() ? configuration::AudioOutputBackendType::RTAUDIO
-                                             : configuration::AudioOutputBackendType::QT);
+    configuration_->setAudioOutputBackendType(configuration::AudioOutputBackendType::QT);
 
     configuration_->save();
-
-    // generate param string for autoapp_helper
-    std::string params;
-    params.append(std::to_string(ui_->horizontalSliderSystemVolume->value()));
-    params.append("#");
-    params.append(std::to_string(ui_->horizontalSliderSystemCapture->value()));
-    params.append("#");
-    params.append(
-        std::string("'") + std::string(ui_->comboBoxPulseOutput->currentText().toStdString()) + std::string("'"));
-    params.append("#");
-    params.append(
-        std::string("'") + std::string(ui_->comboBoxPulseInput->currentText().toStdString()) + std::string("'"));
-    params.append("#");
-    if (ui_->checkBoxHotspot->isChecked()) {
-      params.append("1");
-    } else {
-      params.append("0");
-    }
-    params.append("#");
-    if (ui_->checkBoxBluetoothAutoPair->isChecked()) {
-      params.append("1");
-    } else {
-      params.append("0");
-    }
-    params.append("#");
-    params.append(
-        std::string(ui_->comboBoxCountryCode->currentText().split("|")[0].replace(" ", "").toStdString()));
-    params.append("#");
-    system((std::string("/usr/local/bin/autoapp_helper setparams#") + std::string(params) +
-            std::string(" &")).c_str());
-
     this->close();
   }
 
@@ -282,21 +178,14 @@ namespace f1x::openauto::autoapp::ui {
                                       aap_protobuf::service::media::sink::message::VideoCodecResolutionType::VIDEO_1920x1080);
     ui_->horizontalSliderScreenDPI->setValue(static_cast<int>(configuration_->getScreenDPI()));
 
-    const auto &videoMargins = configuration_->getVideoMargins();
-    ui_->spinBoxVideoMarginWidth->setValue(videoMargins.width());
-    ui_->spinBoxVideoMarginHeight->setValue(videoMargins.height());
-
     ui_->checkBoxEnableTouchscreen->setChecked(configuration_->getTouchscreenEnabled());
     this->loadButtonCheckBoxes();
     ui_->checkBoxPlayerControl->setChecked(configuration_->playerButtonControl());
-
-    ui_->disableProjectionButton->setChecked(!configuration_->getWirelessProjectionEnabled());
 
     ui_->checkBoxMusicAudioChannel->setChecked(configuration_->musicAudioChannelEnabled());
     ui_->checkBoxSpeechAudioChannel->setChecked(configuration_->guidanceAudioChannelEnabled());
 
     const auto &audioOutputBackendType = configuration_->getAudioOutputBackendType();
-    ui_->radioButtonRtAudio->setChecked(audioOutputBackendType == configuration::AudioOutputBackendType::RTAUDIO);
     ui_->radioButtonQtAudio->setChecked(audioOutputBackendType == configuration::AudioOutputBackendType::QT);
 
   }
@@ -449,29 +338,19 @@ namespace f1x::openauto::autoapp::ui {
   void SettingsWindow::show_tab2() {
     ui_->tab3->hide();
     ui_->tab4->hide();
-    ui_->tab5->hide();
     ui_->tab2->show();
   }
 
   void SettingsWindow::show_tab3() {
     ui_->tab2->hide();
     ui_->tab4->hide();
-    ui_->tab5->hide();
     ui_->tab3->show();
   }
 
   void SettingsWindow::show_tab4() {
     ui_->tab2->hide();
     ui_->tab3->hide();
-    ui_->tab5->hide();
     ui_->tab4->show();
-  }
-
-  void SettingsWindow::show_tab5() {
-    ui_->tab2->hide();
-    ui_->tab3->hide();
-    ui_->tab4->hide();
-    ui_->tab5->show();
   }
 
 
@@ -484,109 +363,6 @@ void f1x::openauto::autoapp::ui::SettingsWindow::on_pushButtonAudioTest_clicked(
   ui_->labelTestInProgress->hide();
 }
 
-void f1x::openauto::autoapp::ui::SettingsWindow::updateNetworkInfo() {
-  if (std::ifstream("/tmp/samba_running")) {
-    ui_->labelSambaStatus->setText("running");
-    if (ui_->pushButtonSambaStart->isVisible() == true) {
-      ui_->pushButtonSambaStart->hide();
-      ui_->pushButtonSambaStop->show();
-    }
-  } else {
-    ui_->labelSambaStatus->setText("stopped");
-    if (ui_->pushButtonSambaStop->isVisible() == true) {
-      ui_->pushButtonSambaStop->hide();
-      ui_->pushButtonSambaStart->show();
-    }
-  }
-
-  if (!std::ifstream("/tmp/mode_change_progress")) {
-    QNetworkInterface eth0if = QNetworkInterface::interfaceFromName("eth0");
-    if (eth0if.flags().testFlag(QNetworkInterface::IsUp)) {
-      QList<QNetworkAddressEntry> entrieseth0 = eth0if.addressEntries();
-      if (!entrieseth0.isEmpty()) {
-        QNetworkAddressEntry eth0 = entrieseth0.first();
-        //qDebug() << "eth0: " << eth0.ip();
-        ui_->lineEdit_eth0->setText(eth0.ip().toString());
-      }
-    } else {
-      //qDebug() << "eth0: down";
-      ui_->lineEdit_eth0->setText("interface down");
-    }
-
-    QNetworkInterface wlan0if = QNetworkInterface::interfaceFromName("wlan0");
-    if (wlan0if.flags().testFlag(QNetworkInterface::IsUp)) {
-      QList<QNetworkAddressEntry> entrieswlan0 = wlan0if.addressEntries();
-      if (!entrieswlan0.isEmpty()) {
-        QNetworkAddressEntry wlan0 = entrieswlan0.first();
-        //qDebug() << "wlan0: " << wlan0.ip();
-        ui_->lineEdit_wlan0->setText(wlan0.ip().toString());
-      }
-    } else {
-      //qDebug() << "wlan0: down";
-      ui_->lineEdit_wlan0->setText("interface down");
-    }
-
-    if (std::ifstream("/tmp/hotspot_active")) {
-      ui_->radioButtonClient->setEnabled(1);
-      ui_->radioButtonHotspot->setEnabled(1);
-      ui_->radioButtonHotspot->setChecked(1);
-      ui_->radioButtonClient->setChecked(0);
-      ui_->label_modeswitchprogress->setText("Ok");
-      ui_->lineEditWifiSSID->setText(configuration_->getParamFromFile("/etc/hostapd/hostapd.conf", "ssid"));
-      ui_->lineEditPassword->show();
-      ui_->label_password->show();
-      ui_->lineEditPassword->setText(configuration_->getParamFromFile("/etc/hostapd/hostapd.conf", "wpa_passphrase"));
-      ui_->clientNetworkSelect->hide();
-      ui_->pushButtonNetworkAuto->hide();
-      ui_->label_notavailable->show();
-    } else {
-      ui_->radioButtonClient->setEnabled(1);
-      ui_->radioButtonHotspot->setEnabled(1);
-      ui_->radioButtonHotspot->setChecked(0);
-      ui_->radioButtonClient->setChecked(1);
-      ui_->label_modeswitchprogress->setText("Ok");
-      ui_->lineEditWifiSSID->setText(configuration_->readFileContent("/tmp/wifi_ssid"));
-      ui_->lineEditPassword->hide();
-      ui_->label_password->hide();
-      ui_->lineEditPassword->setText("");
-      ui_->clientNetworkSelect->show();
-      ui_->label_notavailable->hide();
-      ui_->pushButtonNetworkAuto->show();
-
-      if (!std::ifstream("/boot/crankshaft/network1.conf")) {
-        ui_->pushButtonNetwork1->hide();
-        ui_->pushButtonNetwork0->show();
-      }
-      if (!std::ifstream("/boot/crankshaft/network0.conf")) {
-        ui_->pushButtonNetwork1->hide();
-        ui_->pushButtonNetwork0->setText(configuration_->getCSValue("WIFI2_SSID"));
-      }
-      if (!std::ifstream("/boot/crankshaft/network0.conf") && !std::ifstream("/boot/crankshaft/network1.conf")) {
-        ui_->pushButtonNetwork0->hide();
-        ui_->pushButtonNetwork1->hide();
-        ui_->pushButtonNetworkAuto->hide();
-        ui_->label_notavailable->show();
-      }
-    }
-  }
-}
-
-void f1x::openauto::autoapp::ui::SettingsWindow::on_pushButtonNetwork0_clicked() {
-  ui_->lineEdit_wlan0->setText("");
-  ui_->lineEditWifiSSID->setText("");
-  ui_->lineEditPassword->setText("");
-  qApp->processEvents();
-  system("/usr/local/bin/crankshaft network 0 >/dev/null 2>&1 &");
-
-}
-
-void f1x::openauto::autoapp::ui::SettingsWindow::on_pushButtonNetwork1_clicked() {
-  ui_->lineEdit_wlan0->setText("");
-  ui_->lineEditWifiSSID->setText("");
-  ui_->lineEditPassword->setText("");
-  qApp->processEvents();
-  system("/usr/local/bin/crankshaft network 1 >/dev/null 2>&1 &");
-}
 
 void f1x::openauto::autoapp::ui::SettingsWindow::keyPressEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key_Escape) {

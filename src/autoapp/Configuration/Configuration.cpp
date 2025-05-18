@@ -39,7 +39,6 @@ const std::string Configuration::cGeneralShowNetworkinfoKey = "General.ShowNetwo
 const std::string Configuration::cVideoFPSKey = "Video.FPS";
 const std::string Configuration::cVideoResolutionKey = "Video.Resolution";
 const std::string Configuration::cVideoScreenDPIKey = "Video.ScreenDPI";
-const std::string Configuration::cVideoOMXLayerIndexKey = "Video.OMXLayerIndex";
 const std::string Configuration::cVideoMarginWidth = "Video.MarginWidth";
 const std::string Configuration::cVideoMarginHeight = "Video.MarginHeight";
 
@@ -100,7 +99,6 @@ void Configuration::load()
                                                                                                            aap_protobuf::service::media::sink::message::VideoCodecResolutionType::VIDEO_800x480));
         screenDPI_ = iniConfig.get<size_t>(cVideoScreenDPIKey, 140);
 
-        omxLayerIndex_ = iniConfig.get<int32_t>(cVideoOMXLayerIndexKey, 1);
         videoMargins_ = QRect(0, 0, iniConfig.get<int32_t>(cVideoMarginWidth, 0), iniConfig.get<int32_t>(cVideoMarginHeight, 0));
 
         enableTouchscreen_ = iniConfig.get<bool>(cInputEnableTouchscreenKey, true);
@@ -119,7 +117,6 @@ void Configuration::load()
         _audioChannelEnabledSystem = iniConfig.get<bool>(cAudioChannelSystemEnabled, true);
         _audioChannelEnabledTelephony = iniConfig.get<bool>(cAudioChannelTelephonyEnabled, true);
 
-         audioOutputBackendType_ = static_cast<AudioOutputBackendType>(iniConfig.get<uint32_t>(cAudioOutputBackendType, static_cast<uint32_t>(AudioOutputBackendType::RTAUDIO)));
     }
     catch(const boost::property_tree::ini_parser_error& e)
     {
@@ -152,7 +149,6 @@ void Configuration::reset()
     videoFPS_ = aap_protobuf::service::media::sink::message::VideoFrameRateType::VIDEO_FPS_30;
     videoResolution_ = aap_protobuf::service::media::sink::message::VideoCodecResolutionType::VIDEO_800x480;
     screenDPI_ = 140;
-    omxLayerIndex_ = 1;
     videoMargins_ = QRect(0, 0, 0, 0);
     enableTouchscreen_ = true;
     enablePlayerControl_ = false;
@@ -182,7 +178,6 @@ void Configuration::save()
     iniConfig.put<uint32_t>(cVideoFPSKey, static_cast<uint32_t>(videoFPS_));
     iniConfig.put<uint32_t>(cVideoResolutionKey, static_cast<uint32_t>(videoResolution_));
     iniConfig.put<size_t>(cVideoScreenDPIKey, screenDPI_);
-    iniConfig.put<int32_t>(cVideoOMXLayerIndexKey, omxLayerIndex_);
     iniConfig.put<uint32_t>(cVideoMarginWidth, videoMargins_.width());
     iniConfig.put<uint32_t>(cVideoMarginHeight, videoMargins_.height());
 

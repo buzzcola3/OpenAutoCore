@@ -61,34 +61,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     add_definitions(-DNDEBUG)
 endif()
 
-if (WIN32)
-    set(WINSOCK2_LIBRARIES "ws2_32")
-endif (WIN32)
 
-if (DEFINED NOPI)
-    message(STATUS "Configuring for Non-Raspberry Pi")
-else()
-    message(STATUS "Configuring for RaspberryPi")
-    add_definitions(-DUSE_OMX -DOMX_SKIP64BIT -DRASPBERRYPI3)
-    set(BCM_HOST_LIBRARIES "/opt/vc/lib/libbcm_host.so")
-    set(BCM_HOST_INCLUDE_DIRS "/opt/vc/include")
-    set(ILCLIENT_INCLUDE_DIRS "/opt/vc/src/hello_pi/libs/ilclient")
-    set(ILCLIENT_LIBRARIES "/opt/vc/src/hello_pi/libs/ilclient/libilclient.a;/opt/vc/lib/libvcos.so;/opt/vc/lib/libvcilcs.a;/opt/vc/lib/libvchiq_arm.so")
-endif ()
+find_package(Protobuf REQUIRED)
 
-# Building on a Mac requires Abseil
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")  # macOS
-    message(STATUS "MacOS System Detected")
-    add_definitions(-DMAC_OS)
-    find_package(protobuf REQUIRED CONFIG)
-    find_package(absl REQUIRED)
-    set(CMAKE_PREFIX_PATH "/usr/local/opt/qt@5" ${CMAKE_PREFIX_PATH})
-    list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/util-linux)
-    list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/taglib)
-    include(FindProtobuf)
-else ()
-    find_package(Protobuf REQUIRED)
-endif ()
 
 add_subdirectory(OpenAutoSDK/protobuf)
 add_subdirectory(OpenAutoSDK)
@@ -99,7 +74,6 @@ find_package(Boost REQUIRED COMPONENTS system log_setup log OPTIONAL_COMPONENTS 
 #find_package(libusb-1.0 REQUIRED)
 find_package(Qt5 COMPONENTS DBus Multimedia MultimediaWidgets Bluetooth Network)
 find_package(OpenSSL REQUIRED)
-find_package(rtaudio REQUIRED)
 find_package(taglib REQUIRED)
 find_package(blkid REQUIRED)
 find_package(gps REQUIRED)
@@ -117,7 +91,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}
         ${Qt5Network_INCLUDE_DIRS}
         ${Boost_INCLUDE_DIRS}
         ${OPENSSL_INCLUDE_DIR}
-        ${RTAUDIO_INCLUDE_DIRS}
         ${TAGLIB_INCLUDE_DIRS}
         ${BLKID_INCLUDE_DIRS}
         ${BCM_HOST_INCLUDE_DIRS}
@@ -154,7 +127,6 @@ target_link_libraries(autoapp PUBLIC
         ${BCM_HOST_LIBRARIES}
         ${ILCLIENT_LIBRARIES}
         ${WINSOCK2_LIBRARIES}
-        ${RTAUDIO_LIBRARIES}
         ${TAGLIB_LIBRARIES}
         ${BLKID_LIBRARIES}
         ${GPS_LIBRARIES}

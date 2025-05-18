@@ -119,7 +119,6 @@ private:
     aap_protobuf::service::media::sink::message::VideoFrameRateType videoFPS_;
     aap_protobuf::service::media::sink::message::VideoCodecResolutionType videoResolution_;
     size_t screenDPI_;
-    int32_t omxLayerIndex_;
     QRect videoMargins_;
     bool enableTouchscreen_;
     bool enablePlayerControl_;
@@ -151,7 +150,6 @@ private:
     static const std::string cVideoFPSKey;
     static const std::string cVideoResolutionKey;
     static const std::string cVideoScreenDPIKey;
-    static const std::string cVideoOMXLayerIndexKey;
     static const std::string cVideoMarginWidth;
     static const std::string cVideoMarginHeight;
 

@@ -35,7 +35,6 @@
 #include <f1x/openauto/autoapp/Configuration/Configuration.hpp>
 #include <f1x/openauto/autoapp/UI/MainWindow.hpp>
 #include <f1x/openauto/autoapp/UI/SettingsWindow.hpp>
-#include <f1x/openauto/autoapp/UI/ConnectDialog.hpp>
 #include <f1x/openauto/Common/Log.hpp>
 
 namespace autoapp = f1x::openauto::autoapp;
@@ -143,9 +142,6 @@ int main(int argc, char* argv[])
     recentAddressesList.read();
 
     aasdk::tcp::TCPWrapper tcpWrapper;
-    autoapp::ui::ConnectDialog connectdialog(ioService, tcpWrapper, recentAddressesList);
-    //connectdialog.setWindowFlags(Qt::WindowStaysOnTopHint);
-    connectdialog.move((width - 500)/2,(height-300)/2);
 
     QObject::connect(&mainWindow, &autoapp::ui::MainWindow::exit, []() { system("touch /tmp/shutdown"); std::exit(0); });
     QObject::connect(&mainWindow, &autoapp::ui::MainWindow::reboot, []() { system("touch /tmp/reboot"); std::exit(0); });
@@ -227,10 +223,6 @@ int main(int argc, char* argv[])
     auto connectedAccessoriesEnumerator(std::make_shared<aasdk::usb::ConnectedAccessoriesEnumerator>(usbWrapper, ioService, queryChainFactory));
     auto app = std::make_shared<autoapp::App>(ioService, usbWrapper, tcpWrapper, androidAutoEntityFactory, std::move(usbHub), std::move(connectedAccessoriesEnumerator));
 
-    QObject::connect(&connectdialog, &autoapp::ui::ConnectDialog::connectionSucceed, [&app](auto socket) {
-        app->start(std::move(socket));
-    });
-
     QObject::connect(&mainWindow, &autoapp::ui::MainWindow::TriggerAppStart, [&app]() {
         OPENAUTO_LOG(debug) << "[AutoApp] TriggerAppStart: Manual start android auto.";
         try {
@@ -247,8 +239,6 @@ int main(int argc, char* argv[])
             if (std::ifstream("/tmp/android_device")) {
                 OPENAUTO_LOG(debug) << "[AutoApp] TriggerAppStop: Manual stop usb android auto.";
                 app->disableAutostartEntity = true;
-                system("/usr/local/bin/autoapp_helper usbreset");
-                usleep(500000);
                 try {
                     app->stop();
                     //app->pause();
@@ -271,9 +261,8 @@ int main(int argc, char* argv[])
         }
     });
 
-    QObject::connect(&mainWindow, &autoapp::ui::MainWindow::CloseAllDialogs, [&settingsWindow, &connectdialog]() {
+    QObject::connect(&mainWindow, &autoapp::ui::MainWindow::CloseAllDialogs, [&settingsWindow]() {
         settingsWindow.close();
-        connectdialog.close();
         OPENAUTO_LOG(debug) << "[AutoApp] Close all possible open dialogs.";
     });
 

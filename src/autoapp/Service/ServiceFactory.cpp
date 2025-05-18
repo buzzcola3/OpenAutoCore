@@ -37,10 +37,7 @@
 #include <f1x/openauto/autoapp/Service/Sensor/SensorService.hpp>
 #include <f1x/openauto/autoapp/Service/Bluetooth/BluetoothService.hpp>
 #include <f1x/openauto/autoapp/Service/InputSource/InputSourceService.hpp>
-#include <f1x/openauto/autoapp/Service/WifiProjection/WifiProjectionService.hpp>
 #include <f1x/openauto/autoapp/Projection/QtVideoOutput.hpp>
-#include <f1x/openauto/autoapp/Projection/OMXVideoOutput.hpp>
-#include <f1x/openauto/autoapp/Projection/RtAudioOutput.hpp>
 #include <f1x/openauto/autoapp/Projection/QtAudioOutput.hpp>
 #include <f1x/openauto/autoapp/Projection/QtAudioInput.hpp>
 #include <f1x/openauto/autoapp/Projection/InputDevice.hpp>
@@ -125,10 +122,7 @@ namespace f1x::openauto::autoapp::service {
     OPENAUTO_LOG(info) << "[ServiceFactory] createMediaSinkServices()";
     if (configuration_->musicAudioChannelEnabled()) {
       OPENAUTO_LOG(info) << "[ServiceFactory] Media Audio Channel enabled";
-      auto mediaAudioOutput =
-          configuration_->getAudioOutputBackendType() == configuration::AudioOutputBackendType::RTAUDIO ?
-          std::make_shared<projection::RtAudioOutput>(2, 16, 48000) :
-          projection::IAudioOutput::Pointer(new projection::QtAudioOutput(2, 16, 48000),
+      auto mediaAudioOutput = projection::IAudioOutput::Pointer(new projection::QtAudioOutput(2, 16, 48000),
                                             std::bind(&QObject::deleteLater, std::placeholders::_1));
 
       serviceList.emplace_back(
@@ -137,10 +131,7 @@ namespace f1x::openauto::autoapp::service {
 
     if (configuration_->guidanceAudioChannelEnabled()) {
       OPENAUTO_LOG(info) << "[ServiceFactory] Guidance Audio Channel enabled";
-      auto guidanceAudioOutput =
-          configuration_->getAudioOutputBackendType() == configuration::AudioOutputBackendType::RTAUDIO ?
-          std::make_shared<projection::RtAudioOutput>(1, 16, 16000) :
-          projection::IAudioOutput::Pointer(new projection::QtAudioOutput(1, 16, 16000),
+      auto guidanceAudioOutput = projection::IAudioOutput::Pointer(new projection::QtAudioOutput(1, 16, 16000),
                                             std::bind(&QObject::deleteLater, std::placeholders::_1));
 
       serviceList.emplace_back(
@@ -148,40 +139,20 @@ namespace f1x::openauto::autoapp::service {
                                                             std::move(guidanceAudioOutput)));
     }
 
-    /* TODO: This also causes a problem - suspect not actually enabled yet in AA, or removed due to preference of Bluetooth.
-    if (configuration_->telephonyAudioChannelEnabled()) {
-      OPENAUTO_LOG(info) << "[ServiceFactory] Telephony Audio Channel enabled";
-      auto telephonyAudioOutput =
-          configuration_->getAudioOutputBackendType() == configuration::AudioOutputBackendType::RTAUDIO ?
-          std::make_shared<projection::RtAudioOutput>(1, 16, 16000) :
-          projection::IAudioOutput::Pointer(new projection::QtAudioOutput(1, 16, 16000),
-                                            std::bind(&QObject::deleteLater, std::placeholders::_1));
-
-      serviceList.emplace_back(
-          std::make_shared<mediasink::TelephonyAudioService>(ioService_, messenger,
-                                                             std::move(telephonyAudioOutput)));
-    }
-*/
     /*
      * No Need to Check for systemAudioChannelEnabled - MUST be enabled by default.
      */
 
     OPENAUTO_LOG(info) << "[ServiceFactory] System Audio Channel enabled";
-    auto systemAudioOutput =
-        configuration_->getAudioOutputBackendType() == configuration::AudioOutputBackendType::RTAUDIO ?
-        std::make_shared<projection::RtAudioOutput>(1, 16, 16000) :
-        projection::IAudioOutput::Pointer(new projection::QtAudioOutput(1, 16, 16000),
+    auto systemAudioOutput = projection::IAudioOutput::Pointer(new projection::QtAudioOutput(1, 16, 16000),
                                           std::bind(&QObject::deleteLater, std::placeholders::_1));
 
     serviceList.emplace_back(
         std::make_shared<mediasink::SystemAudioService>(ioService_, messenger, std::move(systemAudioOutput)));
 
-#ifdef USE_OMX
-    auto videoOutput(std::make_shared<projection::OMXVideoOutput>(configuration_));
-#else
     projection::IVideoOutput::Pointer videoOutput(new projection::QtVideoOutput(configuration_),
                                                   std::bind(&QObject::deleteLater, std::placeholders::_1));
-#endif
+
 
     OPENAUTO_LOG(info) << "[ServiceFactory] Video Channel enabled";
     serviceList.emplace_back(
@@ -200,11 +171,6 @@ namespace f1x::openauto::autoapp::service {
   IService::Pointer ServiceFactory::createSensorService(aasdk::messenger::IMessenger::Pointer messenger) {
     OPENAUTO_LOG(info) << "[ServiceFactory] createSensorService()";
     return std::make_shared<sensor::SensorService>(ioService_, messenger);
-  }
-
-  IService::Pointer ServiceFactory::createWifiProjectionService(aasdk::messenger::IMessenger::Pointer messenger) {
-    OPENAUTO_LOG(info) << "[ServiceFactory] createWifiProjectionService()";
-    return std::make_shared<wifiprojection::WifiProjectionService>(ioService_, messenger, configuration_);
   }
 
 }
