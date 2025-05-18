@@ -90,8 +90,8 @@ else ()
     find_package(Protobuf REQUIRED)
 endif ()
 
-add_subdirectory(aasdk/protobuf)
-add_subdirectory(aasdk)
+add_subdirectory(OpenAutoSDK/protobuf)
+add_subdirectory(OpenAutoSDK)
 
 
 
@@ -103,6 +103,11 @@ find_package(rtaudio REQUIRED)
 find_package(taglib REQUIRED)
 find_package(blkid REQUIRED)
 find_package(gps REQUIRED)
+
+# Add GStreamer, is likely needed for qt5multimedia to work
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GST REQUIRED gstreamer-1.0)
+pkg_check_modules(GSTAPP REQUIRED gstreamer-app-1.0)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}
         ${Qt5Multimedia_INCLUDE_DIRS}
@@ -153,7 +158,9 @@ target_link_libraries(autoapp PUBLIC
         ${TAGLIB_LIBRARIES}
         ${BLKID_LIBRARIES}
         ${GPS_LIBRARIES}
-        ${PROTOBUF_LIBRARIES})
+        ${PROTOBUF_LIBRARIES}
+        ${GST_LIBRARIES}      # Link against GStreamer libraries
+        ${GSTAPP_LIBRARIES})   # Link against GStreamer App libraries
 
 set(PROGRAM_VERSION_STRING "${OPENAUTO_BUILD_MAJOR_RELEASE}.${OPENAUTO_BUILD_MINOR_RELEASE}.${OPENAUTO_BUILD_INCREMENTAL}+${OPENAUTO_BUILD_DATE}")
 
