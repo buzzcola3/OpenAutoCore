@@ -107,8 +107,6 @@ private slots:
     void updateAlpha();
 
 private slots:
-    void on_pushButtonBrightness_clicked();
-    void on_pushButtonBrightness2_clicked();
     void on_pushButtonVolume_clicked();
     void on_pushButtonVolume2_clicked();
     void switchGuiToDay();
@@ -245,8 +243,6 @@ private:
 
     bool toggleMute = false;
     bool oldGUIStyle = false;
-    bool UseBigClock = false;
-    bool NoClock = false;
 
     bool c1ButtonForce = false;
     bool c2ButtonForce = false;
@@ -259,8 +255,6 @@ private:
     int currentPlaylistIndex = 0;
     bool background_set = false;
     bool mediacontentchanged = true;
-
-    bool lightsensor = false;
     bool holidaybg = false;
 
     bool csmtupdate = false;

@@ -46,44 +46,12 @@ public:
 
     bool hasTouchScreen() const override;
 
-    void setHandednessOfTrafficType(HandednessOfTrafficType value) override;
-    HandednessOfTrafficType getHandednessOfTrafficType() const override;
-    void showClock(bool value) override;
-    bool showClock() const override;
-
-    void showBigClock(bool value) override;
-    bool showBigClock() const override;
-    void oldGUI(bool value) override;
-    bool oldGUI() const override;
-    void setAlphaTrans(size_t value) override;
-    size_t getAlphaTrans() const override;
     void hideMenuToggle(bool value) override;
     bool hideMenuToggle() const override;
-    void hideAlpha(bool value) override;
-    bool hideAlpha() const override;
-    void showLux(bool value) override;
-    bool showLux() const override;
     void showCursor(bool value) override;
     bool showCursor() const override;
-    void hideBrightnessControl(bool value) override;
-    bool hideBrightnessControl() const override;
     void showNetworkinfo(bool value) override;
     bool showNetworkinfo() const override;
-    void hideWarning(bool value) override;
-    bool hideWarning() const override;
-
-    std::string getMp3MasterPath() const override;
-    void setMp3MasterPath(const std::string& value) override;
-    std::string getMp3SubFolder() const override;
-    void setMp3SubFolder(const std::string& value) override;
-    int32_t getMp3Track() const override;
-    void setMp3Track(int32_t value) override;
-    bool mp3AutoPlay() const override;
-    void mp3AutoPlay(bool value) override;
-    bool showAutoPlay() const override;
-    void showAutoPlay(bool value) override;
-    bool instantPlay() const override;
-    void instantPlay(bool value) override;
 
     QString getCSValue(QString searchString) const override;
     QString readFileContent(QString fileName) const override;
@@ -95,8 +63,6 @@ public:
     void setVideoResolution(aap_protobuf::service::media::sink::message::VideoCodecResolutionType value) override;
     size_t getScreenDPI() const override;
     void setScreenDPI(size_t value) override;
-    void setOMXLayerIndex(int32_t value) override;
-    int32_t getOMXLayerIndex() const override;
     void setVideoMargins(QRect value) override;
     QRect getVideoMargins() const override;
 
@@ -173,25 +139,14 @@ private:
 
     static const std::string cGeneralShowClockKey;
 
-    static const std::string cGeneralShowBigClockKey;
     static const std::string cGeneralOldGUIKey;
     static const std::string cGeneralAlphaTransKey;
     static const std::string cGeneralHideMenuToggleKey;
-    static const std::string cGeneralHideAlphaKey;
-    static const std::string cGeneralShowLuxKey;
     static const std::string cGeneralShowCursorKey;
     static const std::string cGeneralHideBrightnessControlKey;
     static const std::string cGeneralShowNetworkinfoKey;
-    static const std::string cGeneralHideWarningKey;
 
     static const std::string cGeneralHandednessOfTrafficTypeKey;
-
-    static const std::string cGeneralMp3MasterPathKey;
-    static const std::string cGeneralMp3SubFolderKey;
-    static const std::string cGeneralMp3TrackKey;
-    static const std::string cGeneralMp3AutoPlayKey;
-    static const std::string cGeneralShowAutoPlayKey;
-    static const std::string cGeneralInstantPlayKey;
 
     static const std::string cVideoFPSKey;
     static const std::string cVideoResolutionKey;

@@ -194,7 +194,6 @@ namespace f1x::openauto::autoapp::ui {
     }
 
     configuration_->setScreenDPI(static_cast<size_t>(ui_->horizontalSliderScreenDPI->value()));
-    configuration_->setOMXLayerIndex(ui_->spinBoxOmxLayerIndex->value());
 
     QRect videoMargins(0, 0, ui_->spinBoxVideoMarginWidth->value(), ui_->spinBoxVideoMarginHeight->value());
     configuration_->setVideoMargins(std::move(videoMargins));
@@ -282,7 +281,6 @@ namespace f1x::openauto::autoapp::ui {
     ui_->radioButton1080p->setChecked(configuration_->getVideoResolution() ==
                                       aap_protobuf::service::media::sink::message::VideoCodecResolutionType::VIDEO_1920x1080);
     ui_->horizontalSliderScreenDPI->setValue(static_cast<int>(configuration_->getScreenDPI()));
-    ui_->spinBoxOmxLayerIndex->setValue(configuration_->getOMXLayerIndex());
 
     const auto &videoMargins = configuration_->getVideoMargins();
     ui_->spinBoxVideoMarginWidth->setValue(videoMargins.width());

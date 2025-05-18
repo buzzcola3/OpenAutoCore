@@ -30,25 +30,11 @@ const std::string Configuration::cConfigFileName = "openauto.ini";
 
 const std::string Configuration::cGeneralShowClockKey = "General.ShowClock";
 
-const std::string Configuration::cGeneralShowBigClockKey = "General.ShowBigClock";
 const std::string Configuration::cGeneralOldGUIKey = "General.OldGUI";
-const std::string Configuration::cGeneralAlphaTransKey = "General.AlphaTrans";
 const std::string Configuration::cGeneralHideMenuToggleKey = "General.HideMenuToggle";
-const std::string Configuration::cGeneralHideAlphaKey = "General.HideAlpha";
-const std::string Configuration::cGeneralShowLuxKey = "General.ShowLux";
 const std::string Configuration::cGeneralShowCursorKey = "General.ShowCursor";
 const std::string Configuration::cGeneralHideBrightnessControlKey = "General.HideBrightnessControl";
 const std::string Configuration::cGeneralShowNetworkinfoKey = "General.ShowNetworkinfo";
-const std::string Configuration::cGeneralHideWarningKey = "General.HideWarning";
-
-const std::string Configuration::cGeneralHandednessOfTrafficTypeKey = "General.HandednessOfTrafficType";
-
-const std::string Configuration::cGeneralMp3MasterPathKey = "General.Mp3MasterPath";
-const std::string Configuration::cGeneralMp3SubFolderKey = "General.Mp3SubFolder";
-const std::string Configuration::cGeneralMp3TrackKey = "General.Mp3Track";
-const std::string Configuration::cGeneralMp3AutoPlayKey = "General.Mp3AutoPlay";
-const std::string Configuration::cGeneralShowAutoPlayKey = "General.ShowAutoPlay";
-const std::string Configuration::cGeneralInstantPlayKey = "General.InstantPlay";
 
 const std::string Configuration::cVideoFPSKey = "Video.FPS";
 const std::string Configuration::cVideoResolutionKey = "Video.Resolution";
@@ -101,25 +87,11 @@ void Configuration::load()
     {
         boost::property_tree::ini_parser::read_ini(cConfigFileName, iniConfig);
 
-        handednessOfTrafficType_ = static_cast<HandednessOfTrafficType>(iniConfig.get<uint32_t>(cGeneralHandednessOfTrafficTypeKey,
-                                                                                              static_cast<uint32_t>(HandednessOfTrafficType::LEFT_HAND_DRIVE)));
-        showClock_ = iniConfig.get<bool>(cGeneralShowClockKey, true);
-        showBigClock_ = iniConfig.get<bool>(cGeneralShowBigClockKey, false);
         oldGUI_ = iniConfig.get<bool>(cGeneralOldGUIKey, false);
-        alphaTrans_ = iniConfig.get<size_t>(cGeneralAlphaTransKey, 50);
         hideMenuToggle_ = iniConfig.get<bool>(cGeneralHideMenuToggleKey, false);
-        hideAlpha_ = iniConfig.get<bool>(cGeneralHideAlphaKey, false);
-        showLux_ = iniConfig.get<bool>(cGeneralShowLuxKey, false);
         showCursor_ = iniConfig.get<bool>(cGeneralShowCursorKey, false);
-        hideBrightnessControl_ = iniConfig.get<bool>(cGeneralHideBrightnessControlKey, false);
-        hideWarning_ = iniConfig.get<bool>(cGeneralHideWarningKey, false);
         showNetworkinfo_ = iniConfig.get<bool>(cGeneralShowNetworkinfoKey, false);
-        mp3MasterPath_ = iniConfig.get<std::string>(cGeneralMp3MasterPathKey, "/media/MYMEDIA");
-        mp3SubFolder_ = iniConfig.get<std::string>(cGeneralMp3SubFolderKey, "/");
-        mp3Track_ = iniConfig.get<size_t>(cGeneralMp3TrackKey, 0);
-        mp3AutoPlay_ = iniConfig.get<bool>(cGeneralMp3AutoPlayKey, false);
-        showAutoPlay_ = iniConfig.get<bool>(cGeneralShowAutoPlayKey, false);
-        instantPlay_ = iniConfig.get<bool>(cGeneralInstantPlayKey, false);
+
 
         videoFPS_ = static_cast<aap_protobuf::service::media::sink::message::VideoFrameRateType>(iniConfig.get<uint32_t>(cVideoFPSKey,
                                                                                              aap_protobuf::service::media::sink::message::VideoFrameRateType::VIDEO_FPS_30));
@@ -162,7 +134,6 @@ void Configuration::reset()
 {
     handednessOfTrafficType_ = HandednessOfTrafficType::LEFT_HAND_DRIVE;
     showClock_ = true;
-    showBigClock_ = false;
     oldGUI_ = false;
     alphaTrans_ = 50;
     hideMenuToggle_ = false;
@@ -201,25 +172,12 @@ void Configuration::reset()
 void Configuration::save()
 {
     boost::property_tree::ptree iniConfig;
-    iniConfig.put<uint32_t>(cGeneralHandednessOfTrafficTypeKey, static_cast<uint32_t>(handednessOfTrafficType_));
 
-    iniConfig.put<bool>(cGeneralShowClockKey, showClock_);
-    iniConfig.put<bool>(cGeneralShowBigClockKey, showBigClock_);
     iniConfig.put<bool>(cGeneralOldGUIKey, oldGUI_);
-    iniConfig.put<size_t>(cGeneralAlphaTransKey, alphaTrans_);
     iniConfig.put<bool>(cGeneralHideMenuToggleKey, hideMenuToggle_);
-    iniConfig.put<bool>(cGeneralHideAlphaKey, hideAlpha_);
-    iniConfig.put<bool>(cGeneralShowLuxKey, showLux_);
     iniConfig.put<bool>(cGeneralShowCursorKey, showCursor_);
     iniConfig.put<bool>(cGeneralHideBrightnessControlKey, hideBrightnessControl_);
-    iniConfig.put<bool>(cGeneralHideWarningKey, hideWarning_);
     iniConfig.put<bool>(cGeneralShowNetworkinfoKey, showNetworkinfo_);
-    iniConfig.put<std::string>(cGeneralMp3MasterPathKey, mp3MasterPath_);
-    iniConfig.put<std::string>(cGeneralMp3SubFolderKey, mp3SubFolder_);
-    iniConfig.put<int32_t>(cGeneralMp3TrackKey, mp3Track_);
-    iniConfig.put<bool>(cGeneralMp3AutoPlayKey, mp3AutoPlay_);
-    iniConfig.put<bool>(cGeneralShowAutoPlayKey, showAutoPlay_);
-    iniConfig.put<bool>(cGeneralInstantPlayKey, instantPlay_);
 
     iniConfig.put<uint32_t>(cVideoFPSKey, static_cast<uint32_t>(videoFPS_));
     iniConfig.put<uint32_t>(cVideoResolutionKey, static_cast<uint32_t>(videoResolution_));
@@ -264,56 +222,6 @@ bool Configuration::hasTouchScreen() const
     return false;
 }
 
-void Configuration::setHandednessOfTrafficType(HandednessOfTrafficType value)
-{
-    handednessOfTrafficType_ = value;
-}
-
-HandednessOfTrafficType Configuration::getHandednessOfTrafficType() const
-{
-    return handednessOfTrafficType_;
-}
-
-void Configuration::showClock(bool value)
-{
-    showClock_ = value;
-}
-
-bool Configuration::showClock() const
-{
-    return showClock_;
-}
-
-void Configuration::showBigClock(bool value)
-{
-    showBigClock_ = value;
-}
-
-bool Configuration::showBigClock() const
-{
-    return showBigClock_;
-}
-
-void Configuration::oldGUI(bool value)
-{
-    oldGUI_ = value;
-}
-
-bool Configuration::oldGUI() const
-{
-    return oldGUI_;
-}
-
-size_t Configuration::getAlphaTrans() const
-{
-    return alphaTrans_;
-}
-
-void Configuration::setAlphaTrans(size_t value)
-{
-    alphaTrans_ = value;
-}
-
 void Configuration::hideMenuToggle(bool value)
 {
     hideMenuToggle_ = value;
@@ -322,26 +230,6 @@ void Configuration::hideMenuToggle(bool value)
 bool Configuration::hideMenuToggle() const
 {
     return hideMenuToggle_;
-}
-
-void Configuration::hideAlpha(bool value)
-{
-    hideAlpha_ = value;
-}
-
-bool Configuration::hideAlpha() const
-{
-    return hideAlpha_;
-}
-
-void Configuration::showLux(bool value)
-{
-    showLux_ = value;
-}
-
-bool Configuration::showLux() const
-{
-    return showLux_;
 }
 
 void Configuration::showCursor(bool value)
@@ -354,26 +242,6 @@ bool Configuration::showCursor() const
     return showCursor_;
 }
 
-void Configuration::hideBrightnessControl(bool value)
-{
-    hideBrightnessControl_ = value;
-}
-
-bool Configuration::hideBrightnessControl() const
-{
-    return hideBrightnessControl_;
-}
-
-void Configuration::hideWarning(bool value)
-{
-    hideWarning_ = value;
-}
-
-bool Configuration::hideWarning() const
-{
-    return hideWarning_;
-}
-
 void Configuration::showNetworkinfo(bool value)
 {
     showNetworkinfo_ = value;
@@ -382,66 +250,6 @@ void Configuration::showNetworkinfo(bool value)
 bool Configuration::showNetworkinfo() const
 {
     return showNetworkinfo_;
-}
-
-std::string Configuration::getMp3MasterPath() const
-{
-    return mp3MasterPath_;
-}
-
-void Configuration::setMp3MasterPath(const std::string& value)
-{
-    mp3MasterPath_ = value;
-}
-
-std::string Configuration::getMp3SubFolder() const
-{
-    return mp3SubFolder_;
-}
-
-void Configuration::setMp3Track(int32_t value)
-{
-    mp3Track_ = value;
-}
-
-void Configuration::setMp3SubFolder(const std::string& value)
-{
-    mp3SubFolder_ = value;
-}
-
-int32_t Configuration::getMp3Track() const
-{
-    return mp3Track_;
-}
-
-void Configuration::mp3AutoPlay(bool value)
-{
-    mp3AutoPlay_ = value;
-}
-
-bool Configuration::mp3AutoPlay() const
-{
-    return mp3AutoPlay_;
-}
-
-void Configuration::showAutoPlay(bool value)
-{
-    showAutoPlay_ = value;
-}
-
-bool Configuration::showAutoPlay() const
-{
-    return showAutoPlay_;
-}
-
-void Configuration::instantPlay(bool value)
-{
-    instantPlay_ = value;
-}
-
-bool Configuration::instantPlay() const
-{
-    return instantPlay_;
 }
 
 aap_protobuf::service::media::sink::message::VideoFrameRateType Configuration::getVideoFPS() const
@@ -472,16 +280,6 @@ size_t Configuration::getScreenDPI() const
 void Configuration::setScreenDPI(size_t value)
 {
     screenDPI_ = value;
-}
-
-void Configuration::setOMXLayerIndex(int32_t value)
-{
-    omxLayerIndex_ = value;
-}
-
-int32_t Configuration::getOMXLayerIndex() const
-{
-    return omxLayerIndex_;
 }
 
 void Configuration::setVideoMargins(QRect value)
