@@ -45,7 +45,6 @@ class SettingsWindow : public QWidget
 public:
     explicit SettingsWindow(configuration::IConfiguration::Pointer configuration, QWidget *parent = nullptr);
     ~SettingsWindow() override;
-    void loadSystemValues();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -79,8 +78,6 @@ private:
     void populateBluetoothComboBoxLinux(QComboBox *comboBoxBluetooth);
     Ui::SettingsWindow* ui_;
     configuration::IConfiguration::Pointer configuration_;
-
-  void getMacMemoryInfo(QString &freeMemory);
 };
 
 }
