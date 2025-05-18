@@ -1,3 +1,6 @@
 [submodule "OpenAutoSDK"]
 	path = OpenAutoSDK
 	url = https://github.com/buzzcola3/OpenAutoSDK.git
+[submodule "gRPC"]
+	path = gRPC
+	url = https://github.com/grpc/grpc.git
