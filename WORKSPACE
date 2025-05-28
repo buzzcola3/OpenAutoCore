@@ -1,0 +1,1 @@
+# External dependencies and toolchains are handled by MODULE.bazel (Bzlmod).

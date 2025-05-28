@@ -1,7 +1,0 @@
-services:
-  openauto-build:
-    build:
-      context: ../
-      dockerfile: buildenv/Dockerfile
-    volumes:
-      - ./release/:/release/

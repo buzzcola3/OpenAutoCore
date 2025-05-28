@@ -1,0 +1,43 @@
+###############################################################################
+# Bazel now uses Bzlmod by default to manage external dependencies.
+# Please consider migrating your external dependencies from WORKSPACE to MODULE.bazel.
+#
+# For more details, please check https://github.com/bazelbuild/bazel/issues/18958
+###############################################################################
+
+# Hermetic C++ toolchain
+bazel_dep(name = "hermetic_cc_toolchain", version = "4.0.0")
+
+toolchains = use_extension("@hermetic_cc_toolchain//toolchain:ext.bzl", "toolchains")
+use_repo(toolchains, "zig_sdk")
+register_toolchains(
+    "@zig_sdk//toolchain:linux_amd64_musl",
+    "@zig_sdk//toolchain:linux_arm64_musl",
+)
+
+# Add proto and grpc dependencies
+bazel_dep(name = "rules_proto", version = "7.1.0")
+bazel_dep(name = "rules_proto_grpc_cpp", version = "5.1.0")
+bazel_dep(name = "grpc", version = "1.72.0")
+
+# Optionally, Google's protobuf (if you need it directly)
+bazel_dep(name = "protobuf", version = "31.0")
+
+
+
+# Patch for Abseil to fix CPU architecture flags
+bazel_dep(
+    name = "abseil-cpp",
+    version = "20250127.1",
+)
+single_version_override(
+    module_name = "abseil-cpp",
+    version = "20250127.1", # Must match the version in the bazel_dep above
+    patches = ["//patches:abseil_fix_arm_march.patch"],
+)
+
+bazel_dep(name = "boost.asio", version = "1.87.0.bcr.1")
+bazel_dep(name = "boost.endian", version = "1.87.0")
+bazel_dep(name = "boost.log", version = "1.87.0")
+
+bazel_dep(name = "libusb", version = "1.0.28")

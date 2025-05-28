@@ -1,0 +1,11 @@
+--- absl/random/internal/BUILD.bazel.orig	2025-02-03 16:50:45.000000000 +0100
++++ absl/random/internal/BUILD.bazel	2025-05-26 19:29:20.776944262 +0200
+@@ -96,7 +96,7 @@
+ # should be called.
+ ABSL_RANDOM_RANDEN_COPTS = select({
+     ":gcc_compatible-aarch32": ["-mfpu=neon"],
+-    ":gcc_compatible-aarch64": ["-march=armv8-a+crypto"],
++    ":gcc_compatible-aarch64": [],
+     ":gcc_compatible-ppc_crypto": ["-mcrypto"],
+     ":gcc_compatible-x86_64": [
+         "-maes",

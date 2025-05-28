@@ -2,6 +2,8 @@
 lib/
 bin/
 build/
+bazel-*
+test_src/
 .vscode/
 openauto.ini
 CMakeLists.txt.user

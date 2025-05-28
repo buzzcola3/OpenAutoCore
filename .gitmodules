@@ -4,3 +4,6 @@
 [submodule "gRPC"]
 	path = gRPC
 	url = https://github.com/grpc/grpc.git
+[submodule "ProtoBuf"]
+	path = ProtoBuf
+	url = https://github.com/protocolbuffers/protobuf.git

@@ -1,0 +1,17 @@
+# Platform configs for cross-compilation
+build:amd64 --platforms=@zig_sdk//platform:linux_amd64
+build:amd64 --extra_toolchains=@zig_sdk//toolchain:linux_amd64_musl
+
+build:arm64 --platforms=@zig_sdk//platform:linux_arm64
+build:arm64 --extra_toolchains=@zig_sdk//toolchain:linux_arm64_musl
+
+# Hermetic toolchain only
+build --action_env BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+
+build:arm64 --copt="-march=generic" # Or try cortex-a53 to solve --> error: unknown CPU: 'armv8'
+
+# Platform-specific sandboxing (optional, but recommended)
+common --enable_platform_specific_config
+build:linux --sandbox_add_mount_pair=/tmp
+build:macos --sandbox_add_mount_pair=/var/tmp
+build:windows --sandbox_add_mount_pair=C:\Temp
