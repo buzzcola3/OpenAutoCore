@@ -20,7 +20,6 @@
 
 #include <Channel/GenericNotification/GenericNotificationService.hpp>
 #include <f1x/openauto/autoapp/Service/IService.hpp>
-#include <boost/asio/io_service.hpp>
 #include <Messenger/IMessenger.hpp>
 
 namespace f1x {
@@ -29,12 +28,15 @@ namespace f1x {
       namespace service {
         namespace genericnotification {
 
+          using IoContext = boost::asio::io_context;
+          using Strand = boost::asio::strand<IoContext::executor_type>;
+
           class GenericNotificationService :
               public aasdk::channel::genericnotification::IGenericNotificationServiceEventHandler,
               public IService,
               public std::enable_shared_from_this<GenericNotificationService> {
           public:
-            GenericNotificationService(boost::asio::io_service &ioService, aasdk::messenger::IMessenger::Pointer messenger);
+            GenericNotificationService(IoContext &ioContext, aasdk::messenger::IMessenger::Pointer messenger);
 
             void start() override;
             void stop() override;
@@ -50,7 +52,7 @@ namespace f1x {
           private:
             using std::enable_shared_from_this<GenericNotificationService>::shared_from_this;
             boost::asio::deadline_timer timer_;
-            boost::asio::io_service::strand strand_;
+            Strand strand_;
             aasdk::channel::genericnotification::GenericNotificationService::Pointer channel_;
           };
 

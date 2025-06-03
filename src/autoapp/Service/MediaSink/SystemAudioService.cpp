@@ -21,10 +21,10 @@
 
 
 namespace f1x::openauto::autoapp::service::mediasink {
-  SystemAudioService::SystemAudioService(boost::asio::io_service &ioService,
+  SystemAudioService::SystemAudioService(IoContext& ioContext,
                                          aasdk::messenger::IMessenger::Pointer messenger,
                                          projection::IAudioOutput::Pointer audioOutput)
-      : AudioMediaSinkService(ioService,
+      : AudioMediaSinkService(ioContext,
                               std::make_shared<aasdk::channel::mediasink::audio::channel::SystemAudioChannel>(strand_,
                                                                                                               std::move(
                                                                                                                   messenger)),

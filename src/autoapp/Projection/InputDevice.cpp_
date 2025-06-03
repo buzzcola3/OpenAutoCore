@@ -29,7 +29,7 @@ namespace autoapp
 namespace projection
 {
 
-InputDevice::InputDevice(QObject& parent, configuration::IConfiguration::Pointer configuration, const QRect& touchscreenGeometry, const QRect& displayGeometry)
+InputDevice::InputDevice(QObject& parent, configuration::IConfiguration::Pointer configuration, const Rect& touchscreenGeometry, const Rect& displayGeometry)
     : parent_(parent)
     , configuration_(std::move(configuration))
     , touchscreenGeometry_(touchscreenGeometry)
@@ -226,7 +226,7 @@ bool InputDevice::hasTouchscreen() const
     return configuration_->getTouchscreenEnabled();
 }
 
-QRect InputDevice::getTouchscreenGeometry() const
+buzz::common::Rect InputDevice::getTouchscreenGeometry() const
 {
     return touchscreenGeometry_;
 }

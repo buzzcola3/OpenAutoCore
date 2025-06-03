@@ -21,13 +21,16 @@
 
 namespace f1x::openauto::autoapp::service {
 
-  Pinger::Pinger(boost::asio::io_service &ioService, time_t duration)
-      : strand_(ioService), timer_(ioService), duration_(duration), cancelled_(false), pingsCount_(0), pongsCount_(0) {
+  using IoContext = boost::asio::io_context;
+  using Strand = boost::asio::strand<IoContext::executor_type>;
+
+  Pinger::Pinger(IoContext &ioContext, time_t duration)
+      : strand_(ioContext.get_executor()), timer_(ioContext), duration_(duration), cancelled_(false), pingsCount_(0), pongsCount_(0) {
 
   }
 
   void Pinger::ping(Promise::Pointer promise) {
-    strand_.dispatch([this, self = this->shared_from_this(), promise = std::move(promise)]() mutable {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this(), promise = std::move(promise)]() mutable {
       cancelled_ = false;
 
       if (promise_ != nullptr) {
@@ -39,13 +42,13 @@ namespace f1x::openauto::autoapp::service {
         promise_ = std::move(promise);
         timer_.expires_from_now(boost::posix_time::milliseconds(duration_));
         timer_.async_wait(
-            strand_.wrap(std::bind(&Pinger::onTimerExceeded, this->shared_from_this(), std::placeholders::_1)));
+            boost::asio::bind_executor(strand_, std::bind(&Pinger::onTimerExceeded, this->shared_from_this(), std::placeholders::_1)));
       }
     });
   }
 
   void Pinger::pong() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       ++pongsCount_;
       OPENAUTO_LOG(debug) << "[Pinger] Pong counter: " << pongsCount_;
     });
@@ -66,7 +69,7 @@ namespace f1x::openauto::autoapp::service {
   }
 
   void Pinger::cancel() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       cancelled_ = true;
       timer_.cancel();
     });

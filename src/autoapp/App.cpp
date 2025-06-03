@@ -24,19 +24,22 @@
 
 namespace f1x::openauto::autoapp {
 
-  App::App(boost::asio::io_service &ioService, aasdk::usb::USBWrapper &usbWrapper, aasdk::tcp::ITCPWrapper &tcpWrapper,
+  using IoContext = boost::asio::io_context;
+  using Strand = boost::asio::strand<IoContext::executor_type>;
+
+  App::App(IoContext &ioContext, aasdk::usb::USBWrapper &usbWrapper, aasdk::tcp::ITCPWrapper &tcpWrapper,
            service::IAndroidAutoEntityFactory &androidAutoEntityFactory,
            aasdk::usb::IUSBHub::Pointer usbHub,
            aasdk::usb::IConnectedAccessoriesEnumerator::Pointer connectedAccessoriesEnumerator)
-      : ioService_(ioService), usbWrapper_(usbWrapper), tcpWrapper_(tcpWrapper), strand_(ioService_),
+      : ioContext_(ioContext), usbWrapper_(usbWrapper), tcpWrapper_(tcpWrapper), strand_(ioContext_.get_executor()),
         androidAutoEntityFactory_(androidAutoEntityFactory), usbHub_(std::move(usbHub)),
         connectedAccessoriesEnumerator_(std::move(connectedAccessoriesEnumerator)),
-        acceptor_(ioService, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 5000)), isStopped_(false) {
+        acceptor_(ioContext, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 5000)), isStopped_(false) {
 
   }
 
   void App::waitForUSBDevice() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       try {
         this->waitForDevice();
       }
@@ -54,7 +57,7 @@ namespace f1x::openauto::autoapp {
   }
 
   void App::start(aasdk::tcp::ITCPEndpoint::SocketPointer socket) {
-    strand_.dispatch([this, self = this->shared_from_this(), socket = std::move(socket)]() mutable {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this(), socket = std::move(socket)]() mutable {
       OPENAUTO_LOG(info) << "Start from socket";
       if (androidAutoEntity_ != nullptr) {
 //            tcpWrapper_.close(*socket);
@@ -90,7 +93,7 @@ namespace f1x::openauto::autoapp {
   }
 
   void App::stop() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       isStopped_ = true;
       try {
         connectedAccessoriesEnumerator_->cancel();
@@ -133,7 +136,7 @@ namespace f1x::openauto::autoapp {
         OPENAUTO_LOG(info) << "[App] Start Android Auto allowed - let's go.";
         connectedAccessoriesEnumerator_->cancel();
 
-        auto aoapDevice(aasdk::usb::AOAPDevice::create(usbWrapper_, ioService_, deviceHandle));
+        auto aoapDevice(aasdk::usb::AOAPDevice::create(usbWrapper_, ioContext_, deviceHandle));
         androidAutoEntity_ = androidAutoEntityFactory_.create(std::move(aoapDevice));
         androidAutoEntity_->start(*this);
       } else {
@@ -171,9 +174,9 @@ namespace f1x::openauto::autoapp {
   }
 
   void App::startServerSocket() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "startServerSocket() - Listening for WIFI Clients on Port 5000";
-      auto socket = std::make_shared<boost::asio::ip::tcp::socket>(ioService_);
+      auto socket = std::make_shared<boost::asio::ip::tcp::socket>(ioContext_);
       acceptor_.async_accept(
           *socket,
           std::bind(&App::handleNewClient, this, socket, std::placeholders::_1)
@@ -190,14 +193,14 @@ namespace f1x::openauto::autoapp {
   }
 
   void App::pause() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[App] pause...";
       androidAutoEntity_->pause();
     });
   }
 
   void App::resume() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       if (androidAutoEntity_ != nullptr) {
         OPENAUTO_LOG(info) << "[App] resume...";
         androidAutoEntity_->resume();
@@ -208,7 +211,7 @@ namespace f1x::openauto::autoapp {
   }
 
   void App::onAndroidAutoQuit() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[App] onAndroidAutoQuit()";
 
       //acceptor_.close();
@@ -238,16 +241,6 @@ namespace f1x::openauto::autoapp {
 
   void App::onUSBHubError(const aasdk::error::Error &error) {
     OPENAUTO_LOG(error) << "[App] onUSBHubError(): " << error.what();
-
-//    if(error != aasdk::error::ErrorCode::OPERATION_ABORTED &&
-//       error != aasdk::error::ErrorCode::OPERATION_IN_PROGRESS)
-//    {
-//        try {
-//            this->waitForDevice();
-//        } catch (...) {
-//            OPENAUTO_LOG(error) << "[App] onUSBHubError: exception caused by this->waitForDevice();";
-//        }
-//    }
   }
 
 }

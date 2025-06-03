@@ -69,7 +69,7 @@ namespace f1x::openauto::btservice {
     void sendMessage(const google::protobuf::Message &message, uint16_t type);
 
 
-    const ::std::string getIP4_(const QString intf);
+    const ::std::string getIP4_(const string intf);
 
     void DecodeProtoMessage(const std::string &proto_data);
   };

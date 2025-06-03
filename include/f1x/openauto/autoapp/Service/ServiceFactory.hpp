@@ -26,9 +26,12 @@ namespace f1x {
     namespace autoapp {
       namespace service {
 
+        using IoContext = boost::asio::io_context;
+        using Strand = boost::asio::strand<IoContext::executor_type>;
+
         class ServiceFactory : public IServiceFactory {
         public:
-          ServiceFactory(boost::asio::io_service &ioService, configuration::IConfiguration::Pointer configuration);
+          ServiceFactory(IoContext &ioContext, configuration::IConfiguration::Pointer configuration);
           ServiceList create(aasdk::messenger::IMessenger::Pointer messenger) override;
 
         private:
@@ -41,7 +44,7 @@ namespace f1x {
           IService::Pointer createSensorService(aasdk::messenger::IMessenger::Pointer messenger);
           IService::Pointer createWifiProjectionService(aasdk::messenger::IMessenger::Pointer messenger);
 
-          boost::asio::io_service &ioService_;
+          IoContext &ioContext_;
           configuration::IConfiguration::Pointer configuration_;
         };
 

@@ -19,13 +19,10 @@
 #pragma once
 
 #include <string>
-#include <QRect>
+#include <buzz/common/Rect.hpp>
 #include <aap_protobuf/service/media/sink/message/VideoFrameRateType.pb.h>
 #include <aap_protobuf/service/media/sink/message/VideoCodecResolutionType.pb.h>
 #include <aap_protobuf/service/media/sink/message/KeyCode.pb.h>
-#include <f1x/openauto/autoapp/Configuration/BluetoothAdapterType.hpp>
-#include <f1x/openauto/autoapp/Configuration/HandednessOfTrafficType.hpp>
-#include <f1x/openauto/autoapp/Configuration/AudioOutputBackendType.hpp>
 
 namespace f1x
 {
@@ -44,9 +41,7 @@ public:
 
     virtual ~IConfiguration() = default;
 
-    virtual void load() = 0;
     virtual void reset() = 0;
-    virtual void save() = 0;
 
     virtual bool hasTouchScreen() const = 0;
 
@@ -57,18 +52,14 @@ public:
     virtual void showNetworkinfo(bool value) = 0;
     virtual bool showNetworkinfo() const = 0;
 
-    virtual QString getCSValue(QString searchString) const = 0;
-    virtual QString readFileContent(QString fileName) const = 0;
-    virtual QString getParamFromFile(QString fileName, QString searchString) const = 0;
-
     virtual aap_protobuf::service::media::sink::message::VideoFrameRateType getVideoFPS() const = 0;
     virtual void setVideoFPS(aap_protobuf::service::media::sink::message::VideoFrameRateType value) = 0;
     virtual aap_protobuf::service::media::sink::message::VideoCodecResolutionType getVideoResolution() const = 0;
     virtual void setVideoResolution(aap_protobuf::service::media::sink::message::VideoCodecResolutionType value) = 0;
     virtual size_t getScreenDPI() const = 0;
     virtual void setScreenDPI(size_t value) = 0;
-    virtual void setVideoMargins(QRect value) = 0;
-    virtual QRect getVideoMargins() const = 0;
+    virtual void setVideoMargins(buzz::common::Rect value) = 0;
+    virtual buzz::common::Rect getVideoMargins() const = 0;
 
     virtual bool getTouchscreenEnabled() const = 0;
     virtual void setTouchscreenEnabled(bool value) = 0;
@@ -77,8 +68,8 @@ public:
     virtual ButtonCodes getButtonCodes() const = 0;
     virtual void setButtonCodes(const ButtonCodes& value) = 0;
 
-    virtual BluetoothAdapterType getBluetoothAdapterType() const = 0;
-    virtual void setBluetoothAdapterType(BluetoothAdapterType value) = 0;
+//    virtual BluetoothAdapterType getBluetoothAdapterType() const = 0;
+//    virtual void setBluetoothAdapterType(BluetoothAdapterType value) = 0;
     virtual std::string getBluetoothAdapterAddress() const = 0;
     virtual void setBluetoothAdapterAddress(const std::string& value) = 0;
     virtual bool getWirelessProjectionEnabled() const = 0;
@@ -92,8 +83,6 @@ public:
     virtual void setSystemAudioChannelEnabled(bool value) = 0;
     virtual bool telephonyAudioChannelEnabled() const = 0;
     virtual void setTelephonyAudioChannelEnabled(bool value) = 0;
-    virtual AudioOutputBackendType getAudioOutputBackendType() const = 0;
-    virtual void setAudioOutputBackendType(AudioOutputBackendType value) = 0;
 };
 
 }

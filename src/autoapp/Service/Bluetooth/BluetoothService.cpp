@@ -21,37 +21,40 @@
 
 namespace f1x::openauto::autoapp::service::bluetooth {
 
-  BluetoothService::BluetoothService(boost::asio::io_service &ioService,
+  using IoContext = boost::asio::io_context;
+  using Strand = boost::asio::strand<IoContext::executor_type>;
+
+  BluetoothService::BluetoothService(IoContext &ioContext,
                                      aasdk::messenger::IMessenger::Pointer messenger,
                                      projection::IBluetoothDevice::Pointer bluetoothDevice)
-      : strand_(ioService),
+      : strand_(ioContext.get_executor()),
         channel_(std::make_shared<aasdk::channel::bluetooth::BluetoothService>(strand_, std::move(messenger))),
         bluetoothDevice_(std::move(bluetoothDevice)) {
 
   }
 
   void BluetoothService::start() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[BluetoothService] start()";
       channel_->receive(this->shared_from_this());
     });
   }
 
   void BluetoothService::stop() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[BluetoothService] stop()";
       bluetoothDevice_->stop();
     });
   }
 
   void BluetoothService::pause() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[BluetoothService] pause()";
     });
   }
 
   void BluetoothService::resume() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[BluetoothService] resume()";
     });
   }

@@ -22,9 +22,9 @@ namespace f1x::openauto::btservice {
     void shutdownService() override;
 
   private slots:
-    void onPairingDisplayPinCode(const QBluetoothAddress &address, QString pin);
+    void onPairingDisplayPinCode(const QBluetoothAddress &address, string pin);
 
-    void onPairingDisplayConfirmation(const QBluetoothAddress &address, QString pin);
+    void onPairingDisplayConfirmation(const QBluetoothAddress &address, string pin);
 
     void onPairingFinished(const QBluetoothAddress &address, QBluetoothLocalDevice::Pairing pairing);
 

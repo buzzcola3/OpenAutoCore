@@ -27,9 +27,13 @@ namespace f1x {
     namespace autoapp {
       namespace service {
         namespace mediasink {
+
+          using IoContext = boost::asio::io_context;
+          using Strand = boost::asio::strand<IoContext::executor_type>;
+          
           class VideoService : public VideoMediaSinkService {
           public:
-            VideoService(boost::asio::io_service &ioService,
+            VideoService(IoContext& ioContext,
                                aasdk::messenger::IMessenger::Pointer messenger,
                                projection::IVideoOutput::Pointer videoOutput);
 

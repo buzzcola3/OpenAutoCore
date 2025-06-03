@@ -24,15 +24,15 @@ namespace f1x {
     namespace autoapp {
       namespace service {
         namespace mediasink {
-          VideoMediaSinkService::VideoMediaSinkService(boost::asio::io_service &ioService,
+          VideoMediaSinkService::VideoMediaSinkService(IoContext& ioContext,
                                                        aasdk::channel::mediasink::video::IVideoMediaSinkService::Pointer channel,
                                                        projection::IVideoOutput::Pointer videoOutput)
-              : strand_(ioService), channel_(std::move(channel)), videoOutput_(std::move(videoOutput)), session_(-1) {
+              : strand_(ioContext.get_executor()), channel_(std::move(channel)), videoOutput_(std::move(videoOutput)), session_(-1) {
 
           }
 
           void VideoMediaSinkService::start() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[VideoMediaSinkService] start()";
               OPENAUTO_LOG(info) << "[VideoMediaSinkService] Channel "
                                  << aasdk::messenger::channelIdToString(channel_->getId());
@@ -41,7 +41,7 @@ namespace f1x {
           }
 
           void VideoMediaSinkService::stop() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[VideoMediaSinkService] stop()";
               OPENAUTO_LOG(info) << "[VideoMediaSinkService] Channel "
                                  << aasdk::messenger::channelIdToString(channel_->getId());
@@ -50,7 +50,7 @@ namespace f1x {
           }
 
           void VideoMediaSinkService::pause() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[VideoMediaSinkService] pause()";
               OPENAUTO_LOG(info) << "[VideoMediaSinkService] Channel "
                                  << aasdk::messenger::channelIdToString(channel_->getId());
@@ -58,7 +58,7 @@ namespace f1x {
           }
 
           void VideoMediaSinkService::resume() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[VideoMediaSinkService] resume()";
               OPENAUTO_LOG(info) << "[VideoMediaSinkService] Channel "
                                  << aasdk::messenger::channelIdToString(channel_->getId());
@@ -87,14 +87,14 @@ namespace f1x {
             videoConfig1->set_frame_rate(videoOutput_->getVideoFPS());
 
             const auto &videoMargins = videoOutput_->getVideoMargins();
-            videoConfig1->set_height_margin(videoMargins.height());
-            videoConfig1->set_width_margin(videoMargins.width());
+            videoConfig1->set_height_margin(videoMargins.height);
+            videoConfig1->set_width_margin(videoMargins.width);
             videoConfig1->set_density(videoOutput_->getScreenDPI());
 
             OPENAUTO_LOG(info) << "[VideoMediaSinkService] getVideoResolution " << VideoCodecResolutionType_Name(videoOutput_->getVideoResolution());
             OPENAUTO_LOG(info) << "[VideoMediaSinkService] getVideoFPS " << VideoFrameRateType_Name(videoOutput_->getVideoFPS());
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] width " << videoMargins.width();
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] height " << videoMargins.height();
+            OPENAUTO_LOG(info) << "[VideoMediaSinkService] width " << videoMargins.width;
+            OPENAUTO_LOG(info) << "[VideoMediaSinkService] height " << videoMargins.height;
             OPENAUTO_LOG(info) << "[VideoMediaSinkService] getScreenDPI " << videoOutput_->getScreenDPI();
           }
 

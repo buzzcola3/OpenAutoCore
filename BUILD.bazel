@@ -1,0 +1,43 @@
+cc_library(
+    name = "OpenAutoCore",
+    srcs = glob(
+        ["src/autoapp/**/*.cpp"],
+        exclude = ["src/**/*.ut.cpp"],  # Exclude unit test files
+    ),
+    hdrs = glob(
+            ["include/**/*.hpp"],
+        ),
+    strip_include_prefix = "include",
+    deps = [
+        "//OpenAutoSDK:OpenAutoSDK",  # Add this line
+    ],
+    copts = [
+        "-I$(GENDIR)/OpenAutoSDK/protobufs_aap_protobuf_cc_gen",
+        "-fPIC",
+    ],
+)
+
+cc_binary(
+    name = "OpenAutoCore_bin",  # You can name your binary anything
+    srcs = ["src/autoapp/autoapp.cpp"], # Specify your main source file
+    deps = [
+        ":OpenAutoCore",  # Depends on the library defined above
+        "//OpenAutoSDK:OpenAutoSDK", # Direct dependency if main uses SDK parts not in OpenAutoCore hdrs
+        "@openssl",
+        "@openssl//:ssl",
+        "@openssl//:crypto",
+        # Add system libraries or other dependencies needed for linking the binary
+        # For example, if you use libusb directly in autoapp.cpp or for linking:
+        # "@libusb//:libusb-1.0", (assuming libusb is an external repository)
+        # "@boost//:thread",
+        # "@boost//:log_setup",
+        # "@boost//:filesystem",
+    ],
+    copts = [
+        "-I$(GENDIR)/OpenAutoSDK/protobufs_aap_protobuf_cc_gen",
+    ],
+    linkopts = [
+        # Add linker options if needed, e.g., "-lpthread"
+        # Bazel often handles common ones like pthread with cc_library features.
+    ],
+)

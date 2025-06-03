@@ -19,39 +19,42 @@
 #include <f1x/openauto/Common/Log.hpp>
 #include <f1x/openauto/autoapp/Service/VendorExtension/VendorExtensionService.hpp>
 #include <fstream>
-#include <QString>
+#include <string>
 
 namespace f1x::openauto::autoapp::service::vendorextension {
 
-  VendorExtensionService::VendorExtensionService(boost::asio::io_service &ioService,
+  using IoContext = boost::asio::io_context;
+  using Strand = boost::asio::strand<IoContext::executor_type>;
+
+  VendorExtensionService::VendorExtensionService(IoContext &ioContext,
                                                  aasdk::messenger::IMessenger::Pointer messenger)
-      : strand_(ioService),
-        timer_(ioService),
+      : strand_(ioContext.get_executor()),
+        timer_(ioContext),
         channel_(
             std::make_shared<aasdk::channel::vendorextension::VendorExtensionService>(strand_, std::move(messenger))) {
 
   }
 
   void VendorExtensionService::start() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[VendorExtensionService] start()";
     });
   }
 
   void VendorExtensionService::stop() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[VendorExtensionService] stop()";
     });
   }
 
   void VendorExtensionService::pause() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[VendorExtensionService] pause()";
     });
   }
 
   void VendorExtensionService::resume() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[VendorExtensionService] resume()";
     });
   }

@@ -20,6 +20,7 @@
 
 #include <boost/property_tree/ini_parser.hpp>
 #include <f1x/openauto/autoapp/Configuration/IConfiguration.hpp>
+#include <buzz/common/Rect.hpp>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -39,10 +40,9 @@ class Configuration: public IConfiguration
 {
 public:
     Configuration();
-
-    void load() override;
+    ~Configuration() override;
+    
     void reset() override;
-    void save() override;
 
     bool hasTouchScreen() const override;
 
@@ -53,18 +53,14 @@ public:
     void showNetworkinfo(bool value) override;
     bool showNetworkinfo() const override;
 
-    QString getCSValue(QString searchString) const override;
-    QString readFileContent(QString fileName) const override;
-    QString getParamFromFile(QString fileName, QString searchString) const override;
-
     aap_protobuf::service::media::sink::message::VideoFrameRateType getVideoFPS() const override;
     void setVideoFPS(aap_protobuf::service::media::sink::message::VideoFrameRateType value) override;
     aap_protobuf::service::media::sink::message::VideoCodecResolutionType getVideoResolution() const override;
     void setVideoResolution(aap_protobuf::service::media::sink::message::VideoCodecResolutionType value) override;
     size_t getScreenDPI() const override;
     void setScreenDPI(size_t value) override;
-    void setVideoMargins(QRect value) override;
-    QRect getVideoMargins() const override;
+    void setVideoMargins(buzz::common::Rect value) override;
+    buzz::common::Rect getVideoMargins() const override;
 
     bool getTouchscreenEnabled() const override;
     void setTouchscreenEnabled(bool value) override;
@@ -73,9 +69,7 @@ public:
     ButtonCodes getButtonCodes() const override;
     void setButtonCodes(const ButtonCodes& value) override;
 
-    BluetoothAdapterType getBluetoothAdapterType() const override;
-    void setBluetoothAdapterType(BluetoothAdapterType value) override;
-    std::string getBluetoothAdapterAddress() const override;
+    std::string  getBluetoothAdapterAddress() const override;
     void setBluetoothAdapterAddress(const std::string& value) override;
     bool getWirelessProjectionEnabled() const override;
     void setWirelessProjectionEnabled(bool value) override;
@@ -89,14 +83,14 @@ public:
     bool telephonyAudioChannelEnabled() const override;
     void setTelephonyAudioChannelEnabled(bool value) override;
 
-    AudioOutputBackendType getAudioOutputBackendType() const override;
-    void setAudioOutputBackendType(AudioOutputBackendType value) override;
+//    AudioOutputBackendType getAudioOutputBackendType() const override;
+//    void setAudioOutputBackendType(AudioOutputBackendType value) override;
 private:
     void readButtonCodes(boost::property_tree::ptree& iniConfig);
     void insertButtonCode(boost::property_tree::ptree& iniConfig, const std::string& buttonCodeKey, aap_protobuf::service::media::sink::message::KeyCode buttonCode);
     void writeButtonCodes(boost::property_tree::ptree& iniConfig);
 
-    HandednessOfTrafficType handednessOfTrafficType_;
+//    HandednessOfTrafficType handednessOfTrafficType_;
     bool showClock_;
 
     bool showBigClock_;
@@ -109,8 +103,8 @@ private:
     bool hideBrightnessControl_;
     bool showNetworkinfo_;
     bool hideWarning_;
-    std::string mp3MasterPath_;
-    std::string mp3SubFolder_;
+    std::string  mp3MasterPath_;
+    std::string  mp3SubFolder_;
     int32_t mp3Track_;
     bool mp3AutoPlay_;
     bool showAutoPlay_;
@@ -119,12 +113,12 @@ private:
     aap_protobuf::service::media::sink::message::VideoFrameRateType videoFPS_;
     aap_protobuf::service::media::sink::message::VideoCodecResolutionType videoResolution_;
     size_t screenDPI_;
-    QRect videoMargins_;
+    buzz::common::Rect videoMargins_;
     bool enableTouchscreen_;
     bool enablePlayerControl_;
     ButtonCodes buttonCodes_;
-    BluetoothAdapterType bluetoothAdapterType_;
-    std::string bluetoothAdapterAddress_;
+//    BluetoothAdapterType bluetoothAdapterType_;
+    std::string  bluetoothAdapterAddress_;
     bool wirelessProjectionEnabled_;
 
     bool _audioChannelEnabledMedia;
@@ -132,57 +126,57 @@ private:
     bool _audioChannelEnabledSystem;
     bool _audioChannelEnabledTelephony;
 
-    AudioOutputBackendType audioOutputBackendType_;
+//    AudioOutputBackendType audioOutputBackendType_;
 
-    static const std::string cConfigFileName;
+    static const std::string  cConfigFileName;
 
-    static const std::string cGeneralShowClockKey;
+    static const std::string  cGeneralShowClockKey;
 
-    static const std::string cGeneralOldGUIKey;
-    static const std::string cGeneralAlphaTransKey;
-    static const std::string cGeneralHideMenuToggleKey;
-    static const std::string cGeneralShowCursorKey;
-    static const std::string cGeneralHideBrightnessControlKey;
-    static const std::string cGeneralShowNetworkinfoKey;
+    static const std::string  cGeneralOldGUIKey;
+    static const std::string  cGeneralAlphaTransKey;
+    static const std::string  cGeneralHideMenuToggleKey;
+    static const std::string  cGeneralShowCursorKey;
+    static const std::string  cGeneralHideBrightnessControlKey;
+    static const std::string  cGeneralShowNetworkinfoKey;
 
-    static const std::string cGeneralHandednessOfTrafficTypeKey;
+    static const std::string  cGeneralHandednessOfTrafficTypeKey;
 
-    static const std::string cVideoFPSKey;
-    static const std::string cVideoResolutionKey;
-    static const std::string cVideoScreenDPIKey;
-    static const std::string cVideoMarginWidth;
-    static const std::string cVideoMarginHeight;
+    static const std::string  cVideoFPSKey;
+    static const std::string  cVideoResolutionKey;
+    static const std::string  cVideoScreenDPIKey;
+    static const std::string  cVideoMarginWidth;
+    static const std::string  cVideoMarginHeight;
 
-    static const std::string cAudioChannelMediaEnabled;
-    static const std::string cAudioChannelGuidanceEnabled;
-    static const std::string cAudioChannelSystemEnabled;
-    static const std::string cAudioChannelTelephonyEnabled;
+    static const std::string  cAudioChannelMediaEnabled;
+    static const std::string  cAudioChannelGuidanceEnabled;
+    static const std::string  cAudioChannelSystemEnabled;
+    static const std::string  cAudioChannelTelephonyEnabled;
 
-    static const std::string cAudioOutputBackendType;
+    static const std::string  cAudioOutputBackendType;
 
-    static const std::string cBluetoothAdapterTypeKey;
-    static const std::string cBluetoothAdapterAddressKey;
-    static const std::string cBluetoothWirelessProjectionEnabledKey;
+    static const std::string  cBluetoothAdapterTypeKey;
+    static const std::string  cBluetoothAdapterAddressKey;
+    static const std::string  cBluetoothWirelessProjectionEnabledKey;
 
-    static const std::string cInputEnableTouchscreenKey;
-    static const std::string cInputEnablePlayerControlKey;
-    static const std::string cInputPlayButtonKey;
-    static const std::string cInputPauseButtonKey;
-    static const std::string cInputTogglePlayButtonKey;
-    static const std::string cInputNextTrackButtonKey;
-    static const std::string cInputPreviousTrackButtonKey;
-    static const std::string cInputHomeButtonKey;
-    static const std::string cInputPhoneButtonKey;
-    static const std::string cInputCallEndButtonKey;
-    static const std::string cInputVoiceCommandButtonKey;
-    static const std::string cInputLeftButtonKey;
-    static const std::string cInputRightButtonKey;
-    static const std::string cInputUpButtonKey;
-    static const std::string cInputDownButtonKey;
-    static const std::string cInputScrollWheelButtonKey;
-    static const std::string cInputBackButtonKey;
-    static const std::string cInputEnterButtonKey;
-    static const std::string cInputNavButtonKey;
+    static const std::string  cInputEnableTouchscreenKey;
+    static const std::string  cInputEnablePlayerControlKey;
+    static const std::string  cInputPlayButtonKey;
+    static const std::string  cInputPauseButtonKey;
+    static const std::string  cInputTogglePlayButtonKey;
+    static const std::string  cInputNextTrackButtonKey;
+    static const std::string  cInputPreviousTrackButtonKey;
+    static const std::string  cInputHomeButtonKey;
+    static const std::string  cInputPhoneButtonKey;
+    static const std::string  cInputCallEndButtonKey;
+    static const std::string  cInputVoiceCommandButtonKey;
+    static const std::string  cInputLeftButtonKey;
+    static const std::string  cInputRightButtonKey;
+    static const std::string  cInputUpButtonKey;
+    static const std::string  cInputDownButtonKey;
+    static const std::string  cInputScrollWheelButtonKey;
+    static const std::string  cInputBackButtonKey;
+    static const std::string  cInputEnterButtonKey;
+    static const std::string  cInputNavButtonKey;
 };
 
 }

@@ -21,7 +21,7 @@
 #include <f1x/openauto/Common/Log.hpp>
 #include <f1x/openauto/autoapp/Configuration/IConfiguration.hpp>
 #include <f1x/openauto/btservice/AndroidBluetoothServer.hpp>
-#include <QString>
+#include <string>
 #include <QtCore/QDataStream>
 #include <QNetworkInterface>
 #include <iostream>
@@ -233,7 +233,7 @@ namespace f1x::openauto::btservice {
     }
   }
 
-  const ::std::string AndroidBluetoothServer::getIP4_(const QString intf) {
+  const ::std::string AndroidBluetoothServer::getIP4_(const string intf) {
     for (const QNetworkAddressEntry &address: QNetworkInterface::interfaceFromName(intf).addressEntries()) {
       if (address.ip().protocol() == QAbstractSocket::IPv4Protocol)
         return address.ip().toString().toStdString();

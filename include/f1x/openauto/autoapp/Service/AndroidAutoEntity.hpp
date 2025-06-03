@@ -41,10 +41,13 @@ namespace autoapp
 namespace service
 {
 
+using IoContext = boost::asio::io_context;
+using Strand = boost::asio::strand<IoContext::executor_type>;
+
 class AndroidAutoEntity: public IAndroidAutoEntity, public aasdk::channel::control::IControlServiceChannelEventHandler, public std::enable_shared_from_this<AndroidAutoEntity>
 {
 public:
-    AndroidAutoEntity(boost::asio::io_service& ioService,
+    AndroidAutoEntity(IoContext& ioContext,
                       aasdk::messenger::ICryptor::Pointer cryptor,
                       aasdk::transport::ITransport::Pointer transport,
                       aasdk::messenger::IMessenger::Pointer messenger,
@@ -77,7 +80,7 @@ private:
     void schedulePing();
     void sendPing();
 
-    boost::asio::io_service::strand strand_;
+    Strand strand_;
     aasdk::messenger::ICryptor::Pointer cryptor_;
     aasdk::transport::ITransport::Pointer transport_;
     aasdk::messenger::IMessenger::Pointer messenger_;

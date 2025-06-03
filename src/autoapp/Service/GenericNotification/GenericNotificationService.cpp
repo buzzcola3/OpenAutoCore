@@ -19,39 +19,42 @@
 #include <f1x/openauto/Common/Log.hpp>
 #include <f1x/openauto/autoapp/Service/GenericNotification/GenericNotificationService.hpp>
 #include <fstream>
-#include <QString>
+#include <string>
 
 namespace f1x::openauto::autoapp::service::genericnotification {
 
-  GenericNotificationService::GenericNotificationService(boost::asio::io_service &ioService,
+  using IoContext = boost::asio::io_context;
+  using Strand = boost::asio::strand<IoContext::executor_type>;
+
+  GenericNotificationService::GenericNotificationService(IoContext &ioContext,
                                                          aasdk::messenger::IMessenger::Pointer messenger)
-      : strand_(ioService),
-        timer_(ioService),
+      : strand_(ioContext.get_executor()),
+        timer_(ioContext),
         channel_(std::make_shared<aasdk::channel::genericnotification::GenericNotificationService>(strand_, std::move(
             messenger))) {
 
   }
 
   void GenericNotificationService::start() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[GenericNotificationService] start()";
     });
   }
 
   void GenericNotificationService::stop() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[GenericNotificationService] stop()";
     });
   }
 
   void GenericNotificationService::pause() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[GenericNotificationService] pause()";
     });
   }
 
   void GenericNotificationService::resume() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[GenericNotificationService] resume()";
     });
   }

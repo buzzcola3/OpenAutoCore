@@ -26,9 +26,13 @@ namespace f1x {
     namespace autoapp {
       namespace service {
         namespace mediasink {
+
+          using IoContext = boost::asio::io_context;
+          using Strand = boost::asio::strand<IoContext::executor_type>;
+          
           class SystemAudioService : public AudioMediaSinkService {
           public:
-            SystemAudioService(boost::asio::io_service &ioService,
+            SystemAudioService(IoContext& ioContext,
                                aasdk::messenger::IMessenger::Pointer messenger,
                                projection::IAudioOutput::Pointer audioOutput);
 

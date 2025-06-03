@@ -24,10 +24,13 @@
 
 namespace f1x::openauto::autoapp::service {
 
+  using IoContext = boost::asio::io_context;
+  using Strand = boost::asio::strand<IoContext::executor_type>;
+
   class Service
       : public IService {
   public:
-    Service(boost::asio::io_service &ioService);
+    Service(IoContext &ioContext);
 
     void start() override;
 
@@ -41,7 +44,7 @@ namespace f1x::openauto::autoapp::service {
 
   private:
 
-    boost::asio::io_service::strand strand_;
+    Strand strand_;
 
   };
 }

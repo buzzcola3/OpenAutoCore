@@ -20,10 +20,14 @@
 #include <f1x/openauto/autoapp/Service/MediaSource/MicrophoneMediaSourceService.hpp>
 
 namespace f1x::openauto::autoapp::service::mediasource {
-  MicrophoneMediaSourceService::MicrophoneMediaSourceService(boost::asio::io_service &ioService,
+
+  using IoContext = boost::asio::io_context;
+  using Strand = boost::asio::strand<IoContext::executor_type>;
+
+  MicrophoneMediaSourceService::MicrophoneMediaSourceService(IoContext &ioContext,
                                                              aasdk::messenger::IMessenger::Pointer messenger,
                                                              projection::IAudioInput::Pointer audioOutput)
-      : MediaSourceService(ioService,
+      : MediaSourceService(ioContext,
                            std::make_shared<aasdk::channel::mediasource::audio::MicrophoneAudioChannel>(strand_,
                                                                                                         std::move(
                                                                                                             messenger)),

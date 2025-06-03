@@ -20,18 +20,20 @@
 
 #include <Channel/VendorExtension/VendorExtensionService.hpp>
 #include <f1x/openauto/autoapp/Service/IService.hpp>
-#include <boost/asio/io_service.hpp>
 #include <Messenger/IMessenger.hpp>
 
 
 namespace f1x::openauto::autoapp::service::vendorextension {
+
+using IoContext = boost::asio::io_context;
+using Strand = boost::asio::strand<IoContext::executor_type>;
 
   class VendorExtensionService :
       public aasdk::channel::vendorextension::IVendorExtensionServiceEventHandler,
       public IService,
       public std::enable_shared_from_this<VendorExtensionService> {
   public:
-    VendorExtensionService(boost::asio::io_service &ioService, aasdk::messenger::IMessenger::Pointer messenger);
+    VendorExtensionService(IoContext &ioContext, aasdk::messenger::IMessenger::Pointer messenger);
 
     void start() override;
 
@@ -51,7 +53,7 @@ namespace f1x::openauto::autoapp::service::vendorextension {
   private:
     using std::enable_shared_from_this<VendorExtensionService>::shared_from_this;
     boost::asio::deadline_timer timer_;
-    boost::asio::io_service::strand strand_;
+    Strand strand_;
     aasdk::channel::vendorextension::VendorExtensionService::Pointer channel_;
   };
 

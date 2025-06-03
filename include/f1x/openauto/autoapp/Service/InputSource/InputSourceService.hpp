@@ -30,13 +30,16 @@ namespace f1x {
       namespace service {
         namespace inputsource {
 
+          using IoContext = boost::asio::io_context;
+          using Strand = boost::asio::strand<IoContext::executor_type>;
+
           class InputSourceService :
               public aasdk::channel::inputsource::IInputSourceServiceEventHandler,
               public IService,
               public projection::IInputDeviceEventHandler,
               public std::enable_shared_from_this<InputSourceService> {
           public:
-            InputSourceService(boost::asio::io_service &ioService, aasdk::messenger::IMessenger::Pointer messenger,
+            InputSourceService(IoContext &ioContext, aasdk::messenger::IMessenger::Pointer messenger,
                                projection::IInputDevice::Pointer inputDevice);
 
             void start() override;
@@ -59,7 +62,7 @@ namespace f1x {
           private:
             using std::enable_shared_from_this<InputSourceService>::shared_from_this;
 
-            boost::asio::io_service::strand strand_;
+            Strand strand_;
             aasdk::channel::inputsource::InputSourceService::Pointer channel_;
             projection::IInputDevice::Pointer inputDevice_;
           };

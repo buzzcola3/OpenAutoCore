@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include <QObject>
-#include <QKeyEvent>
 #include <f1x/openauto/autoapp/Projection/IInputDevice.hpp>
 #include <f1x/openauto/autoapp/Configuration/IConfiguration.hpp>
 
@@ -37,25 +35,21 @@ class InputDevice: public QObject, public IInputDevice, boost::noncopyable
     Q_OBJECT
 
 public:
-    InputDevice(QObject& parent, configuration::IConfiguration::Pointer configuration, const QRect& touchscreenGeometry, const QRect& videoGeometry);
+    InputDevice(QObject& parent, configuration::IConfiguration::Pointer configuration, const buzz::common::Rect& touchscreenGeometry, const buzz::common::Rect& videoGeometry);
 
     void start(IInputDeviceEventHandler& eventHandler) override;
     void stop() override;
     ButtonCodes getSupportedButtonCodes() const override;
-    bool eventFilter(QObject* obj, QEvent* event) override;
     bool hasTouchscreen() const override;
-    QRect getTouchscreenGeometry() const override;
+    buzz::common::Rect getTouchscreenGeometry() const override;
 
 private:
     void setVideoGeometry();
-    bool handleKeyEvent(QEvent* event, QKeyEvent* key);
     void dispatchKeyEvent(ButtonEvent event);
-    bool handleTouchEvent(QEvent* event);
 
-    QObject& parent_;
     configuration::IConfiguration::Pointer configuration_;
-    QRect touchscreenGeometry_;
-    QRect displayGeometry_;
+    buzz::common::Rect touchscreenGeometry_;
+    buzz::common::Rect displayGeometry_;
     IInputDeviceEventHandler* eventHandler_;
     std::mutex mutex_;
 };

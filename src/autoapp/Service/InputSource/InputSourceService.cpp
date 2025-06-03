@@ -24,37 +24,41 @@ namespace f1x {
     namespace autoapp {
       namespace service {
         namespace inputsource {
-          InputSourceService::InputSourceService(boost::asio::io_service &ioService,
+
+          using IoContext = boost::asio::io_context;
+          using Strand = boost::asio::strand<IoContext::executor_type>;
+
+          InputSourceService::InputSourceService(IoContext &ioContext,
                                                  aasdk::messenger::IMessenger::Pointer messenger,
                                                  projection::IInputDevice::Pointer inputDevice)
-              : strand_(ioService),
+              : strand_(ioContext.get_executor()),
                 channel_(std::make_shared<aasdk::channel::inputsource::InputSourceService>(strand_, std::move(messenger))),
                 inputDevice_(std::move(inputDevice)) {
 
           }
 
           void InputSourceService::start() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[InputSourceService] start()";
               channel_->receive(this->shared_from_this());
             });
           }
 
           void InputSourceService::stop() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[InputSourceService] stop()";
               inputDevice_->stop();
             });
           }
 
           void InputSourceService::pause() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[InputSourceService] pause()";
             });
           }
 
           void InputSourceService::resume() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[InputSourceService] resume()";
             });
           }
@@ -78,8 +82,8 @@ namespace f1x {
               const auto &touchscreenSurface = inputDevice_->getTouchscreenGeometry();
               auto touchscreenConfig = inputChannel->add_touchscreen();
 
-              touchscreenConfig->set_width(touchscreenSurface.width());
-              touchscreenConfig->set_height(touchscreenSurface.height());
+              touchscreenConfig->set_width(touchscreenSurface.width);
+              touchscreenConfig->set_height(touchscreenSurface.height);
             }
           }
 
@@ -140,7 +144,7 @@ namespace f1x {
             auto timestamp = std::chrono::duration_cast<std::chrono::microseconds>(
                 std::chrono::high_resolution_clock::now().time_since_epoch());
 
-            strand_.dispatch(
+            boost::asio::dispatch(strand_ ,
                 [this, self = this->shared_from_this(), event = std::move(event), timestamp = std::move(timestamp)]() {
                   aap_protobuf::service::inputsource::message::InputReport inputReport;
                   inputReport.set_timestamp(timestamp.count());
@@ -169,7 +173,7 @@ namespace f1x {
             auto timestamp = std::chrono::duration_cast<std::chrono::microseconds>(
                 std::chrono::high_resolution_clock::now().time_since_epoch());
 
-            strand_.dispatch(
+            boost::asio::dispatch(strand_ ,
                 [this, self = this->shared_from_this(), event = std::move(event), timestamp = std::move(timestamp)]() {
                   aap_protobuf::service::inputsource::message::InputReport inputReport;
                   inputReport.set_timestamp(timestamp.count());

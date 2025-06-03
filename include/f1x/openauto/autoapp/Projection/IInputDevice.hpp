@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <QRect>
+#include <buzz/common/Rect.hpp>
 #include <IO/Promise.hpp>
 #include <f1x/openauto/autoapp/Projection/InputEvent.hpp>
 
@@ -44,7 +44,7 @@ public:
     virtual void stop() = 0;
     virtual ButtonCodes getSupportedButtonCodes() const = 0;
     virtual bool hasTouchscreen() const = 0;
-    virtual QRect getTouchscreenGeometry() const = 0;
+    virtual buzz::common::Rect getTouchscreenGeometry() const = 0;
 };
 
 }

@@ -36,8 +36,12 @@ single_version_override(
     patches = ["//patches:abseil_fix_arm_march.patch"],
 )
 
+bazel_dep(name = "googletest", version = "1.16.0")
+
 bazel_dep(name = "boost.asio", version = "1.87.0.bcr.1")
 bazel_dep(name = "boost.endian", version = "1.87.0")
 bazel_dep(name = "boost.log", version = "1.87.0")
+bazel_dep(name = "boost.circular_buffer", version = "1.87.0")
 
 bazel_dep(name = "libusb", version = "1.0.28")
+bazel_dep(name = "openssl", version = "3.3.1.bcr.1")

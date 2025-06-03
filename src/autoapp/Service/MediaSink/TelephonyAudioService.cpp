@@ -24,10 +24,10 @@ namespace f1x {
     namespace autoapp {
       namespace service {
         namespace mediasink {
-          TelephonyAudioService::TelephonyAudioService(boost::asio::io_service &ioService,
+          TelephonyAudioService::TelephonyAudioService(IoContext& ioContext,
                                                      aasdk::messenger::IMessenger::Pointer messenger,
                                                      projection::IAudioOutput::Pointer audioOutput)
-              : AudioMediaSinkService(ioService, std::make_shared<aasdk::channel::mediasink::audio::channel::TelephonyAudioChannel>(strand_,
+              : AudioMediaSinkService(ioContext, std::make_shared<aasdk::channel::mediasink::audio::channel::TelephonyAudioChannel>(strand_,
                                                                                                           std::move(
                                                                                                               messenger)),
                                  std::move(audioOutput)) {

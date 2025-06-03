@@ -24,11 +24,11 @@ namespace f1x::openauto::autoapp::service::mediasink {
   using f1x::openauto::autoapp::service::mediasink::AudioMediaSinkService;
   using aasdk::channel::mediasink::audio::channel::GuidanceAudioChannel;
 
-  GuidanceAudioService::GuidanceAudioService(boost::asio::io_service &ioService,
+  GuidanceAudioService::GuidanceAudioService(IoContext& ioContext,
                                              aasdk::messenger::IMessenger::Pointer messenger,
                                              projection::IAudioOutput::Pointer audioOutput)
       : AudioMediaSinkService(
-      ioService,
+      ioContext,
       std::make_shared<GuidanceAudioChannel>(strand_, std::move(messenger)),
       std::move(audioOutput)) {
 

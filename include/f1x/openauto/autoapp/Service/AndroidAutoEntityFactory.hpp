@@ -33,10 +33,13 @@ namespace autoapp
 namespace service
 {
 
+    using IoContext = boost::asio::io_context;
+    using Strand = boost::asio::strand<IoContext::executor_type>;
+
 class AndroidAutoEntityFactory: public IAndroidAutoEntityFactory
 {
 public:
-    AndroidAutoEntityFactory(boost::asio::io_service& ioService,
+    AndroidAutoEntityFactory(IoContext& ioContext,
                              configuration::IConfiguration::Pointer configuration,
                              IServiceFactory& serviceFactory);
 
@@ -46,7 +49,7 @@ public:
 private:
     IAndroidAutoEntity::Pointer create(aasdk::transport::ITransport::Pointer transport);
 
-    boost::asio::io_service& ioService_;
+    IoContext& ioContext_;
     configuration::IConfiguration::Pointer configuration_;
     IServiceFactory& serviceFactory_;
 };

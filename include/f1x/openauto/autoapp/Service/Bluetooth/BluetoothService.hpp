@@ -28,12 +28,15 @@ namespace f1x {
       namespace service {
         namespace bluetooth {
 
+          using IoContext = boost::asio::io_context;
+          using Strand = boost::asio::strand<IoContext::executor_type>;
+
           class BluetoothService
               : public aasdk::channel::bluetooth::IBluetoothServiceEventHandler,
                 public IService,
                 public std::enable_shared_from_this<BluetoothService> {
           public:
-            BluetoothService(boost::asio::io_service &ioService,
+            BluetoothService(IoContext &ioContext,
                              aasdk::messenger::IMessenger::Pointer messenger,
                              projection::IBluetoothDevice::Pointer bluetoothDevice);
 
@@ -58,7 +61,7 @@ namespace f1x {
 
             void sendBluetoothAuthenticationData();
 
-            boost::asio::io_service::strand strand_;
+            Strand strand_;
             aasdk::channel::bluetooth::BluetoothService::Pointer channel_;
             projection::IBluetoothDevice::Pointer bluetoothDevice_;
           };

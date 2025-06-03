@@ -19,38 +19,41 @@
 #include <f1x/openauto/Common/Log.hpp>
 #include <f1x/openauto/autoapp/Service/Radio/RadioService.hpp>
 #include <fstream>
-#include <QString>
+#include <string>
 
 namespace f1x::openauto::autoapp::service::radio {
 
-  RadioService::RadioService(boost::asio::io_service &ioService,
+  using IoContext = boost::asio::io_context;
+  using Strand = boost::asio::strand<IoContext::executor_type>;
+
+  RadioService::RadioService(IoContext& ioContext,
                              aasdk::messenger::IMessenger::Pointer messenger)
-      : strand_(ioService),
-        timer_(ioService),
+      : strand_(ioContext.get_executor()),
+        timer_(ioContext),
         channel_(std::make_shared<aasdk::channel::radio::RadioService>(strand_, std::move(messenger))) {
 
   }
 
   void RadioService::start() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(debug) << "[RadioService] start()";
     });
   }
 
   void RadioService::stop() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(debug) << "[RadioService] stop()";
     });
   }
 
   void RadioService::pause() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(debug) << "[RadioService] pause()";
     });
   }
 
   void RadioService::resume() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(debug) << "[RadioService] resume()";
     });
   }

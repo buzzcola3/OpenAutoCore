@@ -29,10 +29,13 @@ namespace autoapp
 namespace service
 {
 
+using IoContext = boost::asio::io_context;
+using Strand = boost::asio::strand<IoContext::executor_type>;
+
 class Pinger: public IPinger, public std::enable_shared_from_this<Pinger>
 {
 public:
-    Pinger(boost::asio::io_service& ioService, time_t duration);
+    Pinger(IoContext& ioContext, time_t duration);
 
     void ping(Promise::Pointer promise) override;
     void pong() override;
@@ -43,7 +46,7 @@ private:
 
     void onTimerExceeded(const boost::system::error_code& error);
 
-    boost::asio::io_service::strand strand_;
+    Strand strand_;
     boost::asio::deadline_timer timer_;
     time_t duration_;
     bool cancelled_;

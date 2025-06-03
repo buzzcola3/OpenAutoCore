@@ -19,7 +19,7 @@
 #pragma once
 
 #include <memory>
-#include <QRect>
+#include <buzz/common/Rect.hpp>
 #include <Common/Data.hpp>
 #include <Messenger/Timestamp.hpp>
 #include <aap_protobuf/service/media/sink/message/VideoFrameRateType.pb.h>
@@ -50,7 +50,7 @@ public:
     virtual aap_protobuf::service::media::sink::message::VideoFrameRateType getVideoFPS() const = 0;
     virtual aap_protobuf::service::media::sink::message::VideoCodecResolutionType getVideoResolution() const = 0;
     virtual size_t getScreenDPI() const = 0;
-    virtual QRect getVideoMargins() const = 0;
+    virtual buzz::common::Rect getVideoMargins() const = 0;
 
 };
 

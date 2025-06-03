@@ -19,7 +19,7 @@
 #include <f1x/openauto/Common/Log.hpp>
 #include <f1x/openauto/autoapp/Service/MediaBrowser/MediaBrowserService.hpp>
 #include <fstream>
-#include <QString>
+#include <string>
 
 namespace f1x {
   namespace openauto {
@@ -27,34 +27,37 @@ namespace f1x {
       namespace service {
         namespace mediabrowser {
 
-          MediaBrowserService::MediaBrowserService(boost::asio::io_service &ioService,
+          using IoContext = boost::asio::io_context;
+          using Strand = boost::asio::strand<IoContext::executor_type>;
+
+          MediaBrowserService::MediaBrowserService(IoContext &ioContext,
                                                        aasdk::messenger::IMessenger::Pointer messenger)
-              : strand_(ioService),
-                timer_(ioService),
+              : strand_(ioContext.get_executor()),
+                timer_(ioContext),
                 channel_(std::make_shared<aasdk::channel::mediabrowser::MediaBrowserService>(strand_, std::move(messenger))) {
 
           }
 
           void MediaBrowserService::start() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[MediaBrowserService] start()";
             });
           }
 
           void MediaBrowserService::stop() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[MediaBrowserService] stop()";
             });
           }
 
           void MediaBrowserService::pause() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[MediaBrowserService] pause()";
             });
           }
 
           void MediaBrowserService::resume() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[MediaBrowserService] resume()";
             });
           }

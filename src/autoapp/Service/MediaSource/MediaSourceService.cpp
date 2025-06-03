@@ -22,35 +22,38 @@
 
 namespace f1x::openauto::autoapp::service::mediasource {
 
-  MediaSourceService::MediaSourceService(boost::asio::io_service &ioService,
+  using IoContext = boost::asio::io_context;
+  using Strand = boost::asio::strand<IoContext::executor_type>;
+
+  MediaSourceService::MediaSourceService(IoContext &ioContext,
                                          aasdk::channel::mediasource::IMediaSourceService::Pointer channel,
                                          projection::IAudioInput::Pointer audioInput)
-      : strand_(ioService), channel_(std::move(channel)), audioInput_(std::move(audioInput)), session_(-1) {
+      : strand_(ioContext.get_executor()), channel_(std::move(channel)), audioInput_(std::move(audioInput)), session_(-1) {
 
   }
 
   void MediaSourceService::start() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[MediaSourceService] start()";
       channel_->receive(this->shared_from_this());
     });
   }
 
   void MediaSourceService::stop() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[MediaSourceService] stop()";
       audioInput_->stop();
     });
   }
 
   void MediaSourceService::pause() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[MediaSourceService] pause()";
     });
   }
 
   void MediaSourceService::resume() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[MediaSourceService] resume()";
     });
   }

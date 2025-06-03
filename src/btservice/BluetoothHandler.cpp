@@ -16,7 +16,7 @@ namespace f1x::openauto::btservice {
 
     OPENAUTO_LOG(info) << "[BluetoothHandler::BluetoothHandler] Starting Up...";
 
-    QString adapterAddress = QString::fromStdString(configuration_->getBluetoothAdapterAddress());
+    string adapterAddress = QString::fromStdString(configuration_->getBluetoothAdapterAddress());
     QBluetoothAddress address(adapterAddress);
     localDevice_ = std::make_unique<QBluetoothLocalDevice>(QBluetoothAddress());
 
@@ -63,11 +63,11 @@ namespace f1x::openauto::btservice {
     androidBluetoothService_->unregisterService();
   }
 
-  void BluetoothHandler::onPairingDisplayPinCode(const QBluetoothAddress &address, QString pin) {
+  void BluetoothHandler::onPairingDisplayPinCode(const QBluetoothAddress &address, string pin) {
     OPENAUTO_LOG(debug) << "[BluetoothHandler::onPairingDisplayPinCode] Pairing display PIN code: " << pin.toStdString();
   }
 
-  void BluetoothHandler::onPairingDisplayConfirmation(const QBluetoothAddress &address, QString pin) {
+  void BluetoothHandler::onPairingDisplayConfirmation(const QBluetoothAddress &address, string pin) {
     OPENAUTO_LOG(debug) << "[BluetoothHandler::onPairingDisplayConfirmation] Pairing display confirmation: " << pin.toStdString();
 
     // Here you can implement logic to show this PIN to the user or automatically accept if you trust all devices

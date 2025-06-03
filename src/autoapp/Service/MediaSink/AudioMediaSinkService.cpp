@@ -25,15 +25,18 @@ namespace f1x {
       namespace service {
         namespace mediasink {
 
-          AudioMediaSinkService::AudioMediaSinkService(boost::asio::io_service &ioService,
+          using IoContext = boost::asio::io_context;
+          using Strand = boost::asio::strand<IoContext::executor_type>;
+
+          AudioMediaSinkService::AudioMediaSinkService(IoContext &ioContext,
                                                        aasdk::channel::mediasink::audio::IAudioMediaSinkService::Pointer channel,
                                                        projection::IAudioOutput::Pointer audioOutput)
-              : strand_(ioService), channel_(std::move(channel)), audioOutput_(std::move(audioOutput)), session_(-1) {
+              : strand_(ioContext.get_executor()), channel_(std::move(channel)), audioOutput_(std::move(audioOutput)), session_(-1) {
 
           }
 
           void AudioMediaSinkService::start() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[AudioMediaSinkService] start()";
               OPENAUTO_LOG(info) << "[AudioMediaSinkService] Channel " << aasdk::messenger::channelIdToString(channel_->getId());
               channel_->receive(this->shared_from_this());
@@ -41,7 +44,7 @@ namespace f1x {
           }
 
           void AudioMediaSinkService::stop() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[AudioMediaSinkService] stop()";
               OPENAUTO_LOG(info) << "[AudioMediaSinkService] Channel " << aasdk::messenger::channelIdToString(channel_->getId());
               audioOutput_->stop();
@@ -49,7 +52,7 @@ namespace f1x {
           }
 
           void AudioMediaSinkService::pause() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[AudioMediaSinkService] pause()";
               OPENAUTO_LOG(info) << "[AudioMediaSinkService] Channel " << aasdk::messenger::channelIdToString(channel_->getId());
 
@@ -57,7 +60,7 @@ namespace f1x {
           }
 
           void AudioMediaSinkService::resume() {
-            strand_.dispatch([this, self = this->shared_from_this()]() {
+            boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[AudioMediaSinkService] resume()";
               OPENAUTO_LOG(info) << "[AudioMediaSinkService] Channel " << aasdk::messenger::channelIdToString(channel_->getId());
 

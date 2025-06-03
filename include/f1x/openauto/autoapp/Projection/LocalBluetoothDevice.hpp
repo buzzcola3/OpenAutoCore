@@ -31,7 +31,7 @@ class LocalBluetoothDevice: public QObject, public IBluetoothDevice
     Q_OBJECT
 
 public:
-    LocalBluetoothDevice(const QString &adapterAddress = QString(), QObject *parent = nullptr);
+    LocalBluetoothDevice(const string &adapterAddress = QString(), QObject *parent = nullptr);
 
     void stop() override;
     bool isPaired(const std::string& address) const override;
@@ -39,7 +39,7 @@ public:
     bool isAvailable() const override;
 
 private slots:
-    void createBluetoothLocalDevice(const QString &adapterAddress);
+    void createBluetoothLocalDevice(const string &adapterAddress);
 
 private:
     mutable std::mutex mutex_;

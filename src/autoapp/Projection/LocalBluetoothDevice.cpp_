@@ -23,7 +23,7 @@
 
 namespace f1x::openauto::autoapp::projection {
 
-  LocalBluetoothDevice::LocalBluetoothDevice(const QString &adapterAddress, QObject *parent) : QObject(parent) {
+  LocalBluetoothDevice::LocalBluetoothDevice(const string &adapterAddress, QObject *parent) : QObject(parent) {
     qRegisterMetaType<IBluetoothDevice::PairingPromise::Pointer>("PairingPromise::Pointer");
 
     this->moveToThread(QApplication::instance()->thread());
@@ -33,7 +33,7 @@ namespace f1x::openauto::autoapp::projection {
 
   }
 
-  void LocalBluetoothDevice::createBluetoothLocalDevice(const QString &adapterAddress) {
+  void LocalBluetoothDevice::createBluetoothLocalDevice(const string &adapterAddress) {
     OPENAUTO_LOG(info) << "[LocalBluetoothDevice] create.";
 
 

@@ -38,7 +38,7 @@ public:
     aap_protobuf::service::media::sink::message::VideoFrameRateType getVideoFPS() const override;
     aap_protobuf::service::media::sink::message::VideoCodecResolutionType getVideoResolution() const override;
     size_t getScreenDPI() const override;
-    QRect getVideoMargins() const override;
+    buzz::common::Rect getVideoMargins() const override;
 
 protected:
     configuration::IConfiguration::Pointer configuration_;

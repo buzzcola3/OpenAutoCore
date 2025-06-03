@@ -18,22 +18,25 @@
 
 #pragma once
 
-#include <gps.h>
+//#include <gps.h>
 #include <aap_protobuf/service/sensorsource/message/DrivingStatus.pb.h>
 #include <aap_protobuf/service/sensorsource/message/SensorType.pb.h>
 #include <Channel/SensorSource/SensorSourceService.hpp>
 #include <f1x/openauto/autoapp/Service/IService.hpp>
-#include <boost/asio/io_service.hpp>
 #include <Messenger/IMessenger.hpp>
 
 
 namespace f1x::openauto::autoapp::service::sensor {
+
+  using IoContext = boost::asio::io_context;
+  using Strand = boost::asio::strand<IoContext::executor_type>;
+
   class SensorService :
       public aasdk::channel::sensorsource::ISensorSourceServiceEventHandler,
       public IService,
       public std::enable_shared_from_this<SensorService> {
   public:
-    SensorService(boost::asio::io_service &ioService,
+    SensorService(IoContext& ioContext,
                   aasdk::messenger::IMessenger::Pointer messenger);
 
     bool isNight = false;
@@ -73,9 +76,8 @@ namespace f1x::openauto::autoapp::service::sensor {
     bool firstRun = true;
 
     boost::asio::deadline_timer timer_;
-    boost::asio::io_service::strand strand_;
+    Strand strand_;
     aasdk::channel::sensorsource::SensorSourceService::Pointer channel_;
-    struct gps_data_t gpsData_;
     bool gpsEnabled_ = false;
   };
 

@@ -20,19 +20,22 @@
 #include <f1x/openauto/autoapp/Service/AndroidAutoEntity.hpp>
 #include <f1x/openauto/Common/Log.hpp>
 
+using IoContext = boost::asio::io_context;
+using Strand = boost::asio::strand<IoContext::executor_type>;
+
 namespace f1x {
   namespace openauto {
     namespace autoapp {
       namespace service {
 
-        AndroidAutoEntity::AndroidAutoEntity(boost::asio::io_service &ioService,
+        AndroidAutoEntity::AndroidAutoEntity(IoContext &ioContext,
                                              aasdk::messenger::ICryptor::Pointer cryptor,
                                              aasdk::transport::ITransport::Pointer transport,
                                              aasdk::messenger::IMessenger::Pointer messenger,
                                              configuration::IConfiguration::Pointer configuration,
                                              ServiceList serviceList,
                                              IPinger::Pointer pinger)
-            : strand_(ioService), cryptor_(std::move(cryptor)), transport_(std::move(transport)),
+            : strand_(ioContext.get_executor()), cryptor_(std::move(cryptor)), transport_(std::move(transport)),
               messenger_(std::move(messenger)), controlServiceChannel_(
                 std::make_shared<aasdk::channel::control::ControlServiceChannel>(strand_, messenger_)),
               configuration_(std::move(configuration)), serviceList_(std::move(serviceList)),
@@ -44,7 +47,7 @@ namespace f1x {
         }
 
         void AndroidAutoEntity::start(IAndroidAutoEntityEventHandler &eventHandler) {
-          strand_.dispatch([this, self = this->shared_from_this(), eventHandler = &eventHandler]() {
+          boost::asio::dispatch(strand_, [this, self = this->shared_from_this(), eventHandler = &eventHandler]() {
             OPENAUTO_LOG(info) << "[AndroidAutoEntity] start()";
 
             eventHandler_ = eventHandler;
@@ -61,7 +64,7 @@ namespace f1x {
         }
 
         void AndroidAutoEntity::stop() {
-          strand_.dispatch([this, self = this->shared_from_this()]() {
+          boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
             OPENAUTO_LOG(info) << "[AndroidAutoEntity] stop()";
 
             try {
@@ -79,7 +82,7 @@ namespace f1x {
         }
 
         void AndroidAutoEntity::pause() {
-          strand_.dispatch([this, self = this->shared_from_this()]() {
+          boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
             OPENAUTO_LOG(info) << "[AndroidAutoEntity] pause()";
 
             try {
@@ -92,7 +95,7 @@ namespace f1x {
         }
 
         void AndroidAutoEntity::resume() {
-          strand_.dispatch([this, self = this->shared_from_this()]() {
+          boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
             OPENAUTO_LOG(info) << "[AndroidAutoEntity] resume()";
 
             try {

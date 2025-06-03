@@ -20,7 +20,6 @@
 
 #include <Channel/NavigationStatus/NavigationStatusService.hpp>
 #include <f1x/openauto/autoapp/Service/IService.hpp>
-#include <boost/asio/io_service.hpp>
 #include <Messenger/IMessenger.hpp>
 
 namespace f1x {
@@ -29,12 +28,15 @@ namespace f1x {
       namespace service {
         namespace navigationstatus {
 
+          using IoContext = boost::asio::io_context;
+          using Strand = boost::asio::strand<IoContext::executor_type>;
+
           class NavigationStatusService :
               public aasdk::channel::navigationstatus::INavigationStatusServiceEventHandler,
               public IService,
               public std::enable_shared_from_this<NavigationStatusService> {
           public:
-            NavigationStatusService(boost::asio::io_service &ioService, aasdk::messenger::IMessenger::Pointer messenger);
+            NavigationStatusService(IoContext& ioContext, aasdk::messenger::IMessenger::Pointer messenger);
 
             void start() override;
             void stop() override;
@@ -53,7 +55,7 @@ namespace f1x {
           private:
             using std::enable_shared_from_this<NavigationStatusService>::shared_from_this;
             boost::asio::deadline_timer timer_;
-            boost::asio::io_service::strand strand_;
+            Strand strand_;
             aasdk::channel::navigationstatus::NavigationStatusService::Pointer channel_;
           };
         }

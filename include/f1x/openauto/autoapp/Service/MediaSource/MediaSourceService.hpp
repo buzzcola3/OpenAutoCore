@@ -34,6 +34,9 @@ namespace service
 {
   namespace mediasource {
 
+    using IoContext = boost::asio::io_context;
+    using Strand = boost::asio::strand<IoContext::executor_type>;
+
 
     class MediaSourceService
         : public aasdk::channel::mediasource::IMediaSourceServiceEventHandler,
@@ -43,7 +46,7 @@ namespace service
       typedef std::shared_ptr<MediaSourceService> Pointer;
 
       // General Constructor
-      MediaSourceService(boost::asio::io_service& ioService,
+      MediaSourceService(IoContext& ioContext,
       aasdk::channel::mediasource::IMediaSourceService::Pointer channel, projection::IAudioInput::Pointer audioInput);
 
       void start() override;
@@ -79,7 +82,7 @@ namespace service
 
       void readMediaSource();
 
-      boost::asio::io_service::strand strand_;
+      Strand strand_;
       aasdk::channel::mediasource::IMediaSourceService::Pointer channel_;
       projection::IAudioInput::Pointer audioInput_;
       int32_t session_;

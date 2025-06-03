@@ -21,62 +21,32 @@
 #include <f1x/openauto/autoapp/Service/Sensor/SensorService.hpp>
 #include <fstream>
 #include <cmath>
-#include <gps.h>
+//#include <gps.h>
 
 namespace f1x::openauto::autoapp::service::sensor {
-  SensorService::SensorService(boost::asio::io_service &ioService,
+  SensorService::SensorService(IoContext& ioContext,
                                aasdk::messenger::IMessenger::Pointer messenger)
-      : strand_(ioService),
-        timer_(ioService),
+      : strand_(ioContext.get_executor()),
+        timer_(ioContext),
         channel_(std::make_shared<aasdk::channel::sensorsource::SensorSourceService>(strand_, std::move(messenger))) {
 
   }
 
   void SensorService::start() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
-      if (gps_open("127.0.0.1", "2947", &this->gpsData_)) {
-        OPENAUTO_LOG(warning) << "[SensorService] can't connect to GPSD.";
-      } else {
-        OPENAUTO_LOG(info) << "[SensorService] Connected to GPSD.";
-        gps_stream(&this->gpsData_, WATCH_ENABLE | WATCH_JSON, NULL);
-        this->gpsEnabled_ = true;
-      }
 
-      if (is_file_exist("/tmp/night_mode_enabled")) {
-        this->isNight = true;
-      }
-      this->sensorPolling();
-
-      OPENAUTO_LOG(info) << "[SensorService] start()";
-      channel_->receive(this->shared_from_this());
-    });
 
   }
 
   void SensorService::stop() {
-    this->stopPolling = true;
 
-    strand_.dispatch([this, self = this->shared_from_this()]() {
-      if (this->gpsEnabled_) {
-        gps_stream(&this->gpsData_, WATCH_DISABLE, NULL);
-        gps_close(&this->gpsData_);
-        this->gpsEnabled_ = false;
-      }
-
-      OPENAUTO_LOG(info) << "[SensorService] stop()";
-    });
   }
 
   void SensorService::pause() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
-      OPENAUTO_LOG(info) << "[SensorService] pause()";
-    });
+
   }
 
   void SensorService::resume() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
-      OPENAUTO_LOG(info) << "[SensorService] resume()";
-    });
+
   }
 
   void SensorService::fillFeatures(
@@ -178,30 +148,30 @@ namespace f1x::openauto::autoapp::service::sensor {
     auto *locInd = indication.add_location_data();
 
     // epoch seconds
-#if GPSD_API_MAJOR_VERSION >= 7
-    locInd->set_timestamp(this->gpsData_.fix.time.tv_sec);
-#else
-    locInd->set_timestamp(this->gpsData_.fix.time);
-#endif
+//#if GPSD_API_MAJOR_VERSION >= 7
+//    locInd->set_timestamp(this->gpsData_.fix.time.tv_sec);
+//#else
+//    locInd->set_timestamp(this->gpsData_.fix.time);
+//#endif
     // degrees
-    locInd->set_latitude_e7(this->gpsData_.fix.latitude * 1e7);
-    locInd->set_longitude_e7(this->gpsData_.fix.longitude * 1e7);
+//    locInd->set_latitude_e7(this->gpsData_.fix.latitude * 1e7);
+//    locInd->set_longitude_e7(this->gpsData_.fix.longitude * 1e7);
     // meters
-    auto accuracy = sqrt(pow(this->gpsData_.fix.epx, 2) + pow(this->gpsData_.fix.epy, 2));
-    locInd->set_accuracy_e3(accuracy * 1e3);
+//    auto accuracy = sqrt(pow(this->gpsData_.fix.epx, 2) + pow(this->gpsData_.fix.epy, 2));
+//    locInd->set_accuracy_e3(accuracy * 1e3);
 
-    if (this->gpsData_.set & ALTITUDE_SET) {
-      // meters above ellipsoid
-      locInd->set_altitude_e2(this->gpsData_.fix.altitude * 1e2);
-    }
-    if (this->gpsData_.set & SPEED_SET) {
-      // meters per second to knots
-      locInd->set_speed_e3(this->gpsData_.fix.speed * 1.94384 * 1e3);
-    }
-    if (this->gpsData_.set & TRACK_SET) {
-      // degrees
-      locInd->set_bearing_e6(this->gpsData_.fix.track * 1e6);
-    }
+//    if (this->gpsData_.set & ALTITUDE_SET) {
+//      // meters above ellipsoid
+//      locInd->set_altitude_e2(this->gpsData_.fix.altitude * 1e2);
+//    }
+//    if (this->gpsData_.set & SPEED_SET) {
+//      // meters per second to knots
+//      locInd->set_speed_e3(this->gpsData_.fix.speed * 1.94384 * 1e3);
+//    }
+//    if (this->gpsData_.set & TRACK_SET) {
+//      // degrees
+//      locInd->set_bearing_e6(this->gpsData_.fix.track * 1e6);
+//    }
 
     auto promise = aasdk::channel::SendPromise::defer(strand_);
     promise->then([]() {},
@@ -212,34 +182,34 @@ namespace f1x::openauto::autoapp::service::sensor {
   void SensorService::sensorPolling() {
     OPENAUTO_LOG(info) << "[SensorService] sensorPolling()";
     if (!this->stopPolling) {
-      strand_.dispatch([this, self = this->shared_from_this()]() {
+      boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
         this->isNight = is_file_exist("/tmp/night_mode_enabled");
         if (this->previous != this->isNight && !this->firstRun) {
           this->previous = this->isNight;
           this->sendNightData();
         }
         bool gpsDataAvailable = false;
-#if GPSD_API_MAJOR_VERSION >= 7
-        if (gps_read (&this->gpsData_, NULL, 0) != -1) {
-          gpsDataAvailable = true;
-        }
-#else
-        if (gps_read (&this->gpsData_) != -1) {
-                    gpsDataAvailable = true;
-                }
-#endif
-        if ((this->gpsEnabled_) &&
-            (gps_waiting(&this->gpsData_, 0)) &&
-            (gpsDataAvailable == true) &&
-            (this->gpsData_.fix.mode == MODE_2D || this->gpsData_.fix.mode == MODE_3D) &&
-            (this->gpsData_.set & TIME_SET) &&
-            (this->gpsData_.set & LATLON_SET))
-        {
-          this->sendGPSLocationData();
-        }
-
+//#if GPSD_API_MAJOR_VERSION >= 7
+//        if (gps_read (&this->gpsData_, NULL, 0) != -1) {
+//          gpsDataAvailable = true;
+//        }
+//#else
+//        if (gps_read (&this->gpsData_) != -1) {
+//                    gpsDataAvailable = true;
+//                }
+//#endif
+//        if ((this->gpsEnabled_) &&
+//            (gps_waiting(&this->gpsData_, 0)) &&
+//            (gpsDataAvailable == true) &&
+//            (this->gpsData_.fix.mode == MODE_2D || this->gpsData_.fix.mode == MODE_3D) &&
+//            (this->gpsData_.set & TIME_SET) &&
+//            (this->gpsData_.set & LATLON_SET))
+//        {
+//          this->sendGPSLocationData();
+//        }
+//
         timer_.expires_from_now(boost::posix_time::milliseconds(250));
-        timer_.async_wait(strand_.wrap(std::bind(&SensorService::sensorPolling, this->shared_from_this())));
+        timer_.async_wait(boost::asio::bind_executor(strand_, std::bind(&SensorService::sensorPolling, this->shared_from_this())));
       });
     }
   }

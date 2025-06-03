@@ -28,6 +28,10 @@ namespace f1x {
     namespace autoapp {
       namespace service {
         namespace mediasink {
+
+          using IoContext = boost::asio::io_context;
+          using Strand = boost::asio::strand<IoContext::executor_type>;
+
           class AudioMediaSinkService :
             public aasdk::channel::mediasink::audio::IAudioMediaSinkServiceEventHandler,
             public IService,
@@ -36,7 +40,7 @@ namespace f1x {
             typedef std::shared_ptr<AudioMediaSinkService> Pointer;
 
             // General Constructor
-            AudioMediaSinkService(boost::asio::io_service& ioService,
+            AudioMediaSinkService(IoContext& ioContext,
                              aasdk::channel::mediasink::audio::IAudioMediaSinkService::Pointer channel,
                              projection::IAudioOutput::Pointer audioOutput);
 
@@ -66,7 +70,7 @@ namespace f1x {
 
           protected:
             using std::enable_shared_from_this<AudioMediaSinkService>::shared_from_this;
-            boost::asio::io_service::strand strand_;
+            Strand strand_;
             aasdk::channel::mediasink::audio::IAudioMediaSinkService::Pointer channel_;
             projection::IAudioOutput::Pointer audioOutput_;
             int32_t session_;

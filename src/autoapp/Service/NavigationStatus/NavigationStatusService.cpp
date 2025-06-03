@@ -19,39 +19,42 @@
 #include <f1x/openauto/Common/Log.hpp>
 #include <f1x/openauto/autoapp/Service/NavigationStatus/NavigationStatusService.hpp>
 #include <fstream>
-#include <QString>
+#include <string>
 
 namespace f1x::openauto::autoapp::service::navigationstatus {
 
-  NavigationStatusService::NavigationStatusService(boost::asio::io_service &ioService,
+  using IoContext = boost::asio::io_context;
+  using Strand = boost::asio::strand<IoContext::executor_type>;
+
+  NavigationStatusService::NavigationStatusService(IoContext& ioContext,
                                                    aasdk::messenger::IMessenger::Pointer messenger)
-      : strand_(ioService),
-        timer_(ioService),
+      : strand_(ioContext.get_executor()),
+        timer_(ioContext),
         channel_(std::make_shared<aasdk::channel::navigationstatus::NavigationStatusService>(strand_,
                                                                                              std::move(messenger))) {
 
   }
 
   void NavigationStatusService::start() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[NavigationStatusService] start()";
     });
   }
 
   void NavigationStatusService::stop() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[NavigationStatusService] stop()";
     });
   }
 
   void NavigationStatusService::pause() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[NavigationStatusService] pause()";
     });
   }
 
   void NavigationStatusService::resume() {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
+    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[NavigationStatusService] resume()";
     });
   }

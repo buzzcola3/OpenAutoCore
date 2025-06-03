@@ -41,7 +41,7 @@ namespace f1x {
           return configuration_->getScreenDPI();
         }
 
-        QRect VideoOutput::getVideoMargins() const {
+        Rect VideoOutput::getVideoMargins() const {
           return configuration_->getVideoMargins();
         }
 

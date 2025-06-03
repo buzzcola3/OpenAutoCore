@@ -20,7 +20,6 @@
 
 #include <Channel/Radio/RadioService.hpp>
 #include <f1x/openauto/autoapp/Service/IService.hpp>
-#include <boost/asio/io_service.hpp>
 #include <Messenger/IMessenger.hpp>
 
 namespace f1x {
@@ -29,12 +28,15 @@ namespace f1x {
       namespace service {
         namespace radio {
 
+          using IoContext = boost::asio::io_context;
+          using Strand = boost::asio::strand<IoContext::executor_type>;
+
           class RadioService :
               public aasdk::channel::radio::IRadioServiceEventHandler,
               public IService,
               public std::enable_shared_from_this<RadioService> {
           public:
-            RadioService(boost::asio::io_service &ioService, aasdk::messenger::IMessenger::Pointer messenger);
+            RadioService(IoContext& ioContext, aasdk::messenger::IMessenger::Pointer messenger);
 
             void start() override;
             void stop() override;
@@ -50,7 +52,7 @@ namespace f1x {
           private:
             using std::enable_shared_from_this<RadioService>::shared_from_this;
             boost::asio::deadline_timer timer_;
-            boost::asio::io_service::strand strand_;
+            Strand strand_;
             aasdk::channel::radio::RadioService::Pointer channel_;
           };
 

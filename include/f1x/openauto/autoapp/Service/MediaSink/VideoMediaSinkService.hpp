@@ -30,6 +30,9 @@ namespace f1x {
       namespace service {
         namespace mediasink {
 
+          using IoContext = boost::asio::io_context;
+          using Strand = boost::asio::strand<IoContext::executor_type>;
+
           class VideoMediaSinkService :
               public aasdk::channel::mediasink::video::IVideoMediaSinkServiceEventHandler,
               public IService,
@@ -38,7 +41,7 @@ namespace f1x {
               typedef std::shared_ptr<VideoMediaSinkService> Pointer;
 
             // General Constructor
-            VideoMediaSinkService(boost::asio::io_service& ioService,
+            VideoMediaSinkService(IoContext& ioContext,
                                   aasdk::channel::mediasink::video::IVideoMediaSinkService::Pointer channel,
                                   projection::IVideoOutput::Pointer videoOutput);
 
@@ -70,7 +73,7 @@ namespace f1x {
             void sendVideoFocusIndication();
           protected:
             using std::enable_shared_from_this<VideoMediaSinkService>::shared_from_this;
-            boost::asio::io_service::strand strand_;
+            Strand strand_;
             aasdk::channel::mediasink::video::IVideoMediaSinkService::Pointer channel_;
             projection::IVideoOutput::Pointer videoOutput_;
             int32_t session_;
