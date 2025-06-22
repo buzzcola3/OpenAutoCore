@@ -1,6 +1,6 @@
 /*
 *  This file is part of openauto project.
-*  Copyright (C) 2018 f1x.studio (Michal Szwaj)
+*  Copyright (C) 2025 buzzcola3 (Samuel Betak)
 *
 *  openauto is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -18,9 +18,6 @@
 
 #pragma once
 
-#include <mutex>
-#include <QAudioInput>
-#include <QAudioFormat>
 #include <f1x/openauto/autoapp/Projection/IAudioInput.hpp>
 
 namespace f1x
@@ -32,11 +29,12 @@ namespace autoapp
 namespace projection
 {
 
-class QtAudioInput: public QObject, public IAudioInput
+// A dummy implementation of IAudioInput that does not depend on any framework.
+class SharedAudioInput : public IAudioInput
 {
-    Q_OBJECT
 public:
-    QtAudioInput(uint32_t channelCount, uint32_t sampleSize, uint32_t sampleRate);
+    SharedAudioInput(uint32_t channelCount, uint32_t sampleSize, uint32_t sampleRate);
+    ~SharedAudioInput() override = default;
 
     bool open() override;
     bool isActive() const override;
@@ -47,24 +45,10 @@ public:
     uint32_t getChannelCount() const override;
     uint32_t getSampleRate() const override;
 
-signals:
-    void startRecording(StartPromise::Pointer promise);
-    void stopRecording();
-
-private slots:
-    void createAudioInput();
-    void onStartRecording(StartPromise::Pointer promise);
-    void onStopRecording();
-    void onReadyRead();
-
 private:
-    QAudioFormat audioFormat_;
-    QIODevice* ioDevice_;
-    std::unique_ptr<QAudioInput> audioInput_;
-    ReadPromise::Pointer readPromise_;
-    mutable std::mutex mutex_;
-
-    static constexpr size_t cSampleSize = 2056;
+    uint32_t channelCount_;
+    uint32_t sampleSize_;
+    uint32_t sampleRate_;
 };
 
 }

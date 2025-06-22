@@ -1,6 +1,6 @@
 /*
 *  This file is part of openauto project.
-*  Copyright (C) 2018 f1x.studio (Michal Szwaj)
+*  Copyright (C) 2025 buzzcola3 (Samuel Betak)
 *
 *  openauto is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -18,10 +18,9 @@
 
 #pragma once
 
-#include <QAudioOutput>
-#include <QAudioFormat>
 #include <f1x/openauto/autoapp/Projection/IAudioOutput.hpp>
 #include <f1x/openauto/autoapp/Projection/SequentialBuffer.hpp>
+#include <mutex>
 
 namespace f1x
 {
@@ -32,14 +31,19 @@ namespace autoapp
 namespace projection
 {
 
-class QtAudioOutput: public QObject, public IAudioOutput
+/**
+ * @brief An IAudioOutput implementation that stores audio data in a shared,
+ *        asynchronous buffer instead of playing it directly.
+ */
+class SharedAudioOutput: public IAudioOutput
 {
-    Q_OBJECT
-
 public:
-    QtAudioOutput(uint32_t channelCount, uint32_t sampleSize, uint32_t sampleRate);
+    SharedAudioOutput(boost::asio::io_context& io_context, uint32_t channelCount, uint32_t sampleSize, uint32_t sampleRate);
+    ~SharedAudioOutput() override = default;
+
+    // IAudioOutput interface implementation
     bool open() override;
-    void write(aasdk::messenger::Timestamp::ValueType, const aasdk::common::DataConstBuffer& buffer) override;
+    void write(aasdk::messenger::Timestamp::ValueType timestamp, const aasdk::common::DataConstBuffer& buffer) override;
     void start() override;
     void stop() override;
     void suspend() override;
@@ -47,22 +51,17 @@ public:
     uint32_t getChannelCount() const override;
     uint32_t getSampleRate() const override;
 
-signals:
-    void startPlayback();
-    void suspendPlayback();
-    void stopPlayback();
-
-protected slots:
-    void createAudioOutput();
-    void onStartPlayback();
-    void onSuspendPlayback();
-    void onStopPlayback();
+    /**
+     * @brief Provides access to the underlying buffer for a consumer.
+     * @return A reference to the SequentialBuffer.
+     */
+    SequentialBuffer& getBuffer();
 
 private:
-    QAudioFormat audioFormat_;
-    QIODevice * audioBuffer_;
-    std::unique_ptr<QAudioOutput> audioOutput_;
-    bool playbackStarted_;
+    uint32_t channelCount_;
+    uint32_t sampleSize_;
+    uint32_t sampleRate_;
+    SequentialBuffer audioBuffer_;
 };
 
 }

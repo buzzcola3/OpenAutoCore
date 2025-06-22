@@ -35,6 +35,10 @@
 #include <f1x/openauto/autoapp/Service/Bluetooth/BluetoothService.hpp>
 #include <f1x/openauto/autoapp/Service/InputSource/InputSourceService.hpp>
 #include <f1x/openauto/autoapp/Projection/DummyBluetoothDevice.hpp>
+#include <f1x/openauto/autoapp/Projection/InputDevice.hpp>
+#include <f1x/openauto/autoapp/Projection/SharedAudioOutput.hpp>
+#include <f1x/openauto/autoapp/Projection/SharedVideoOutput.hpp>
+#include <f1x/openauto/autoapp/Projection/SharedAudioInput.hpp>
 
 #include <buzz/common/Rect.hpp>
 
@@ -108,7 +112,7 @@ namespace f1x::openauto::autoapp::service {
     // Stubbing inputDevice
     // The original code for creating inputDevice is commented out.
     // We'll pass nullptr. InputSourceService needs to be able to handle this.
-    projection::IInputDevice::Pointer inputDevice = nullptr; 
+    auto inputDevice = std::make_shared<projection::InputDevice>(configuration_, videoGeometry, videoGeometry);
 
     // If InputSourceService cannot handle a nullptr, you might need a dummy implementation:
     // class DummyInputDevice : public projection::IInputDevice { /* ... implement pure virtuals ... */ };
@@ -117,18 +121,51 @@ namespace f1x::openauto::autoapp::service {
     return std::make_shared<inputsource::InputSourceService>(ioContext_, messenger, std::move(inputDevice));
   }
 
+
   void ServiceFactory::createMediaSinkServices(ServiceList &serviceList,
                                                aasdk::messenger::IMessenger::Pointer messenger) {
     OPENAUTO_LOG(info) << "[ServiceFactory] createMediaSinkServices()";
+
+    // --- Media Audio Service ---
+    if (1) {
+        OPENAUTO_LOG(info) << "[ServiceFactory] Media Audio Channel enabled";
+        auto mediaAudioOutput = std::make_shared<projection::SharedAudioOutput>(ioContext_, 2, 16, 48000);
+        serviceList.emplace_back(
+            std::make_shared<mediasink::MediaAudioService>(ioContext_, messenger, std::move(mediaAudioOutput)));
+    }
+
+    // --- Guidance Audio Service ---
+    if (1) {
+        OPENAUTO_LOG(info) << "[ServiceFactory] Guidance Audio Channel enabled";
+        auto guidanceAudioOutput = std::make_shared<projection::SharedAudioOutput>(ioContext_, 1, 16, 16000);
+        serviceList.emplace_back(
+            std::make_shared<mediasink::GuidanceAudioService>(ioContext_, messenger, std::move(guidanceAudioOutput)));
+    }
+
+    // --- System Audio Service (Required by Android Auto) ---
+    OPENAUTO_LOG(info) << "[ServiceFactory] System Audio Channel enabled";
+    auto systemAudioOutput = std::make_shared<projection::SharedAudioOutput>(ioContext_, 1, 16, 16000);
+    serviceList.emplace_back(
+        std::make_shared<mediasink::SystemAudioService>(ioContext_, messenger, std::move(systemAudioOutput)));
+
+
+    // --- Video Service Creation ---
+    if (1) {
+        OPENAUTO_LOG(info) << "[ServiceFactory] Video Channel enabled";
+
+        auto videoOutput = std::make_shared<projection::SharedVideoOutput>(ioContext_, configuration_);
+
+        serviceList.emplace_back(
+            std::make_shared<mediasink::VideoService>(ioContext_, messenger, std::move(videoOutput)));
+    }
   }
 
   void ServiceFactory::createMediaSourceServices(f1x::openauto::autoapp::service::ServiceList &serviceList,
                                                  aasdk::messenger::IMessenger::Pointer messenger) {
     OPENAUTO_LOG(info) << "[ServiceFactory] createMediaSourceServices()";
-//    projection::IAudioInput::Pointer audioInput(new projection::QtAudioInput(1, 16, 16000),
-//                                                std::bind(&QObject::deleteLater, std::placeholders::_1));
-//    serviceList.emplace_back(std::make_shared<mediasource::MicrophoneMediaSourceService>(ioService_, messenger,
-//                                                                                         std::move(audioInput)));
+    // Create the microphone service with our new SharedAudioInput class
+    auto audioInput = std::make_shared<projection::SharedAudioInput>(1, 16, 16000);
+    serviceList.emplace_back(std::make_shared<mediasource::MicrophoneMediaSourceService>(ioContext_, messenger, std::move(audioInput)));
   }
 
   IService::Pointer ServiceFactory::createSensorService(aasdk::messenger::IMessenger::Pointer messenger) {

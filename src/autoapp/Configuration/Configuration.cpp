@@ -103,7 +103,7 @@ void Configuration::reset()
     videoFPS_ = aap_protobuf::service::media::sink::message::VideoFrameRateType::VIDEO_FPS_30;
     videoResolution_ = aap_protobuf::service::media::sink::message::VideoCodecResolutionType::VIDEO_800x480;
     screenDPI_ = 140;
-    videoMargins_ = buzz::common::Rect(0, 0, 0, 0);
+    videoMargins_ = buzz::common::Rect(0, 0, 800, 480);
     enableTouchscreen_ = true;
     enablePlayerControl_ = false;
     buttonCodes_.clear();

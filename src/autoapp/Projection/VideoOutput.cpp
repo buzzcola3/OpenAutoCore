@@ -41,7 +41,7 @@ namespace f1x {
           return configuration_->getScreenDPI();
         }
 
-        Rect VideoOutput::getVideoMargins() const {
+        buzz::common::Rect VideoOutput::getVideoMargins() const {
           return configuration_->getVideoMargins();
         }
 

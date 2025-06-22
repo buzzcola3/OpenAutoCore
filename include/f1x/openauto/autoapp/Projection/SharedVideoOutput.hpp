@@ -1,6 +1,6 @@
 /*
 *  This file is part of openauto project.
-*  Copyright (C) 2018 f1x.studio (Michal Szwaj)
+*  Copyright (C) 2025 buzzcola3 (Samuel Betak)
 *
 *  openauto is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -18,9 +18,8 @@
 
 #pragma once
 
-#include <QMediaPlayer>
-#include <QVideoWidget>
 #include <boost/noncopyable.hpp>
+#include <boost/asio/io_context.hpp>
 #include <f1x/openauto/autoapp/Projection/VideoOutput.hpp>
 #include <f1x/openauto/autoapp/Projection/SequentialBuffer.hpp>
 
@@ -33,30 +32,37 @@ namespace autoapp
 namespace projection
 {
 
-class QtVideoOutput: public QObject, public VideoOutput, boost::noncopyable
+/**
+ * @class SharedVideoOutput
+ * @brief A video sink that pushes raw H.264 frames into a shared buffer.
+ *
+ * This class removes all Qt dependencies for video playback, acting as a simple
+ * conduit between the Android Auto video stream and an in-memory buffer.
+ */
+class SharedVideoOutput: public VideoOutput, private boost::noncopyable
 {
-    Q_OBJECT
-
 public:
-    QtVideoOutput(configuration::IConfiguration::Pointer configuration);
+    /**
+     * @brief Constructor.
+     * @param io_context The Boost.Asio io_context needed to initialize the internal buffer.
+     * @param configuration The application configuration pointer.
+     */
+    SharedVideoOutput(boost::asio::io_context& io_context, configuration::IConfiguration::Pointer configuration);
+
+    // IVideoOutput interface implementation
     bool open() override;
     bool init() override;
     void write(uint64_t timestamp, const aasdk::common::DataConstBuffer& buffer) override;
     void stop() override;
 
-signals:
-    void startPlayback();
-    void stopPlayback();
-
-protected slots:
-    void createVideoOutput();
-    void onStartPlayback();
-    void onStopPlayback();
+    /**
+     * @brief Provides access to the internal buffer for consumer components.
+     * @return A reference to the SequentialBuffer.
+     */
+    SequentialBuffer& getBuffer();
 
 private:
     SequentialBuffer videoBuffer_;
-    std::unique_ptr<QVideoWidget> videoWidget_;
-    std::unique_ptr<QMediaPlayer> mediaPlayer_;
 };
 
 }

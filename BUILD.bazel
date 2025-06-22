@@ -5,7 +5,10 @@ cc_library(
         exclude = ["src/**/*.ut.cpp"],  # Exclude unit test files
     ),
     hdrs = glob(
-            ["include/**/*.hpp"],
+            [
+                "include/**/*.hpp",
+                "include/**/*.inl"
+            ],
         ),
     strip_include_prefix = "include",
     deps = [

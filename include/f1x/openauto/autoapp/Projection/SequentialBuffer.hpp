@@ -1,27 +1,19 @@
 /*
 *  This file is part of openauto project.
-*  Copyright (C) 2018 f1x.studio (Michal Szwaj)
-*
-*  openauto is free software: you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation; either version 3 of the License, or
-*  (at your option) any later version.
-
-*  openauto is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with openauto. If not, see <http://www.gnu.org/licenses/>.
+*  ...
 */
 
 #pragma once
 
-#include <QIODevice>
-#include <mutex>
+// --- Standard Library Headers ---
+#include <functional>
+#include <optional>
+#include <type_traits>
+
+// --- Third-Party Library Headers ---
+#include <boost/asio.hpp>
 #include <boost/circular_buffer.hpp>
-#include <Common/Data.hpp>
+#include <boost/system/error_code.hpp>
 
 namespace f1x
 {
@@ -32,30 +24,37 @@ namespace autoapp
 namespace projection
 {
 
-class SequentialBuffer: public QIODevice
+class SequentialBuffer
 {
 public:
-    SequentialBuffer();
-    bool isSequential() const override;
-    qint64 size() const override;
-    qint64 pos() const override;
-    bool seek(qint64 pos) override;
-    bool atEnd() const override;
-    bool reset() override;
-    bool canReadLine() const override;
-    qint64 bytesAvailable() const override;
-    bool open(OpenMode mode) override;
+    using IoContext = boost::asio::io_context;
+    using Strand = boost::asio::strand<IoContext::executor_type>;
 
-protected:
-    qint64 readData(char *data, qint64 maxlen) override;
-    qint64 writeData(const char *data, qint64 len) override;
+    explicit SequentialBuffer(IoContext& io_context, size_t capacity = 65536);
+
+    template <typename MutableBufferSequence, typename ReadHandler>
+    void async_read_some(const MutableBufferSequence& buffers, ReadHandler&& handler);
+
+    size_t write(const char* data, size_t len);
+    void cancel();
+    void close();
 
 private:
-    boost::circular_buffer<aasdk::common::Data::value_type> data_;
-    mutable std::mutex mutex_;
+    using ReadHandlerType = std::function<void(const boost::system::error_code&)>;
+
+    void complete_pending_read(const boost::system::error_code& ec);
+
+    // PIMPL removed. Members are now directly in the class.
+    Strand strand_;
+    boost::circular_buffer<char> buffer_;
+    std::optional<ReadHandlerType> pending_read_handler_;
+    bool is_closed_;
 };
 
 }
 }
 }
 }
+
+// Include the template implementation at the end of the header.
+#include <f1x/openauto/autoapp/Projection/SequentialBuffer.inl>

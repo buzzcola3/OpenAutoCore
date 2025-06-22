@@ -18,25 +18,22 @@
 
 #pragma once
 
-//#include <gps.h>
+// #include <gps.h> // Removed for mocking
 #include <aap_protobuf/service/sensorsource/message/DrivingStatus.pb.h>
 #include <aap_protobuf/service/sensorsource/message/SensorType.pb.h>
-#include <Channel/SensorSource/SensorSourceService.hpp>
+#include <aasdk/Channel/SensorSource/SensorSourceService.hpp>
 #include <f1x/openauto/autoapp/Service/IService.hpp>
-#include <Messenger/IMessenger.hpp>
+#include <boost/asio.hpp>
+#include <aasdk/Messenger/IMessenger.hpp>
 
 
 namespace f1x::openauto::autoapp::service::sensor {
-
-  using IoContext = boost::asio::io_context;
-  using Strand = boost::asio::strand<IoContext::executor_type>;
-
   class SensorService :
       public aasdk::channel::sensorsource::ISensorSourceServiceEventHandler,
       public IService,
       public std::enable_shared_from_this<SensorService> {
   public:
-    SensorService(IoContext& ioContext,
+    SensorService(boost::asio::io_context &ioContext,
                   aasdk::messenger::IMessenger::Pointer messenger);
 
     bool isNight = false;
@@ -76,12 +73,12 @@ namespace f1x::openauto::autoapp::service::sensor {
     bool firstRun = true;
 
     boost::asio::deadline_timer timer_;
-    Strand strand_;
+    boost::asio::strand<boost::asio::io_context::executor_type> strand_;
     aasdk::channel::sensorsource::SensorSourceService::Pointer channel_;
-    bool gpsEnabled_ = false;
+    // struct gps_data_t gpsData_; // Removed for mocking
+    // bool gpsEnabled_ = false;   // Removed for mocking
   };
 
 }
-
 
 

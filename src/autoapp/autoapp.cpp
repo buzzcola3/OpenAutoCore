@@ -99,70 +99,12 @@ int main(int argc, char* argv[])
     startUSBWorkers(ioContext , usbContext, threadPool);
     startIOContextWorkers(ioContext , threadPool);
 
-    //QApplication qApplication(argc, argv);
-    //int width = QApplication::desktop()->width();
-    //int height = QApplication::desktop()->height();
-
-    //for (QScreen *screen : qApplication.screens()) {
-    //  OPENAUTO_LOG(info) << "[AutoApp] Screen name: " << screen->name().toStdString();
-    //  OPENAUTO_LOG(info) << "[AutoApp] Screen geometry: " << screen->geometry().width(); // This includes position and size
-    //  OPENAUTO_LOG(info) << "[AutoApp] Screen physical size: " << screen->physicalSize().width(); // Size in millimeters
-    //}
-
-    //QScreen *primaryScreen = QGuiApplication::primaryScreen();
-
-    // Check if a primary screen was found
-    //if (primaryScreen) {
-    //  // Get the geometry of the primary screen
-    //  Rect screenGeometry = primaryScreen->geometry();
-    //  width = screenGeometry.width();
-    //  height = screenGeometry.height();
-    //  OPENAUTO_LOG(info) << "[AutoApp] Using gemoetry from primary screen.";
-    //} else {
-    //  OPENAUTO_LOG(info) << "[AutoApp] Unable to find primary screen, using default values.";
-    //}
-
-    //OPENAUTO_LOG(info) << "[AutoApp] Display width: " << width;
-    //OPENAUTO_LOG(info) << "[AutoApp] Display height: " << height;
-
     auto configuration = std::make_shared<autoapp::configuration::Configuration>();
-
-    //autoapp::ui::MainWindow mainWindow(configuration);
-
-    //autoapp::ui::SettingsWindow settingsWindow(configuration);
-
-    //settingsWindow.setFixedSize(width, height);
-    //settingsWindow.adjustSize();
 
     //autoapp::configuration::RecentAddressesList recentAddressesList(7);
     //recentAddressesList.read();
 
     aasdk::tcp::TCPWrapper tcpWrapper;
-
-    //QObject::connect(&mainWindow, &autoapp::ui::MainWindow::exit, []() { system("touch /tmp/shutdown"); std::exit(0); });
-    //QObject::connect(&mainWindow, &autoapp::ui::MainWindow::reboot, []() { system("touch /tmp/reboot"); std::exit(0); });
-    //QObject::connect(&mainWindow, &autoapp::ui::MainWindow::openSettings, &settingsWindow, &autoapp::ui::SettingsWindow::showFullScreen);
-    //QObject::connect(&mainWindow, &autoapp::ui::MainWindow::openSettings, &settingsWindow, &autoapp::ui::SettingsWindow::show_tab2);
-
-    //if (configuration->showCursor() == false) {
-    //    qApplication.setOverrideCursor(Qt::BlankCursor);
-    //} else {
-    //    qApplication.setOverrideCursor(Qt::ArrowCursor);
-    //}
-
-    //QObject::connect(&mainWindow, &autoapp::ui::MainWindow::cameraHide, [&qApplication]() {
-    //    system("/opt/crankshaft/cameracontrol.py Background &");
-    //    OPENAUTO_LOG(debug) << "[AutoApp] Camera Background.";
-    //});
-
-    //QObject::connect(&mainWindow, &autoapp::ui::MainWindow::cameraShow, [&qApplication]() {
-    //    system("/opt/crankshaft/cameracontrol.py Foreground &");
-    //    OPENAUTO_LOG(debug) << "[AutoApp] Camera Foreground.";
-    //});
-
-    //mainWindow.showFullScreen();
-    //mainWindow.setFixedSize(width, height);
-    //mainWindow.adjustSize();
 
     aasdk::usb::USBWrapper usbWrapper(usbContext);
     aasdk::usb::AccessoryModeQueryFactory queryFactory(usbWrapper, ioContext );
