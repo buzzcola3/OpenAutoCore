@@ -39,8 +39,4 @@ cc_binary(
     copts = [
         "-I$(GENDIR)/OpenAutoSDK/protobufs_aap_protobuf_cc_gen",
     ],
-    linkopts = [
-        # Add linker options if needed, e.g., "-lpthread"
-        # Bazel often handles common ones like pthread with cc_library features.
-    ],
 )

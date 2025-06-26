@@ -16,13 +16,21 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include <f1x/openauto/Common/Log.hpp>
 #include <f1x/openauto/autoapp/Service/Sensor/SensorService.hpp>
 #include <fstream>
 #include <cmath>
-// #include <gps.h> // GPSD dependency removed
-#include <chrono>  // Added for timestamp
+#include <chrono>
+#include <boost/date_time/posix_time/posix_time.hpp>
+
+// Uncomment the line below to enable detailed debug logging for this service
+// #define OAE_SENSOR_SERVICE_DEBUG
+
+#ifdef OAE_SENSOR_SERVICE_DEBUG
+#define SENSOR_LOG_DEBUG(x) OPENAUTO_LOG(debug) << "[SensorService] " << x
+#else
+#define SENSOR_LOG_DEBUG(x) do {} while (0)
+#endif
 
 namespace f1x::openauto::autoapp::service::sensor {
   SensorService::SensorService(boost::asio::io_context &ioContext,
@@ -34,18 +42,7 @@ namespace f1x::openauto::autoapp::service::sensor {
   }
 
   void SensorService::start() {
-    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
-      /*
-      if (gps_open("127.0.0.1", "2947", &this->gpsData_)) {
-        OPENAUTO_LOG(warning) << "[SensorService] can't connect to GPSD.";
-      } else {
-        OPENAUTO_LOG(info) << "[SensorService] Connected to GPSD.";
-        gps_stream(&this->gpsData_, WATCH_ENABLE | WATCH_JSON, NULL);
-        this->gpsEnabled_ = true;
-      }
-      */
-      OPENAUTO_LOG(info) << "[SensorService] Using mocked GPS data.";
-
+    boost::asio::dispatch([this, self = this->shared_from_this()]() {
       if (is_file_exist("/tmp/night_mode_enabled")) {
         this->isNight = true;
       }
@@ -54,33 +51,24 @@ namespace f1x::openauto::autoapp::service::sensor {
       OPENAUTO_LOG(info) << "[SensorService] start()";
       channel_->receive(this->shared_from_this());
     });
-
   }
 
   void SensorService::stop() {
     this->stopPolling = true;
 
-    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
-      /*
-      if (this->gpsEnabled_) {
-        gps_stream(&this->gpsData_, WATCH_DISABLE, NULL);
-        gps_close(&this->gpsData_);
-        this->gpsEnabled_ = false;
-      }
-      */
-
+    boost::asio::dispatch([this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[SensorService] stop()";
     });
   }
 
   void SensorService::pause() {
-    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
+    boost::asio::dispatch([this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[SensorService] pause()";
     });
   }
 
   void SensorService::resume() {
-    boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
+    boost::asio::dispatch([this, self = this->shared_from_this()]() {
       OPENAUTO_LOG(info) << "[SensorService] resume()";
     });
   }
@@ -103,8 +91,7 @@ namespace f1x::openauto::autoapp::service::sensor {
 
   void SensorService::onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) {
     OPENAUTO_LOG(info) << "[SensorService] onChannelOpenRequest()";
-    OPENAUTO_LOG(debug) << "[SensorService] Channel Id: " << request.service_id() << ", Priority: "
-                        << request.priority();
+    SENSOR_LOG_DEBUG("Channel Id: " << request.service_id() << ", Priority: " << request.priority());
 
     aap_protobuf::service::control::message::ChannelOpenResponse response;
     const aap_protobuf::shared::MessageStatus status = aap_protobuf::shared::MessageStatus::STATUS_SUCCESS;
@@ -121,7 +108,7 @@ namespace f1x::openauto::autoapp::service::sensor {
   void SensorService::onSensorStartRequest(
       const aap_protobuf::service::sensorsource::message::SensorRequest &request) {
     OPENAUTO_LOG(info) << "[SensorService] onSensorStartRequest()";
-    OPENAUTO_LOG(debug) << "[SensorService] Request Type: " << request.type();
+    SENSOR_LOG_DEBUG("Request Type: " << request.type());
 
     aap_protobuf::service::sensorsource::message::SensorStartResponseMessage response;
     response.set_status(aap_protobuf::shared::MessageStatus::STATUS_SUCCESS);
@@ -134,6 +121,9 @@ namespace f1x::openauto::autoapp::service::sensor {
     } else if (request.type() == aap_protobuf::service::sensorsource::message::SensorType::SENSOR_NIGHT_MODE) {
       promise->then(std::bind(&SensorService::sendNightData, this->shared_from_this()),
                     std::bind(&SensorService::onChannelError, this->shared_from_this(), std::placeholders::_1));
+    } else if (request.type() == aap_protobuf::service::sensorsource::message::SensorType::SENSOR_LOCATION) {
+      promise->then(std::bind(&SensorService::sendMockGPSLocationData, this->shared_from_this()),
+                    std::bind(&SensorService::onChannelError, this->shared_from_this(), std::placeholders::_1));
     } else {
       promise->then([]() {},
                     std::bind(&SensorService::onChannelError, this->shared_from_this(), std::placeholders::_1));
@@ -144,7 +134,7 @@ namespace f1x::openauto::autoapp::service::sensor {
   }
 
   void SensorService::sendDrivingStatusUnrestricted() {
-    OPENAUTO_LOG(info) << "[SensorService] sendDrivingStatusUnrestricted()";
+    SENSOR_LOG_DEBUG("sendDrivingStatusUnrestricted()");
     aap_protobuf::service::sensorsource::message::SensorBatch indication;
     indication.add_driving_status_data()->set_status(
         aap_protobuf::service::sensorsource::message::DrivingStatus::DRIVE_STATUS_UNRESTRICTED);
@@ -156,16 +146,10 @@ namespace f1x::openauto::autoapp::service::sensor {
   }
 
   void SensorService::sendNightData() {
-    OPENAUTO_LOG(info) << "[SensorService] sendNightData()";
+    SENSOR_LOG_DEBUG("sendNightData()");
     aap_protobuf::service::sensorsource::message::SensorBatch indication;
 
-    if (SensorService::isNight) {
-      OPENAUTO_LOG(info) << "[SensorService] Night Mode Triggered";
-      indication.add_night_mode_data()->set_night_mode(true);
-    } else {
-      OPENAUTO_LOG(info) << "[SensorService] Day Mode Triggered";
-      indication.add_night_mode_data()->set_night_mode(false);
-    }
+    indication.add_night_mode_data()->set_night_mode(isNight);
 
     auto promise = aasdk::channel::SendPromise::defer(strand_);
     promise->then([]() {},
@@ -173,36 +157,22 @@ namespace f1x::openauto::autoapp::service::sensor {
     channel_->sendSensorEventIndication(indication, std::move(promise));
     if (this->firstRun) {
       this->firstRun = false;
-      this->previous = this->isNight;
     }
   }
 
-  void SensorService::sendGPSLocationData() {
-    OPENAUTO_LOG(trace) << "[SensorService] sendGPSLocationData()";
+  void SensorService::sendMockGPSLocationData() {
+    SENSOR_LOG_DEBUG("sendMockGPSLocationData() [MOCKED]");
     aap_protobuf::service::sensorsource::message::SensorBatch indication;
 
     auto *locInd = indication.add_location_data();
 
-    // --- MOCK GPS DATA START ---
-    static double mock_latitude = 34.052235;
-    static double mock_longitude = -118.243683;
-
-    // Simulate movement
-    mock_latitude += 0.00001;
-    mock_longitude += 0.00001;
-
-    auto now = std::chrono::system_clock::now();
-    auto epoch = now.time_since_epoch();
-    auto value = std::chrono::duration_cast<std::chrono::seconds>(epoch);
-    locInd->set_timestamp(value.count());
-
-    locInd->set_latitude_e7(mock_latitude * 1e7);
-    locInd->set_longitude_e7(mock_longitude * 1e7);
-    locInd->set_accuracy_e3(10 * 1e3); // 10 meters
-    locInd->set_altitude_e2(50 * 1e2); // 50 meters
-    locInd->set_speed_e3(5 * 1e3); // 5 m/s
-    locInd->set_bearing_e6(45 * 1e6); // 45 degrees
-    // --- MOCK GPS DATA END ---
+    // Mocked values
+    locInd->set_latitude_e7(static_cast<int32_t>(37.7749 * 1e7));  // San Francisco latitude
+    locInd->set_longitude_e7(static_cast<int32_t>(-122.4194 * 1e7)); // San Francisco longitude
+    locInd->set_accuracy_e3(5000); // 5km accuracy (mocked)
+    locInd->set_altitude_e2(1500); // 15 meters in centimeters
+    locInd->set_speed_e3(0);       // 0 mm/s (stationary)
+    locInd->set_bearing_e6(0);     // 0 millionths of a degree (north)
 
     auto promise = aasdk::channel::SendPromise::defer(strand_);
     promise->then([]() {},
@@ -211,7 +181,7 @@ namespace f1x::openauto::autoapp::service::sensor {
   }
 
   void SensorService::sensorPolling() {
-    OPENAUTO_LOG(trace) << "[SensorService] sensorPolling()";
+    SENSOR_LOG_DEBUG("sensorPolling()");
     if (!this->stopPolling) {
       boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
         this->isNight = is_file_exist("/tmp/night_mode_enabled");
@@ -220,21 +190,14 @@ namespace f1x::openauto::autoapp::service::sensor {
           this->sendNightData();
         }
 
-        // Always send mock GPS data instead of checking gpsd
-        this->sendGPSLocationData();
-
         timer_.expires_from_now(boost::posix_time::milliseconds(250));
-        timer_.async_wait(boost::asio::bind_executor(strand_, [this, self = shared_from_this()](const boost::system::error_code& ec){
-            if (!ec) {
-                this->sensorPolling();
-            }
-        }));
+        timer_.async_wait(boost::asio::bind_executor(strand_, std::bind(&SensorService::sensorPolling, this->shared_from_this())));
       });
     }
   }
 
   bool SensorService::is_file_exist(const char *fileName) {
-    OPENAUTO_LOG(info) << "[SensorService] is_file_exist()";
+    SENSOR_LOG_DEBUG("is_file_exist() check for: " << fileName);
     std::ifstream ifile(fileName, std::ios::in);
     return ifile.good();
   }
@@ -243,5 +206,6 @@ namespace f1x::openauto::autoapp::service::sensor {
     OPENAUTO_LOG(error) << "[SensorService] onChannelError(): " << e.what();
   }
 }
+
 
 
