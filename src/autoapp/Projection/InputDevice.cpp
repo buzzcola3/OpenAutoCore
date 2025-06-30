@@ -19,6 +19,7 @@
 #include <f1x/openauto/Common/Log.hpp>
 #include <f1x/openauto/autoapp/Projection/IInputDeviceEventHandler.hpp>
 #include <f1x/openauto/autoapp/Projection/InputDevice.hpp>
+#include <algorithm>
 
 namespace f1x
 {
@@ -35,28 +36,27 @@ InputDevice::InputDevice(configuration::IConfiguration::Pointer configuration, c
     , displayGeometry_(displayGeometry)
     , eventHandler_(nullptr)
 {
-    OPENAUTO_LOG(info) << "[InputDevice] STUB created.";
 }
 
 void InputDevice::start(IInputDeviceEventHandler& eventHandler)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    OPENAUTO_LOG(info) << "[InputDevice] STUB: start() called. No-op.";
+    std::lock_guard<decltype(mutex_)> lock(mutex_);
+
+    //OPENAUTO_LOG(info) << "[InputDevice] start()";
     eventHandler_ = &eventHandler;
-    // Original code installed an event filter here. This stub does nothing.
 }
 
 void InputDevice::stop()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    OPENAUTO_LOG(info) << "[InputDevice] STUB: stop() called. No-op.";
+    std::lock_guard<decltype(mutex_)> lock(mutex_);
+
+    OPENAUTO_LOG(info) << "[InputDevice] stop()";
     eventHandler_ = nullptr;
-    // Original code removed an event filter here. This stub does nothing.
 }
+
 
 bool InputDevice::hasTouchscreen() const
 {
-    // This functionality can remain as it depends on configuration, not Qt.
     return configuration_->getTouchscreenEnabled();
 }
 
@@ -67,7 +67,6 @@ buzz::common::Rect InputDevice::getTouchscreenGeometry() const
 
 IInputDevice::ButtonCodes InputDevice::getSupportedButtonCodes() const
 {
-    // This functionality can remain as it depends on configuration, not Qt.
     return configuration_->getButtonCodes();
 }
 

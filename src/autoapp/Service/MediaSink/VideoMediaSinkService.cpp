@@ -87,8 +87,8 @@ namespace f1x {
             videoConfig1->set_frame_rate(videoOutput_->getVideoFPS());
 
             const auto &videoMargins = videoOutput_->getVideoMargins();
-            videoConfig1->set_height_margin(videoMargins.height);
-            videoConfig1->set_width_margin(videoMargins.width);
+            videoConfig1->set_height_margin(0);
+            videoConfig1->set_width_margin(0);
             videoConfig1->set_density(videoOutput_->getScreenDPI());
 
             OPENAUTO_LOG(info) << "[VideoMediaSinkService] getVideoResolution " << VideoCodecResolutionType_Name(videoOutput_->getVideoResolution());
@@ -100,17 +100,17 @@ namespace f1x {
 
           void
           VideoMediaSinkService::onMediaChannelSetupRequest(const aap_protobuf::service::media::shared::message::Setup &request) {
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] onMediaChannelSetupRequest()";
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] Channel Id: "
-                               << aasdk::messenger::channelIdToString(channel_->getId()) << ", Codec: "
-                               << MediaCodecType_Name(request.type());
+          //  OPENAUTO_LOG(info) << "[VideoMediaSinkService] onMediaChannelSetupRequest()";
+          //  OPENAUTO_LOG(info) << "[VideoMediaSinkService] Channel Id: "
+          //                     << aasdk::messenger::channelIdToString(channel_->getId()) << ", Codec: "
+          //                     << MediaCodecType_Name(request.type());
 
 
             auto status = videoOutput_->init()
                           ? aap_protobuf::service::media::shared::message::Config::STATUS_READY
                           : aap_protobuf::service::media::shared::message::Config::STATUS_WAIT;
 
-            OPENAUTO_LOG(debug) << "[VideoMediaSinkService] setup status: " << Config_Status_Name(status);
+            //OPENAUTO_LOG(debug) << "[VideoMediaSinkService] setup status: " << Config_Status_Name(status);
 
             aap_protobuf::service::media::shared::message::Config response;
             response.set_status(status);
@@ -150,10 +150,10 @@ namespace f1x {
 
           void VideoMediaSinkService::onMediaChannelStartIndication(
               const aap_protobuf::service::media::shared::message::Start &indication) {
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] onMediaChannelStartIndication()";
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] Channel Id: "
-                               << aasdk::messenger::channelIdToString(channel_->getId()) << ", session: "
-                               << indication.session_id();
+          //  OPENAUTO_LOG(info) << "[VideoMediaSinkService] onMediaChannelStartIndication()";
+          //  OPENAUTO_LOG(info) << "[VideoMediaSinkService] Channel Id: "
+          //                     << aasdk::messenger::channelIdToString(channel_->getId()) << ", session: "
+          //                     << indication.session_id();
 
             session_ = indication.session_id();
             channel_->receive(this->shared_from_this());
@@ -220,7 +220,7 @@ namespace f1x {
           }
 
           void VideoMediaSinkService::sendVideoFocusIndication() {
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] sendVideoFocusIndication()";
+          //  OPENAUTO_LOG(info) << "[VideoMediaSinkService] sendVideoFocusIndication()";
 
             aap_protobuf::service::media::video::message::VideoFocusNotification videoFocusIndication;
             videoFocusIndication.set_focus(

@@ -22,6 +22,7 @@
 #include <f1x/openauto/autoapp/Configuration/IConfiguration.hpp>
 #include <boost/noncopyable.hpp>
 #include <mutex>
+#include <buzz/common/Rect.hpp>
 
 namespace f1x
 {
@@ -32,8 +33,7 @@ namespace autoapp
 namespace projection
 {
 
-// STUBBED version without Qt dependencies.
-class InputDevice : public IInputDevice, private boost::noncopyable
+class InputDevice: public IInputDevice, private boost::noncopyable
 {
 public:
     InputDevice(configuration::IConfiguration::Pointer configuration, const buzz::common::Rect& touchscreenGeometry, const buzz::common::Rect& videoGeometry);
@@ -44,12 +44,13 @@ public:
     bool hasTouchscreen() const override;
     buzz::common::Rect getTouchscreenGeometry() const override;
 
+
 private:
     configuration::IConfiguration::Pointer configuration_;
     buzz::common::Rect touchscreenGeometry_;
     buzz::common::Rect displayGeometry_;
     IInputDeviceEventHandler* eventHandler_;
-    mutable std::mutex mutex_;
+    std::mutex mutex_;
 };
 
 }
