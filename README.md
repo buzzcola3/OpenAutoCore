@@ -1,95 +1,32 @@
 
-# OpenAuto
+# OpenAutoCore
 
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
 
 ### Support project
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=R4HXE5ESDR4U4)
-
-For support of other platforms please contact me at f1xstudiopl@gmail.com
 
 ### Community
 [![Join the chat at https://gitter.im/publiclab/publiclab](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/openauto_androidauto/Lobby)
 
 ### Description
-OpenAuto is an AndroidAuto(tm) headunit emulator based on aasdk library and Qt libraries. Main goal is to run this application on the RaspberryPI 3 board computer smoothly.
-
-[See demo video](https://www.youtube.com/watch?v=k9tKRqIkQs8)
-
-### Supported functionalities
- - 480p, 720p and 1080p with 30 or 60 FPS
- - RaspberryPI 3 hardware acceleration support to decode video stream (up to 1080p@60!)
- - Audio playback from all audio channels (Media, System and Speech)
- - Audio input for voice commands
- - Touchscreen and buttons input
- - Bluetooth
- - Automatic launch after device hotplug
- - Automatic detection of connected Android devices
- - Wireless (WiFi) mode via head unit server (must be enabled in hidden developer settings)
- - User-friendly settings
+OpenAutoCore is a Headless AndroidAuto(tm) headunit, to which a Head application written in Flutter, .NET or React can be attached to using Shared Memory and gRPC,
 
 ### Supported platforms
 
- - Linux
- - RaspberryPI 3
- - Windows
+ - Linux aarch64/x86_64
+
+### Build
+ - The build system Bazel, fully hermetic
+   
+ - to build x86:
+    bazel build --config=amd64 //:OpenAutoCore_bin
+ - to build aarch64:
+    bazel build --config=arm64 //:OpenAutoCore_bin
 
 ### License
 GNU GPLv3
 
+Copyrights (c) 2025 buzzcola3 (Samuel Betak)
 Copyrights (c) 2018 f1x.studio (Michal Szwaj)
 
 *AndroidAuto is registered trademark of Google Inc.*
-
-### Used software
- - [aasdk](https://github.com/f1xpl/aasdk)
- - [Boost libraries](http://www.boost.org/)
- - [Qt libraries](https://www.qt.io/)
- - [CMake](https://cmake.org/)
- - Broadcom ilclient from RaspberryPI 3 firmware
- - OpenMAX IL API
-
-### Building
-
-sudo apt-get install -y \
-    cmake \
-    g++ \
-    qtbase5-dev \
-    libqt5serialport5-dev \
-    libssl-dev \
-    libcurl4-openssl-dev \
-    pulseaudio libusb-1.0-0-dev \
-    libasound2-dev \
-    libprotobuf-dev \
-    protobuf-compiler \
-    qtbase5-dev \
-    qttools5-dev \
-    qttools5-dev-tools \
-    qtmultimedia5-dev \
-    libqt5bluetooth5 \
-    libqt5bluetooth5-bin \
-    qtconnectivity5-dev \
-    qml-module-qtbluetooth \
-    libboost-all-dev
-
-
-#### Amd64
-Install the packages specified in the [prebuilts](https://github.com/opencardev/prebuilts) repository. Qt5 is required, versions packaged in modern Ubuntu and Debian
-seem to work fine.
-
-You will also likely need to install the udev rules from `prebuilts`
-
-You need to point some CMAKE variables at your `aasdk` files.
-```text
--DAASDK_INCLUDE_DIRS=<path_to_aasdk_repo>/include
--DAASDK_LIBRARIES=<path_to_aasdk_repo>/lib/libaasdk.so
- DAASDK_PROTO_INCLUDE_DIRS=<path_to_aasdk_build>
--DAASDK_PROTO_LIBRARIES=<path_to_aasdk_repo>/lib/libaasdk_proto.so
-```
-
-#### Raspberry Pi
-Just run the scripts in the `prebuilts` repository for `aasdk` and `openauto`. It is possible to cross compile if your raspberry pi is too slow to compile the code itself.
-However, its easiest to just develop on a more capable `amd64` device.
-
-### Remarks
-**This software is not certified by Google Inc. It is created for R&D purposes and may not work as expected by the original authors. Do not use while driving. You use this software at your own risk.**
