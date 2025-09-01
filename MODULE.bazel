@@ -18,9 +18,7 @@ register_toolchains(
 # Add proto and grpc dependencies
 bazel_dep(name = "rules_proto", version = "7.1.0")
 bazel_dep(name = "rules_proto_grpc_cpp", version = "5.1.0")
-bazel_dep(name = "grpc", version = "1.72.0")
-
-# Optionally, Google's protobuf (if you need it directly)
+#bazel_dep(name = "grpc", version = "1.72.0")
 bazel_dep(name = "protobuf", version = "31.0")
 
 
@@ -42,6 +40,16 @@ bazel_dep(name = "boost.asio", version = "1.87.0.bcr.1")
 bazel_dep(name = "boost.endian", version = "1.87.0")
 bazel_dep(name = "boost.log", version = "1.87.0")
 bazel_dep(name = "boost.circular_buffer", version = "1.87.0")
+bazel_dep(name = "boost.filesystem", version = "1.87.0")
 
 bazel_dep(name = "libusb", version = "1.0.28")
 bazel_dep(name = "openssl", version = "3.3.1.bcr.1")
+
+bazel_dep(name = "capnp-cpp", version = "1.1.0")
+
+bazel_dep(name = "capnproto_shm_transport", version = "0.0.1")
+git_override(
+    module_name = "capnproto_shm_transport",
+    remote = "https://github.com/buzzcola3/capnproto_shm_transport.git",
+    commit = "0e44ea0c6aec9315ed606354990f4e915adc8294"
+)

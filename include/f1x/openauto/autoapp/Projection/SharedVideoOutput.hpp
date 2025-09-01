@@ -18,10 +18,14 @@
 
 #pragma once
 
-#include <boost/noncopyable.hpp>
-#include <boost/asio/io_context.hpp>
 #include <f1x/openauto/autoapp/Projection/VideoOutput.hpp>
-#include <f1x/openauto/autoapp/Projection/SequentialBuffer.hpp>
+#include <buzz/autoapp/Projection/SharedMemoryProducer.hpp>
+#include <cstdint>
+#include <boost/asio/io_context.hpp>
+#include <memory>
+
+// Forward-declare Transport to avoid heavy includes in header.
+namespace buzz { namespace autoapp { namespace Transport { class Transport; } } }
 
 namespace f1x
 {
@@ -32,37 +36,24 @@ namespace autoapp
 namespace projection
 {
 
-/**
- * @class SharedVideoOutput
- * @brief A video sink that pushes raw H.264 frames into a shared buffer.
- *
- * This class removes all Qt dependencies for video playback, acting as a simple
- * conduit between the Android Auto video stream and an in-memory buffer.
- */
-class SharedVideoOutput: public VideoOutput, private boost::noncopyable
+constexpr size_t MAX_VIDEO_CHUNK_SIZE = 1920 * 1080 * 3;
+
+class SharedVideoOutput: public VideoOutput
 {
 public:
-    /**
-     * @brief Constructor.
-     * @param io_context The Boost.Asio io_context needed to initialize the internal buffer.
-     * @param configuration The application configuration pointer.
-     */
-    SharedVideoOutput(boost::asio::io_context& io_context, configuration::IConfiguration::Pointer configuration);
+    SharedVideoOutput(boost::asio::io_context& io_context,
+                      configuration::IConfiguration::Pointer configuration,
+                      std::shared_ptr<buzz::autoapp::Transport::Transport> transport);
+    ~SharedVideoOutput() override = default;
 
-    // IVideoOutput interface implementation
     bool open() override;
     bool init() override;
     void write(uint64_t timestamp, const aasdk::common::DataConstBuffer& buffer) override;
     void stop() override;
 
-    /**
-     * @brief Provides access to the internal buffer for consumer components.
-     * @return A reference to the SequentialBuffer.
-     */
-    SequentialBuffer& getBuffer();
-
 private:
-    SequentialBuffer videoBuffer_;
+    std::unique_ptr<SharedMemoryProducer> videoProducer_;
+    std::shared_ptr<buzz::autoapp::Transport::Transport> transport_;
 };
 
 }

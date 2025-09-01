@@ -17,7 +17,12 @@
 */
 
 #include <f1x/openauto/autoapp/Projection/SharedVideoOutput.hpp>
+#include <buzz/autoapp/Projection/SharedMemoryProducer.hpp>
+#include <buzz/autoapp/Transport/transport.hpp>
 #include <f1x/openauto/Common/Log.hpp>
+#include <cstring>
+#include <iomanip>
+#include <sstream>
 
 namespace f1x
 {
@@ -28,43 +33,76 @@ namespace autoapp
 namespace projection
 {
 
-SharedVideoOutput::SharedVideoOutput(boost::asio::io_context& io_context, configuration::IConfiguration::Pointer configuration)
+SharedVideoOutput::SharedVideoOutput(boost::asio::io_context& io_context,
+                                     configuration::IConfiguration::Pointer configuration,
+                                     std::shared_ptr<buzz::autoapp::Transport::Transport> transport)
     : VideoOutput(std::move(configuration))
-    , videoBuffer_(io_context) // Initialize the buffer with the io_context
+    , transport_(std::move(transport))
 {
-    OPENAUTO_LOG(info) << "[SharedVideoOutput] Created.";
+    size_t buffer_capacity = MAX_VIDEO_CHUNK_SIZE;
+    std::string shmName = "/openauto_video_shm";
+    std::string semName = "/sem.openauto_video_shm_sem";
+    videoProducer_ = std::make_unique<SharedMemoryProducer>(shmName, semName, buffer_capacity);
+
+    if (!videoProducer_->init()) {
+        OPENAUTO_LOG(error) << "[SharedVideoOutput] Failed to initialize SharedMemoryProducer!";
+    } else {
+        OPENAUTO_LOG(info) << "[SharedVideoOutput] Created.";
+    }
 }
 
 bool SharedVideoOutput::open()
 {
-    // The buffer is memory-based and is always "open".
     OPENAUTO_LOG(info) << "[SharedVideoOutput] Opened.";
     return true;
 }
 
 bool SharedVideoOutput::init()
 {
-    // No initialization is needed for a simple buffer sink.
     OPENAUTO_LOG(info) << "[SharedVideoOutput] Initialized.";
     return true;
 }
 
+void SharedVideoOutput::write(uint64_t timestamp, const aasdk::common::DataConstBuffer& buffer)
+{
+    const size_t header_size = sizeof(uint64_t) + sizeof(uint32_t);
+    const size_t total_size = header_size + buffer.size;
+    std::vector<unsigned char> outbuf(total_size);
+
+    // Write timestamp
+    std::memcpy(outbuf.data(), &timestamp, sizeof(uint64_t));
+    // Write size
+    uint32_t chunk_size = static_cast<uint32_t>(buffer.size);
+    std::memcpy(outbuf.data() + sizeof(uint64_t), &chunk_size, sizeof(uint32_t));
+    // Write payload
+    std::memcpy(outbuf.data() + header_size, buffer.cdata, buffer.size);
+
+    // Print header bytes (timestamp + size)
+    std::ostringstream oss;
+    oss << "[SharedVideoOutput] Header bytes: ";
+    for (size_t i = 0; i < header_size; ++i) {
+        oss << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
+            << static_cast<int>(outbuf[i]) << " ";
+    }
+    OPENAUTO_LOG(info) << oss.str();
+
+    // Write to SHM producer (existing path)
+    videoProducer_->writeBuffer(outbuf.data(), outbuf.size());
+
+    // Also send via Transport as a minimal Envelope (MsgType::video = 0)
+    if (transport_) {
+        constexpr uint16_t kMsgTypeVideo = 0; // matches wire.capnp enum MsgType.video
+        transport_->send(kMsgTypeVideo, timestamp, buffer.cdata, buffer.size);
+    }
+
+    OPENAUTO_LOG(info) << "[SharedVideoOutput] Wrote chunk with timestamp " << timestamp
+                       << " and size " << buffer.size;
+}
+
 void SharedVideoOutput::stop()
 {
-    // Close the buffer to signal EOF to any readers.
     OPENAUTO_LOG(info) << "[SharedVideoOutput] Stopped.";
-    videoBuffer_.close();
-}
-
-void SharedVideoOutput::write(uint64_t /*timestamp*/, const aasdk::common::DataConstBuffer& buffer)
-{
-    // Write the received video data directly into the sequential buffer.
-    videoBuffer_.write(reinterpret_cast<const char*>(buffer.cdata), buffer.size);
-}
-
-SequentialBuffer& SharedVideoOutput::getBuffer()
-{
-    return videoBuffer_;
+    // No-op: Producer manages its own queue and memory.
 }
 
 }

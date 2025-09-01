@@ -41,6 +41,7 @@
 #include <f1x/openauto/autoapp/Projection/SharedAudioInput.hpp>
 
 #include <buzz/common/Rect.hpp>
+#include <buzz/autoapp/Transport/transport.hpp>
 
 namespace f1x::openauto::autoapp::service {
 
@@ -48,8 +49,11 @@ namespace f1x::openauto::autoapp::service {
   using Strand = boost::asio::strand<IoContext::executor_type>;
 
   ServiceFactory::ServiceFactory(IoContext &ioContext,
-                                 configuration::IConfiguration::Pointer configuration)
-      : ioContext_(ioContext), configuration_(std::move(configuration)) {
+                                 configuration::IConfiguration::Pointer configuration,
+                                 std::shared_ptr<buzz::autoapp::Transport::Transport> transport)
+      : ioContext_(ioContext)
+      , configuration_(std::move(configuration))
+      , transport_(std::move(transport)) {
 
   }
 
@@ -153,7 +157,7 @@ namespace f1x::openauto::autoapp::service {
     if (1) {
         OPENAUTO_LOG(info) << "[ServiceFactory] Video Channel enabled";
 
-        auto videoOutput = std::make_shared<projection::SharedVideoOutput>(ioContext_, configuration_);
+        auto videoOutput = std::make_shared<projection::SharedVideoOutput>(ioContext_, configuration_, transport_);
 
         serviceList.emplace_back(
             std::make_shared<mediasink::VideoService>(ioContext_, messenger, std::move(videoOutput)));

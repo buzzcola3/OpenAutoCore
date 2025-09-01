@@ -20,6 +20,10 @@
 
 #include <f1x/openauto/autoapp/Service/IServiceFactory.hpp>
 #include <f1x/openauto/autoapp/Configuration/IConfiguration.hpp>
+#include <memory>
+
+// Forward declare Transport to avoid heavy includes here.
+namespace buzz { namespace autoapp { namespace Transport { class Transport; } } }
 
 namespace f1x {
   namespace openauto {
@@ -31,7 +35,9 @@ namespace f1x {
 
         class ServiceFactory : public IServiceFactory {
         public:
-          ServiceFactory(IoContext &ioContext, configuration::IConfiguration::Pointer configuration);
+          ServiceFactory(IoContext &ioContext,
+                         configuration::IConfiguration::Pointer configuration,
+                         std::shared_ptr<buzz::autoapp::Transport::Transport> transport);
           ServiceList create(aasdk::messenger::IMessenger::Pointer messenger) override;
 
         private:
@@ -46,6 +52,7 @@ namespace f1x {
 
           IoContext &ioContext_;
           configuration::IConfiguration::Pointer configuration_;
+          std::shared_ptr<buzz::autoapp::Transport::Transport> transport_; // new
         };
 
       }

@@ -31,6 +31,7 @@
 #include <f1x/openauto/autoapp/Configuration/Configuration.hpp>
 #include <f1x/openauto/Common/Log.hpp>
 #include <buzz/common/Rect.hpp>
+#include <buzz/autoapp/Transport/transport.hpp>
 
 namespace autoapp = f1x::openauto::autoapp;
 using ThreadPool = std::vector<std::thread>;
@@ -86,6 +87,8 @@ int main(int argc, char* argv[])
 {
     configureLogging();
 
+    auto transport = std::make_shared<buzz::autoapp::Transport::Transport>(/*maxQueue=*/1024);
+
     libusb_context* usbContext;
     if(libusb_init(&usbContext) != 0)
     {
@@ -109,49 +112,15 @@ int main(int argc, char* argv[])
     aasdk::usb::USBWrapper usbWrapper(usbContext);
     aasdk::usb::AccessoryModeQueryFactory queryFactory(usbWrapper, ioContext );
     aasdk::usb::AccessoryModeQueryChainFactory queryChainFactory(usbWrapper, ioContext , queryFactory);
-    autoapp::service::ServiceFactory serviceFactory(ioContext , configuration);
+    autoapp::service::ServiceFactory serviceFactory(ioContext , configuration, transport);
     autoapp::service::AndroidAutoEntityFactory androidAutoEntityFactory(ioContext , configuration, serviceFactory);
 
     auto usbHub(std::make_shared<aasdk::usb::USBHub>(usbWrapper, ioContext , queryChainFactory));
     auto connectedAccessoriesEnumerator(std::make_shared<aasdk::usb::ConnectedAccessoriesEnumerator>(usbWrapper, ioContext , queryChainFactory));
     auto app = std::make_shared<autoapp::App>(ioContext , usbWrapper, tcpWrapper, androidAutoEntityFactory, std::move(usbHub), std::move(connectedAccessoriesEnumerator));
 
-    //QObject::connect(&mainWindow, &autoapp::ui::MainWindow::TriggerAppStop, [&app]() {
-    //    try {
-    //        if (std::ifstream("/tmp/android_device")) {
-    //            OPENAUTO_LOG(debug) << "[AutoApp] TriggerAppStop: Manual stop usb android auto.";
-    //            app->disableAutostartEntity = true;
-    //            try {
-    //                app->stop();
-    //                //app->pause();
-    //            } catch (...) {
-    //                OPENAUTO_LOG(error) << "[AutoApp] TriggerAppStop: stop();";
-    //            }
-
-    //        } else {
-    //            OPENAUTO_LOG(debug) << "[AutoApp] TriggerAppStop: Manual stop wifi android auto.";
-    //            try {
-    //                app->onAndroidAutoQuit();
-    //                //app->pause();
-    //            } catch (...) {
-    //                OPENAUTO_LOG(error) << "[Autoapp] TriggerAppStop: stop();";
-    //            }
-
-    //        }
-    //    } catch (...) {
-    //        OPENAUTO_LOG(error) << "[AutoApp] Exception in manual stop android auto.";
-    //    }
-    //});
-
-    //QObject::connect(&mainWindow, &autoapp::ui::MainWindow::CloseAllDialogs, [&settingsWindow]() {
-    //    settingsWindow.close();
-    //    OPENAUTO_LOG(debug) << "[AutoApp] Close all possible open dialogs.";
-    //});
-
 
     app->waitForUSBDevice();
-
-    //auto result = qApplication.exec();
 
     std::for_each(threadPool.begin(), threadPool.end(), std::bind(&std::thread::join, std::placeholders::_1));
 

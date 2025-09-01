@@ -78,13 +78,12 @@ namespace f1x {
               inputChannel->add_keycodes_supported(buttonCode);
             }
 
-            if (inputDevice_->hasTouchscreen()) {
-              const auto &touchscreenSurface = inputDevice_->getTouchscreenGeometry();
-              auto touchscreenConfig = inputChannel->add_touchscreen();
+            
+            auto touchscreenConfig = inputChannel->add_touchscreen();
 
-              touchscreenConfig->set_width(touchscreenSurface.width);
-              touchscreenConfig->set_height(touchscreenSurface.height);
-            }
+            touchscreenConfig->set_width(1920);
+            touchscreenConfig->set_height(1080);
+            
           }
 
           void InputSourceService::onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) {
