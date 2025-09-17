@@ -19,7 +19,6 @@
 #pragma once
 
 #include <f1x/openauto/autoapp/Projection/VideoOutput.hpp>
-#include <buzz/autoapp/Projection/SharedMemoryProducer.hpp>
 #include <cstdint>
 #include <boost/asio/io_context.hpp>
 #include <memory>
@@ -27,36 +26,23 @@
 // Forward-declare Transport to avoid heavy includes in header.
 namespace buzz { namespace autoapp { namespace Transport { class Transport; } } }
 
-namespace f1x
-{
-namespace openauto
-{
-namespace autoapp
-{
-namespace projection
-{
-
+namespace f1x { namespace openauto { namespace autoapp { namespace projection {
 constexpr size_t MAX_VIDEO_CHUNK_SIZE = 1920 * 1080 * 3;
 
-class SharedVideoOutput: public VideoOutput
-{
-public:
-    SharedVideoOutput(boost::asio::io_context& io_context,
-                      configuration::IConfiguration::Pointer configuration,
-                      std::shared_ptr<buzz::autoapp::Transport::Transport> transport);
-    ~SharedVideoOutput() override = default;
+class SharedVideoOutput : public VideoOutput {
+ public:
+  SharedVideoOutput(boost::asio::io_context& io_context,
+                    configuration::IConfiguration::Pointer configuration,
+                    std::shared_ptr<buzz::autoapp::Transport::Transport> transport);
+  ~SharedVideoOutput() override = default;
 
-    bool open() override;
-    bool init() override;
-    void write(uint64_t timestamp, const aasdk::common::DataConstBuffer& buffer) override;
-    void stop() override;
+  bool open() override;
+  bool init() override;
+  void write(uint64_t timestamp, const aasdk::common::DataConstBuffer& buffer) override;
+  void stop() override;
 
-private:
-    std::unique_ptr<SharedMemoryProducer> videoProducer_;
-    std::shared_ptr<buzz::autoapp::Transport::Transport> transport_;
+ private:
+  std::shared_ptr<buzz::autoapp::Transport::Transport> transport_;
 };
 
-}
-}
-}
-}
+}}}}

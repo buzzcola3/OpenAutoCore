@@ -1,9 +1,15 @@
 # Platform configs for cross-compilation
-build:amd64 --platforms=@zig_sdk//platform:linux_amd64
-build:amd64 --extra_toolchains=@zig_sdk//toolchain:linux_amd64_musl
+build:amd64_musl --platforms=@zig_sdk//platform:linux_amd64
+build:amd64_musl --extra_toolchains=@zig_sdk//toolchain:linux_amd64_musl
 
-build:arm64 --platforms=@zig_sdk//platform:linux_arm64
-build:arm64 --extra_toolchains=@zig_sdk//toolchain:linux_arm64_musl
+build:amd64_gnu --platforms=@zig_sdk//platform:linux_amd64
+build:amd64_gnu --extra_toolchains=@zig_sdk//toolchain:linux_amd64_gnu.2.31
+
+build:arm64_musl --platforms=@zig_sdk//platform:linux_arm64
+build:arm64_musl --extra_toolchains=@zig_sdk//toolchain:linux_arm64_musl
+
+build:arm64_gnu --platforms=@zig_sdk//platform:linux_arm64
+build:arm64_gnu --extra_toolchains=@zig_sdk//toolchain:linux_arm64_gnu.2.31
 
 # Hermetic toolchain only
 build --action_env BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1

@@ -11,8 +11,8 @@ enum MsgType {
 }
 
 struct Envelope {
-  version        @0 :UInt16;    # set to ProtocolVersion
-  msgType        @1 :MsgType;   # what the payload is
-  timestampUsec  @2 :UInt64;    # capture / emit time (microseconds)
-  data           @3 :Data;      # raw payload bytes (your choice of format)
+  version        @0 :UInt16 = .protocolVersion;  # fully-qualified
+  msgType        @1 :MsgType;
+  timestampUsec  @2 :UInt64;
+  data           @3 :Data;
 }

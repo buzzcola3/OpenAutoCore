@@ -6,8 +6,8 @@ genrule(
         "wire.capnp.c++",
     ],
     tools = [
-        "@capnp-cpp//src/capnp:capnp_tool",  # capnp CLI
-        "@capnp-cpp//src/capnp:capnpc-c++",  # C++ plugin
+        "@capnp-cpp//src/capnp:capnp_tool",
+        "@capnp-cpp//src/capnp:capnpc-c++",
     ],
     cmd = """
       $(location @capnp-cpp//src/capnp:capnp_tool) compile \
@@ -22,8 +22,8 @@ cc_library(
     name = "wire_capnp",
     srcs = ["wire.capnp.c++"],
     hdrs = ["wire.capnp.h"],
-    includes = ["."],     # allow #include "wire.capnp.h"
-    copts = ["-xc++"],    # ensure .c++ compiles as C++
+    includes = ["."],
+    copts = ["-xc++"],
     deps = [
         "@capnp-cpp//src/capnp:capnp",
         "@capnp-cpp//src/kj:kj",
@@ -34,15 +34,28 @@ cc_library(
 cc_library(
     name = "transport",
     srcs = ["transport.cpp"],
-    hdrs = ["transport.hpp"],
-    include_prefix = "buzz/autoapp/Transport",  # consumers can #include <buzz/autoapp/Transport/transport.hpp>
-    copts = [
-        "-fPIC",
-    ],
+    hdrs = ["transport.hpp", "wire.hpp"],
+    include_prefix = "buzz/autoapp/Transport",
+    copts = ["-fPIC"],
     deps = [
+        ":wire_capnp",
+        "@boost.asio",
+        "@capnp-cpp//src/capnp:capnp",
+        "@capnp-cpp//src/kj:kj",
+        "@capnproto_shm_transport",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_binary(
+    name = "transport_demo",
+    srcs = ["transport_demo.cpp"],
+    deps = [
+        ":transport",
         ":wire_capnp",
         "@capnp-cpp//src/capnp:capnp",
         "@capnp-cpp//src/kj:kj",
+        "@capnproto_shm_transport",
+        "@boost.asio",
     ],
-    visibility = ["//visibility:public"],
 )

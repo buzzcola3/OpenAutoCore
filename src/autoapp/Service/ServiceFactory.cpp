@@ -41,23 +41,34 @@
 #include <f1x/openauto/autoapp/Projection/SharedAudioInput.hpp>
 
 #include <buzz/common/Rect.hpp>
-#include <buzz/autoapp/Transport/transport.hpp>
+#include <buzz/autoapp/Transport/transport.hpp>  // Added for startAsA()
 
-namespace f1x::openauto::autoapp::service {
+namespace f1x {
+namespace openauto {
+namespace autoapp {
+namespace service {
 
-  using IoContext = boost::asio::io_context;
-  using Strand = boost::asio::strand<IoContext::executor_type>;
+ServiceFactory::ServiceFactory(IoContext &ioContext,
+                               configuration::IConfiguration::Pointer configuration,
+                               std::shared_ptr<buzz::autoapp::Transport::Transport> transport)
+  : ioContext_(ioContext)
+  , configuration_(std::move(configuration))
+  , transport_(std::move(transport)) {
 
-  ServiceFactory::ServiceFactory(IoContext &ioContext,
-                                 configuration::IConfiguration::Pointer configuration,
-                                 std::shared_ptr<buzz::autoapp::Transport::Transport> transport)
-      : ioContext_(ioContext)
-      , configuration_(std::move(configuration))
-      , transport_(std::move(transport)) {
-
+  if (transport_) {
+    // Start as Side A (creator). Clean stale segments once.
+    if (!transport_->isRunning()) {
+      bool ok = transport_->startAsA(std::chrono::microseconds{1000}, /*clean=*/true);
+      if (!ok) {
+        std::cerr << "[ServiceFactory] Failed to start shared memory transport as A.\n";
+      } else {
+        std::cout << "[ServiceFactory] Transport started as A.\n";
+      }
+    }
   }
+}
 
-  ServiceList ServiceFactory::create(aasdk::messenger::IMessenger::Pointer messenger) {
+ServiceList ServiceFactory::create(aasdk::messenger::IMessenger::Pointer messenger) {
     OPENAUTO_LOG(info) << "[ServiceFactory] create()";
     ServiceList serviceList;
 
@@ -177,7 +188,10 @@ namespace f1x::openauto::autoapp::service {
     return std::make_shared<sensor::SensorService>(ioContext_, messenger);
   }
 
-}
+} // namespace service
+} // namespace autoapp
+} // namespace openauto
+} // namespace f1x
 
 
 

@@ -51,5 +51,5 @@ bazel_dep(name = "capnproto_shm_transport", version = "0.0.1")
 git_override(
     module_name = "capnproto_shm_transport",
     remote = "https://github.com/buzzcola3/capnproto_shm_transport.git",
-    commit = "0e44ea0c6aec9315ed606354990f4e915adc8294"
+    commit = "7fd5f5c6c3cdbc95dc16426374c00393f3466036",
 )
