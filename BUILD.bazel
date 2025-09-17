@@ -13,6 +13,7 @@ cc_library(
     strip_include_prefix = "include",
     deps = [
         "//OpenAutoSDK:OpenAutoSDK",  # Add this line
+        "//src/autoapp/Transport:transport",   # Added: provides buzz/autoapp/Transport/transport.hpp
     ],
     copts = [
         "-I$(GENDIR)/OpenAutoSDK/protobufs_aap_protobuf_cc_gen",
@@ -26,6 +27,7 @@ cc_binary(
     deps = [
         ":OpenAutoCore",  # Depends on the library defined above
         "//OpenAutoSDK:OpenAutoSDK", # Direct dependency if main uses SDK parts not in OpenAutoCore hdrs
+        "//src/autoapp/Transport:transport",
         "@openssl",
         "@openssl//:ssl",
         "@openssl//:crypto",
