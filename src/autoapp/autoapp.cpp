@@ -31,7 +31,7 @@
 #include <f1x/openauto/autoapp/Configuration/Configuration.hpp>
 #include <f1x/openauto/Common/Log.hpp>
 #include <buzz/common/Rect.hpp>
-#include <buzz/autoapp/Transport/transport.hpp>
+#include "open_auto_transport/transport.hpp"
 
 namespace autoapp = f1x::openauto::autoapp;
 using ThreadPool = std::vector<std::thread>;
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 {
     configureLogging();
 
-    auto transport = std::make_shared<buzz::autoapp::Transport::Transport>(/*maxQueue=*/1024);
+    auto transport = std::make_shared<buzz::autoapp::Transport::Transport>();
 
     libusb_context* usbContext;
     if(libusb_init(&usbContext) != 0)

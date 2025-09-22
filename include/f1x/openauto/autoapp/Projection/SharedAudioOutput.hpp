@@ -19,7 +19,6 @@
 #pragma once
 
 #include <f1x/openauto/autoapp/Projection/IAudioOutput.hpp>
-#include <buzz/autoapp/Projection/SharedMemoryProducer.hpp> // <-- Use the producer
 #include <cstdint>
 #include <boost/asio/io_context.hpp>
 #include <memory>
@@ -32,8 +31,6 @@ namespace autoapp
 {
 namespace projection
 {
-
-constexpr size_t MAX_AUDIO_CHUNK_SIZE = 8192+12; // 8KB for audio data + 12 bytes for header (timestamp + size)
 
 class SharedAudioOutput: public IAudioOutput
 {
@@ -51,10 +48,9 @@ public:
     uint32_t getSampleRate() const override;
 
 private:
-    uint32_t channelCount_;
-    uint32_t sampleSize_;
-    uint32_t sampleRate_;
-    std::unique_ptr<SharedMemoryProducer> audioProducer_; // <-- Use the producer
+    uint32_t channelCount_{};
+    uint32_t sampleSize_{};
+    uint32_t sampleRate_{};
 };
 
 }

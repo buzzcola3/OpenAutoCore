@@ -17,8 +17,8 @@
 */
 
 #include <f1x/openauto/autoapp/Projection/SharedVideoOutput.hpp>
-#include <buzz/autoapp/Transport/transport.hpp>
-#include <buzz/autoapp/Transport/wire.hpp>
+#include "open_auto_transport/transport.hpp"
+#include "wire.hpp"
 #include <f1x/openauto/Common/Log.hpp>
 #include <cstring>
 #include <iomanip>

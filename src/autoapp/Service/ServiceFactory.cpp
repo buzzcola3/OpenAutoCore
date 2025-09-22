@@ -41,7 +41,7 @@
 #include <f1x/openauto/autoapp/Projection/SharedAudioInput.hpp>
 
 #include <buzz/common/Rect.hpp>
-#include <buzz/autoapp/Transport/transport.hpp>  // Added for startAsA()
+#include "open_auto_transport/transport.hpp"
 
 namespace f1x {
 namespace openauto {
