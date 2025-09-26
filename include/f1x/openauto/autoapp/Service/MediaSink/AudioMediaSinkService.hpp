@@ -17,66 +17,82 @@
 */
 
 #pragma once
-#include <Messenger/IMessenger.hpp>
-#include <Channel/MediaSink/Audio/IAudioMediaSinkService.hpp>
-#include <Channel/MediaSink/Audio/IAudioMediaSinkServiceEventHandler.hpp>
-#include <f1x/openauto/autoapp/Projection/IAudioOutput.hpp>
+
+#include <vector>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/strand.hpp>
+
 #include <f1x/openauto/autoapp/Service/IService.hpp>
+#include <f1x/openauto/autoapp/Projection/IAudioOutput.hpp>
+#include <Channel/MediaSink/Audio/IAudioMediaSinkService.hpp>
+#include <aasdk/Common/Data.hpp>
+#include <aasdk/Messenger/Timestamp.hpp>
+#include <aasdk/Error/Error.hpp>
+
+#include "open_auto_transport/wire.hpp"
+
+// Forward-declare transport (global namespace to avoid shadowing).
+namespace buzz { namespace autoapp { namespace Transport { class Transport; } } }
 
 namespace f1x {
-  namespace openauto {
-    namespace autoapp {
-      namespace service {
-        namespace mediasink {
+namespace openauto {
+namespace autoapp {
+namespace service {
+namespace mediasink {
 
-          using IoContext = boost::asio::io_context;
-          using Strand = boost::asio::strand<IoContext::executor_type>;
+class AudioMediaSinkService
+    : public IService
+    , public aasdk::channel::mediasink::audio::IAudioMediaSinkServiceEventHandler
+    , public std::enable_shared_from_this<AudioMediaSinkService> {
+public:
+  using IoContext = boost::asio::io_context;
+  using Strand = boost::asio::strand<IoContext::executor_type>;
 
-          class AudioMediaSinkService :
-            public aasdk::channel::mediasink::audio::IAudioMediaSinkServiceEventHandler,
-            public IService,
-            public std::enable_shared_from_this<AudioMediaSinkService> {
-          public:
-            typedef std::shared_ptr<AudioMediaSinkService> Pointer;
+  AudioMediaSinkService(IoContext& ioContext,
+                        aasdk::channel::mediasink::audio::IAudioMediaSinkService::Pointer channel,
+                        projection::IAudioOutput::Pointer audioOutput);
 
-            // General Constructor
-            AudioMediaSinkService(IoContext& ioContext,
-                             aasdk::channel::mediasink::audio::IAudioMediaSinkService::Pointer channel,
-                             projection::IAudioOutput::Pointer audioOutput);
+  void start() override;
+  void stop() override;
+  void pause() override;
+  void resume() override;
 
-            void start() override;
-            void stop() override;
-            void pause() override;
-            void resume() override;
-            void fillFeatures(aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) override;
+  // Control service hooks
+  void fillFeatures(aap_protobuf::service::control::message::ServiceDiscoveryResponse& response) override;
+  void onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest& request) override;
 
-            void onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) override;
+  // Media channel hooks
+  void onMediaChannelSetupRequest(const aap_protobuf::service::media::shared::message::Setup& request) override;
+  void onMediaChannelStartIndication(const aap_protobuf::service::media::shared::message::Start& indication) override;
+  void onMediaChannelStopIndication(const aap_protobuf::service::media::shared::message::Stop& indication) override;
+  void onMediaWithTimestampIndication(aasdk::messenger::Timestamp::ValueType timestamp,
+                                      const aasdk::common::DataConstBuffer& buffer) override;
+  void onMediaIndication(const aasdk::common::DataConstBuffer& buffer) override;
+  void onChannelError(const aasdk::error::Error& e) override;
 
-            void onMediaChannelSetupRequest(
-                const aap_protobuf::service::media::shared::message::Setup &request) override;
+  // Low-overhead transport tap
+  void enableTransportTap(std::shared_ptr<::buzz::autoapp::Transport::Transport> transport,
+                          ::buzz::wire::MsgType msgType);
 
-            void onMediaChannelStartIndication(
-                const aap_protobuf::service::media::shared::message::Start &indication) override;
+protected:
+  // Make strand_ accessible to derived services (Media/System/Guidance/Telephony).
+  Strand strand_;
 
-            void onMediaChannelStopIndication(
-                const aap_protobuf::service::media::shared::message::Stop &indication) override;
+  // Also useful for derived classes.
+  aasdk::channel::mediasink::audio::IAudioMediaSinkService::Pointer channel_;
+  projection::IAudioOutput::Pointer audioOutput_;
 
-            void onMediaWithTimestampIndication(aasdk::messenger::Timestamp::ValueType timestamp,
-                                                const aasdk::common::DataConstBuffer &buffer) override;
+private:
+  int32_t session_;
 
-            void onMediaIndication(const aasdk::common::DataConstBuffer &buffer) override;
+  // Tap members
+  std::shared_ptr<::buzz::autoapp::Transport::Transport> transportTap_{};
+  ::buzz::wire::MsgType transportMsgType_{};
+  std::vector<uint8_t> txBuf_;
+};
 
-            void onChannelError(const aasdk::error::Error &e) override;
-
-          protected:
-            using std::enable_shared_from_this<AudioMediaSinkService>::shared_from_this;
-            Strand strand_;
-            aasdk::channel::mediasink::audio::IAudioMediaSinkService::Pointer channel_;
-            projection::IAudioOutput::Pointer audioOutput_;
-            int32_t session_;
-          };
-        }
-      }
-    }
-  }
-}
+} // namespace mediasink
+} // namespace service
+} // namespace autoapp
+} // namespace openauto
+} // namespace f1x

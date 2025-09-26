@@ -22,8 +22,8 @@ cc_library(
 )
 
 cc_binary(
-    name = "OpenAutoCore_bin",  # You can name your binary anything
-    srcs = ["src/autoapp/autoapp.cpp"], # Specify your main source file
+    name = "OpenAutoCore_bin",
+    srcs = ["src/autoapp/autoapp.cpp"],
     deps = [
         ":OpenAutoCore",
         "//OpenAutoSDK:OpenAutoSDK",
@@ -31,14 +31,9 @@ cc_binary(
         "@openssl",
         "@openssl//:ssl",
         "@openssl//:crypto",
-        # Add system libraries or other dependencies needed for linking the binary
-        # For example, if you use libusb directly in autoapp.cpp or for linking:
-        # "@libusb//:libusb-1.0", (assuming libusb is an external repository)
-        # "@boost//:thread",
-        # "@boost//:log_setup",
-        # "@boost//:filesystem",
     ],
     copts = [
         "-I$(GENDIR)/OpenAutoSDK/protobufs_aap_protobuf_cc_gen",
     ],
+    data = glob(["configuration/**"]),
 )

@@ -19,6 +19,10 @@
 #include <Channel/Control/ControlServiceChannel.hpp>
 #include <f1x/openauto/autoapp/Service/AndroidAutoEntity.hpp>
 #include <f1x/openauto/Common/Log.hpp>
+#include <google/protobuf/text_format.h>
+#include <fstream>
+#include <sstream>
+#include <cstdlib>
 
 using IoContext = boost::asio::io_context;
 using Strand = boost::asio::strand<IoContext::executor_type>;
@@ -171,44 +175,33 @@ namespace f1x {
         }
 
         void AndroidAutoEntity::onServiceDiscoveryRequest(
-            const aap_protobuf::service::control::message::ServiceDiscoveryRequest &request) {
+            const aap_protobuf::service::control::message::ServiceDiscoveryRequest& request) {
           OPENAUTO_LOG(info) << "[AndroidAutoEntity] onServiceDiscoveryRequest()";
-          OPENAUTO_LOG(debug) << "[AndroidAutoEntity] Type: " << request.label_text() << ", Model: "
-                             << request.device_name();
+          OPENAUTO_LOG(debug) << "[AndroidAutoEntity] Type: " << request.label_text()
+                              << ", Model: " << request.device_name();
 
           aap_protobuf::service::control::message::ServiceDiscoveryResponse serviceDiscoveryResponse;
-          serviceDiscoveryResponse.mutable_channels()->Reserve(256);
-          serviceDiscoveryResponse.set_driver_position(aap_protobuf::service::control::message::DriverPosition::DRIVER_POSITION_RIGHT);
-          serviceDiscoveryResponse.set_can_play_native_media_during_vr(false);
-          serviceDiscoveryResponse.set_display_name("Crankshaft-NG");
-          serviceDiscoveryResponse.set_probe_for_support(false);
 
-          auto *connectionConfiguration = serviceDiscoveryResponse.mutable_connection_configuration();
+          // Always load from runfiles-relative path.
+          const std::string cfgPath = "configuration/ServiceDiscoveryResponse.textproto";
 
-          auto *pingConfiguration = connectionConfiguration->mutable_ping_configuration();
-          pingConfiguration->set_tracked_ping_count(5);
-          pingConfiguration->set_timeout_ms(3000);
-          pingConfiguration->set_interval_ms(1000);
-          pingConfiguration->set_high_latency_threshold_ms(200);
+          std::ifstream in(cfgPath);
+          if (in) {
+            std::ostringstream ss;
+            ss << in.rdbuf();
+            if (google::protobuf::TextFormat::ParseFromString(ss.str(), &serviceDiscoveryResponse)) {
+              OPENAUTO_LOG(info) << "[AndroidAutoEntity] Loaded ServiceDiscoveryResponse from " << cfgPath;
+            } else {
+              OPENAUTO_LOG(error) << "[AndroidAutoEntity] Failed to parse textproto at " << cfgPath << ".";
+            }
+          } else {
+            OPENAUTO_LOG(error) << "[AndroidAutoEntity] Config not found at " << cfgPath << ".";
+          }
 
-
-          auto *headUnitInfo = serviceDiscoveryResponse.mutable_headunit_info();
-
-          serviceDiscoveryResponse.set_display_name("Crankshaft-NG");
-          headUnitInfo->set_make("Crankshaft");
-          headUnitInfo->set_model("Universal");
-          headUnitInfo->set_year("2018");
-          headUnitInfo->set_vehicle_id("2024110822150988");
-          headUnitInfo->set_head_unit_make("f1x");
-          headUnitInfo->set_head_unit_model("Crankshaft-NG Autoapp");
-          headUnitInfo->set_head_unit_software_build("1");
-          headUnitInfo->set_head_unit_software_version("1.0");
-
-          std::for_each(serviceList_.begin(), serviceList_.end(),
-                        std::bind(&IService::fillFeatures, std::placeholders::_1, std::ref(serviceDiscoveryResponse)));
+          OPENAUTO_LOG(debug) << "[AndroidAutoEntity] " << serviceDiscoveryResponse.DebugString();
 
           auto promise = aasdk::channel::SendPromise::defer(strand_);
-          promise->then([]() {  },
+          promise->then([]() {},
                         std::bind(&AndroidAutoEntity::onChannelError, this->shared_from_this(), std::placeholders::_1));
           controlServiceChannel_->sendServiceDiscoveryResponse(serviceDiscoveryResponse, std::move(promise));
           controlServiceChannel_->receive(this->shared_from_this());

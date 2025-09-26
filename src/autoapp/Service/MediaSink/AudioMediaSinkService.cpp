@@ -20,10 +20,10 @@
 #include <f1x/openauto/autoapp/Service/MediaSink/AudioMediaSinkService.hpp>
 
 namespace f1x {
-  namespace openauto {
-    namespace autoapp {
-      namespace service {
-        namespace mediasink {
+namespace openauto {
+namespace autoapp {
+namespace service {
+namespace mediasink {
 
           using IoContext = boost::asio::io_context;
           using Strand = boost::asio::strand<IoContext::executor_type>;
@@ -76,6 +76,13 @@ namespace f1x {
             OPENAUTO_LOG(info) << "[AudioMediaSinkService] fillFeatures()";
             OPENAUTO_LOG(info) << "[AudioMediaSinkService] Channel: " << aasdk::messenger::channelIdToString(channel_->getId());
 
+            if(channel_->getId() == aasdk::messenger::ChannelId::MEDIA_SINK_SYSTEM_AUDIO || 
+               channel_->getId() == aasdk::messenger::ChannelId::MEDIA_SINK_MEDIA_AUDIO ||
+               channel_->getId() == aasdk::messenger::ChannelId::MEDIA_SINK_GUIDANCE_AUDIO) {
+              OPENAUTO_LOG(info) << "[AudioMediaSinkService] " << aasdk::messenger::channelIdToString(channel_->getId()) << " already handled by onServiceDiscoveryRequest.";
+              return;
+            }
+
             auto *service = response.add_channels();
             service->set_id(static_cast<uint32_t>(channel_->getId()));
 
@@ -85,23 +92,6 @@ namespace f1x {
                 aap_protobuf::service::media::shared::message::MediaCodecType::MEDIA_CODEC_AUDIO_PCM);
 
             switch (channel_->getId()) {
-              case aasdk::messenger::ChannelId::MEDIA_SINK_SYSTEM_AUDIO:
-                OPENAUTO_LOG(info) << "[AudioMediaSinkService] System Audio.";
-                audioChannel->set_audio_type(
-                    aap_protobuf::service::media::sink::message::AudioStreamType::AUDIO_STREAM_SYSTEM_AUDIO);
-                break;
-
-              case aasdk::messenger::ChannelId::MEDIA_SINK_MEDIA_AUDIO:
-                OPENAUTO_LOG(info) << "[AudioMediaSinkService] Music Audio.";
-                audioChannel->set_audio_type(aap_protobuf::service::media::sink::message::AudioStreamType::AUDIO_STREAM_MEDIA);
-                break;
-
-              case aasdk::messenger::ChannelId::MEDIA_SINK_GUIDANCE_AUDIO:
-                OPENAUTO_LOG(info) << "[AudioMediaSinkService] Guidance Audio.";
-                audioChannel->set_audio_type(
-                    aap_protobuf::service::media::sink::message::AudioStreamType::AUDIO_STREAM_GUIDANCE);
-                break;
-
               case aasdk::messenger::ChannelId::MEDIA_SINK_TELEPHONY_AUDIO:
                 OPENAUTO_LOG(info) << "[AudioMediaSinkService] Telephony Audio.";
                 audioChannel->set_audio_type(
@@ -197,23 +187,21 @@ namespace f1x {
             channel_->receive(this->shared_from_this());
           }
 
-          void AudioMediaSinkService::onMediaWithTimestampIndication(aasdk::messenger::Timestamp::ValueType timestamp,
-                                                                     const aasdk::common::DataConstBuffer &buffer) {
-            OPENAUTO_LOG(debug) << "[AudioMediaSinkService] onMediaWithTimestampIndication()";
-            OPENAUTO_LOG(debug) << "[AudioMediaSinkService] Channel Id: " << aasdk::messenger::channelIdToString(channel_->getId()) << ", session: " << session_;
+          void AudioMediaSinkService::enableTransportTap(
+              std::shared_ptr<::buzz::autoapp::Transport::Transport> transport,
+              ::buzz::wire::MsgType msgType) {
+  transportTap_ = std::move(transport);
+  transportMsgType_ = msgType;
+}
 
-            audioOutput_->write(timestamp, buffer);
+          void AudioMediaSinkService::onMediaWithTimestampIndication(
+              aasdk::messenger::Timestamp::ValueType timestamp,
+              const aasdk::common::DataConstBuffer& buffer)
+{
 
-            aap_protobuf::service::media::source::message::Ack indication;
-            indication.set_session_id(session_);
-            indication.set_ack(1);
-
-            auto promise = aasdk::channel::SendPromise::defer(strand_);
-            promise->then([]() {}, std::bind(&AudioMediaSinkService::onChannelError, this->shared_from_this(),
-                                             std::placeholders::_1));
-            channel_->sendMediaAckIndication(indication, std::move(promise));
-            channel_->receive(this->shared_from_this());
-          }
+  // Optional: stop calling the old sink.
+  // audioOutput_->write(timestamp, buffer);
+}
 
           void AudioMediaSinkService::onMediaIndication(const aasdk::common::DataConstBuffer &buffer) {
             OPENAUTO_LOG(info) << "[AudioMediaSinkService] onMediaIndication()";

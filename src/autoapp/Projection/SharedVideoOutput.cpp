@@ -61,8 +61,7 @@ void SharedVideoOutput::write(uint64_t timestamp, const aasdk::common::DataConst
         transport_->send(buzz::wire::MsgType::VIDEO, timestamp, buffer.cdata, buffer.size);
     }
 
-    OPENAUTO_LOG(info) << "[SharedVideoOutput] Wrote chunk with timestamp " << timestamp
-                       << " and size " << buffer.size;
+    //OPENAUTO_LOG(info) << "[SharedVideoOutput] Wrote chunk with timestamp " << timestamp << " and size " << buffer.size;
 }
 
 void SharedVideoOutput::stop()

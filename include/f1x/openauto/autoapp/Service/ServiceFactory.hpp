@@ -21,6 +21,7 @@
 #include <f1x/openauto/autoapp/Service/IServiceFactory.hpp>
 #include <f1x/openauto/autoapp/Configuration/IConfiguration.hpp>
 #include <memory>
+#include "open_auto_transport/transport.hpp"
 
 // Forward declare Transport to avoid heavy includes here.
 namespace buzz { namespace autoapp { namespace Transport { class Transport; } } }
@@ -52,7 +53,7 @@ namespace f1x {
 
           IoContext &ioContext_;
           configuration::IConfiguration::Pointer configuration_;
-          std::shared_ptr<buzz::autoapp::Transport::Transport> transport_; // new
+          std::shared_ptr<buzz::autoapp::Transport::Transport> transport_;
         };
 
       }
