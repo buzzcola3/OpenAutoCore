@@ -16,9 +16,14 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #include <Channel/Control/ControlServiceChannel.hpp>
 #include <f1x/openauto/autoapp/Service/AndroidAutoEntity.hpp>
 #include <f1x/openauto/Common/Log.hpp>
+#include <google/protobuf/text_format.h>
+#include <fstream>
+#include <sstream>
+#include <cstdlib>
 
 using IoContext = boost::asio::io_context;
 using Strand = boost::asio::strand<IoContext::executor_type>;
@@ -180,29 +185,46 @@ namespace f1x {
           serviceDiscoveryResponse.mutable_channels()->Reserve(256);
           serviceDiscoveryResponse.set_driver_position(aap_protobuf::service::control::message::DriverPosition::DRIVER_POSITION_RIGHT);
           serviceDiscoveryResponse.set_can_play_native_media_during_vr(false);
-          serviceDiscoveryResponse.set_display_name("Crankshaft-NG");
           serviceDiscoveryResponse.set_probe_for_support(false);
 
           auto *connectionConfiguration = serviceDiscoveryResponse.mutable_connection_configuration();
 
-          auto *pingConfiguration = connectionConfiguration->mutable_ping_configuration();
-          pingConfiguration->set_tracked_ping_count(5);
-          pingConfiguration->set_timeout_ms(3000);
-          pingConfiguration->set_interval_ms(1000);
-          pingConfiguration->set_high_latency_threshold_ms(200);
+          // Always load from runfiles-relative path.
+          std::string cfgPath = "configuration/ConnectionConfiguration.textproto";
+
+          std::ifstream in1(cfgPath);
+          if (in1) {
+            std::ostringstream ss;
+            ss << in1.rdbuf();
+            if (google::protobuf::TextFormat::ParseFromString(ss.str(), connectionConfiguration)) {
+              OPENAUTO_LOG(info) << "[AndroidAutoEntity] Loaded ServiceDiscoveryResponse from " << cfgPath;
+            } else {
+              OPENAUTO_LOG(error) << "[AndroidAutoEntity] Failed to parse textproto at " << cfgPath << ".";
+            }
+          } else {
+            OPENAUTO_LOG(error) << "[AndroidAutoEntity] Config not found at " << cfgPath << ".";
+          }
+
+          OPENAUTO_LOG(debug) << "[AndroidAutoEntity] " << connectionConfiguration->DebugString();
 
 
           auto *headUnitInfo = serviceDiscoveryResponse.mutable_headunit_info();
 
-          serviceDiscoveryResponse.set_display_name("Crankshaft-NG");
-          headUnitInfo->set_make("Crankshaft");
-          headUnitInfo->set_model("Universal");
-          headUnitInfo->set_year("2018");
-          headUnitInfo->set_vehicle_id("2024110822150988");
-          headUnitInfo->set_head_unit_make("f1x");
-          headUnitInfo->set_head_unit_model("Crankshaft-NG Autoapp");
-          headUnitInfo->set_head_unit_software_build("1");
-          headUnitInfo->set_head_unit_software_version("1.0");
+          // Always load from runfiles-relative path.
+          cfgPath = "configuration/MutableHeadunitInfo.textproto";
+
+          std::ifstream in2(cfgPath);
+          if (in2) {
+            std::ostringstream ss;
+            ss << in2.rdbuf();
+            if (google::protobuf::TextFormat::ParseFromString(ss.str(), headUnitInfo)) {
+              OPENAUTO_LOG(info) << "[AndroidAutoEntity] Loaded MutableHeadunitInfo from " << cfgPath;
+            } else {
+              OPENAUTO_LOG(error) << "[AndroidAutoEntity] Failed to parse textproto at " << cfgPath << ".";
+            }
+          } else {
+            OPENAUTO_LOG(error) << "[AndroidAutoEntity] Config not found at " << cfgPath << ".";
+          }
 
           std::for_each(serviceList_.begin(), serviceList_.end(),
                         std::bind(&IService::fillFeatures, std::placeholders::_1, std::ref(serviceDiscoveryResponse)));
