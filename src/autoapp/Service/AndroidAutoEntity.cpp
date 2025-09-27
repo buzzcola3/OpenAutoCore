@@ -184,64 +184,14 @@ namespace f1x {
                               << ", Model: " << request.device_name();
 
           aap_protobuf::service::control::message::ServiceDiscoveryResponse serviceDiscoveryResponse;
-          serviceDiscoveryResponse.mutable_channels()->Reserve(256);
-          serviceDiscoveryResponse.set_driver_position(
-              aap_protobuf::service::control::message::DriverPosition::DRIVER_POSITION_RIGHT);
-          serviceDiscoveryResponse.set_can_play_native_media_during_vr(false);
-          serviceDiscoveryResponse.set_probe_for_support(false);
 
-          // Load connection configuration.
-          auto* connectionConfiguration = serviceDiscoveryResponse.mutable_connection_configuration();
-          f1x::openauto::autoapp::config::loadTextProto("configuration/ConnectionConfiguration.textproto",
-                                                        connectionConfiguration,
-                                                        "ConnectionConfiguration");
+          auto* pServiceDiscoveryResponse = &serviceDiscoveryResponse;
 
-          auto* headUnitInfo = serviceDiscoveryResponse.mutable_headunit_info();
-          f1x::openauto::autoapp::config::loadTextProto("configuration/MutableHeadunitInfo.textproto",
-                                                        headUnitInfo,
-                                                        "MutableHeadunitInfo");
+          f1x::openauto::autoapp::config::loadTextProto("configuration/ServiceDiscoveryResponse.textproto",
+                                                        pServiceDiscoveryResponse,
+                                                        "ServiceDiscoveryResponse");
 
-          auto* service = serviceDiscoveryResponse.add_channels();
-          f1x::openauto::autoapp::config::loadTextProto("configuration/InputSourceService.textproto",
-                                                        service,
-                                                        "InputSourceServiceInfo");
-
-          service = serviceDiscoveryResponse.add_channels();
-          f1x::openauto::autoapp::config::loadTextProto("configuration/MediaSourceService.textproto",
-                                                        service,
-                                                        "MediaSourceServiceInfo");
-
-          service = serviceDiscoveryResponse.add_channels();
-          f1x::openauto::autoapp::config::loadTextProto("configuration/SensorService.textproto",
-                                                        service,
-                                                        "SensorServiceInfo");
-
-          service = serviceDiscoveryResponse.add_channels();
-          f1x::openauto::autoapp::config::loadTextProto("configuration/BluetoothService.textproto",
-                                                        service,
-                                                        "BluetoothServiceInfo");
-          
-          service = serviceDiscoveryResponse.add_channels();
-          f1x::openauto::autoapp::config::loadTextProto("configuration/VideoMediaSinkService.textproto",
-                                                        service,
-                                                        "VideoMediaSinkServiceInfo");
-
-          service = serviceDiscoveryResponse.add_channels();
-          f1x::openauto::autoapp::config::loadTextProto("configuration/GuidanceAudioMediaSinkService.textproto",
-                                                        service,
-                                                        "GuidanceAudioMediaSinkServiceInfo");
-
-          service = serviceDiscoveryResponse.add_channels();
-          f1x::openauto::autoapp::config::loadTextProto("configuration/SystemAudioMediaSinkService.textproto",
-                                                        service,
-                                                        "SystemAudioMediaSinkServiceInfo");
-
-          service = serviceDiscoveryResponse.add_channels();
-          f1x::openauto::autoapp::config::loadTextProto("configuration/MediaAudioMediaSinkService.textproto",
-                                                        service,
-                                                        "MediaAudioMediaSinkServiceInfo");
-
-
+          OPENAUTO_LOG(info) << pServiceDiscoveryResponse->DebugString();
 
           auto promise = aasdk::channel::SendPromise::defer(strand_);
           promise->then([]() {},

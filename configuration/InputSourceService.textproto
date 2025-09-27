@@ -1,7 +1,0 @@
-id: 8
-input_source_service {
-  touchscreen {
-    width: 1920
-    height: 1080
-  }
-}

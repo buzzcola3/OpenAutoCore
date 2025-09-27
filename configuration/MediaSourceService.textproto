@@ -1,9 +1,0 @@
-id: 9
-media_source_service {
-  available_type: MEDIA_CODEC_AUDIO_PCM
-  audio_config {
-    sampling_rate: 16000
-    number_of_bits: 16
-    number_of_channels: 1
-  }
-}

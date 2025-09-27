@@ -1,6 +1,0 @@
-ping_configuration {
-    timeout_ms: 3000
-    interval_ms: 1000
-    high_latency_threshold_ms: 200
-    tracked_ping_count: 5
-  }
