@@ -59,16 +59,6 @@ namespace f1x::openauto::autoapp::service::genericnotification {
     });
   }
 
-  void GenericNotificationService::fillFeatures(
-      aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) {
-    OPENAUTO_LOG(info) << "[GenericNotificationService] fillFeatures()";
-
-    auto *service = response.add_channels();
-    service->set_id(static_cast<uint32_t>(channel_->getId()));
-
-    auto *genericNotification = service->mutable_wifi_projection_service();
-  }
-
   void GenericNotificationService::onChannelOpenRequest(
       const aap_protobuf::service::control::message::ChannelOpenRequest &request) {
     OPENAUTO_LOG(info) << "[GenericNotificationService] onChannelOpenRequest()";

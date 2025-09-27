@@ -58,16 +58,6 @@ namespace f1x::openauto::autoapp::service::radio {
     });
   }
 
-  void RadioService::fillFeatures(
-      aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) {
-    OPENAUTO_LOG(info) << "[RadioService] fillFeatures()";
-
-    auto *service = response.add_channels();
-    service->set_id(static_cast<uint32_t>(channel_->getId()));
-
-    auto *radio = service->mutable_radio_service();
-  }
-
   void RadioService::onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) {
     OPENAUTO_LOG(info) << "[RadioService] onChannelOpenRequest()";
     OPENAUTO_LOG(debug) << "[RadioService] Channel Id: " << request.service_id() << ", Priority: "

@@ -40,8 +40,6 @@ namespace f1x::openauto::autoapp::service {
     virtual void pause() = 0;
 
     virtual void resume() = 0;
-
-    virtual void fillFeatures(aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) = 0;
   };
 
   typedef std::vector<IService::Pointer> ServiceList;

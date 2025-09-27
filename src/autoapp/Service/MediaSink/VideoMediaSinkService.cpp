@@ -66,43 +66,7 @@ namespace f1x {
             });
           }
 
-          void VideoMediaSinkService::fillFeatures(
-              aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) {
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] fillFeatures() DUMMY";
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] Channel "
-                               << aasdk::messenger::channelIdToString(channel_->getId());
-            return;
-
-            auto *service = response.add_channels();
-            service->set_id(static_cast<uint32_t>(channel_->getId()));
-
-            auto *videoChannel = service->mutable_media_sink_service();
-
-            videoChannel->set_available_type(
-                aap_protobuf::service::media::shared::message::MediaCodecType::MEDIA_CODEC_VIDEO_H264_BP);
-            videoChannel->set_available_while_in_call(true);
-
-
-            auto *videoConfig1 = videoChannel->add_video_configs();
-            videoConfig1->set_codec_resolution(videoOutput_->getVideoResolution());
-            videoConfig1->set_frame_rate(videoOutput_->getVideoFPS());
-
-            const auto &videoMargins = videoOutput_->getVideoMargins();
-            videoConfig1->set_height_margin(0);
-            videoConfig1->set_width_margin(0);
-            videoConfig1->set_density(videoOutput_->getScreenDPI());
-
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] getVideoResolution " << VideoCodecResolutionType_Name(videoOutput_->getVideoResolution());
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] getVideoFPS " << VideoFrameRateType_Name(videoOutput_->getVideoFPS());
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] width " << videoMargins.width;
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] height " << videoMargins.height;
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] getScreenDPI " << videoOutput_->getScreenDPI();
-
-            OPENAUTO_LOG(info) << service->DebugString();
-          }
-
-          void
-          VideoMediaSinkService::onMediaChannelSetupRequest(const aap_protobuf::service::media::shared::message::Setup &request) {
+          void VideoMediaSinkService::onMediaChannelSetupRequest(const aap_protobuf::service::media::shared::message::Setup &request) {
           //  OPENAUTO_LOG(info) << "[VideoMediaSinkService] onMediaChannelSetupRequest()";
           //  OPENAUTO_LOG(info) << "[VideoMediaSinkService] Channel Id: "
           //                     << aasdk::messenger::channelIdToString(channel_->getId()) << ", Codec: "

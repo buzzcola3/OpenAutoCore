@@ -62,16 +62,6 @@ namespace f1x {
             });
           }
 
-          void MediaBrowserService::fillFeatures(
-              aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) {
-            OPENAUTO_LOG(info) << "[MediaBrowserService] fillFeatures()";
-
-            auto *service = response.add_channels();
-            service->set_id(static_cast<uint32_t>(channel_->getId()));
-
-            auto *mediaBrowser = service->mutable_media_browser_service();
-          }
-
           void MediaBrowserService::onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) {
             OPENAUTO_LOG(info) << "[MediaBrowserService] onChannelOpenRequest()";
             OPENAUTO_LOG(info) << "[MediaBrowserService] Channel Id: " << request.service_id() << ", Priority: " << request.priority();

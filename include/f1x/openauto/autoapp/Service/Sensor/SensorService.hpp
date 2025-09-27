@@ -49,8 +49,6 @@ namespace f1x::openauto::autoapp::service::sensor {
 
     void resume() override;
 
-    void fillFeatures(aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) override;
-
     void onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) override;
 
     void onSensorStartRequest(

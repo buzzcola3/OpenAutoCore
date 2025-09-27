@@ -59,16 +59,6 @@ namespace f1x::openauto::autoapp::service::navigationstatus {
     });
   }
 
-  void NavigationStatusService::fillFeatures(
-      aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) {
-    OPENAUTO_LOG(info) << "[NavigationStatusService] fillFeatures()";
-
-    auto *service = response.add_channels();
-    service->set_id(static_cast<uint32_t>(channel_->getId()));
-
-    auto *navigationStatus = service->mutable_navigation_status_service();
-  }
-
   void NavigationStatusService::onChannelOpenRequest(
       const aap_protobuf::service::control::message::ChannelOpenRequest &request) {
     OPENAUTO_LOG(info) << "[NavigationStatusService] onChannelOpenRequest()";

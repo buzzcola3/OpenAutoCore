@@ -191,8 +191,6 @@ namespace f1x {
                                                         pServiceDiscoveryResponse,
                                                         "ServiceDiscoveryResponse");
 
-          OPENAUTO_LOG(info) << pServiceDiscoveryResponse->DebugString();
-
           auto promise = aasdk::channel::SendPromise::defer(strand_);
           promise->then([]() {},
                         std::bind(&AndroidAutoEntity::onChannelError, this->shared_from_this(), std::placeholders::_1));

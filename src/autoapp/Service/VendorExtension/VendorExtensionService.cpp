@@ -59,16 +59,6 @@ namespace f1x::openauto::autoapp::service::vendorextension {
     });
   }
 
-  void VendorExtensionService::fillFeatures(
-      aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) {
-    OPENAUTO_LOG(info) << "[VendorExtensionService] fillFeatures()";
-
-    auto *service = response.add_channels();
-    service->set_id(static_cast<uint32_t>(channel_->getId()));
-
-    auto *vendorExtension = service->mutable_vendor_extension_service();
-  }
-
   void VendorExtensionService::onChannelError(const aasdk::error::Error &e) {
     OPENAUTO_LOG(error) << "[VendorExtensionService] onChannelError(): " << e.what();
   }

@@ -40,8 +40,6 @@ namespace f1x::openauto::autoapp::service {
 
     void resume() override;
 
-    void fillFeatures(aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) override;
-
   private:
 
     Strand strand_;

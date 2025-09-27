@@ -63,32 +63,6 @@ namespace f1x {
             });
           }
 
-          void InputSourceService::fillFeatures(
-              aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) {
-            OPENAUTO_LOG(info) << "[InputSourceService] fillFeatures() DUMMY";
-            return;
-
-            auto *service = response.add_channels();
-            service->set_id(static_cast<uint32_t>(channel_->getId()));
-
-            auto *inputChannel = service->mutable_input_source_service();
-
-            const auto &supportedButtonCodes = inputDevice_->getSupportedButtonCodes();
-
-            for (const auto &buttonCode: supportedButtonCodes) {
-              inputChannel->add_keycodes_supported(buttonCode);
-            }
-
-            
-            auto touchscreenConfig = inputChannel->add_touchscreen();
-
-            touchscreenConfig->set_width(1920);
-            touchscreenConfig->set_height(1080);
-
-            OPENAUTO_LOG(info) << service->DebugString();
-            
-          }
-
           void InputSourceService::onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) {
             OPENAUTO_LOG(info) << "[InputSourceService] onChannelOpenRequest()";
             OPENAUTO_LOG(debug) << "[InputSourceService] Channel Id: " << request.service_id() << ", Priority: " << request.priority();

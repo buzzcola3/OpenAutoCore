@@ -62,16 +62,6 @@ namespace f1x {
             });
           }
 
-          void PhoneStatusService::fillFeatures(
-              aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) {
-            OPENAUTO_LOG(info) << "[PhoneStatusService] fillFeatures()";
-
-            auto *service = response.add_channels();
-            service->set_id(static_cast<uint32_t>(channel_->getId()));
-
-            auto *phoneStatus = service->mutable_phone_status_service();
-          }
-
           void PhoneStatusService::onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) {
             OPENAUTO_LOG(info) << "[PhoneStatusService] onChannelOpenRequest()";
             OPENAUTO_LOG(debug) << "[PhoneStatusService] Channel Id: " << request.service_id() << ", Priority: " << request.priority();

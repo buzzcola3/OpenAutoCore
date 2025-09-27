@@ -59,39 +59,7 @@ namespace f1x::openauto::autoapp::service::bluetooth {
     });
   }
 
-  void BluetoothService::fillFeatures(
-      aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) {
-    OPENAUTO_LOG(info) << "[BluetoothService] fillFeatures() DUMMY";
-    return;
-
-    auto *service = response.add_channels();
-    service->set_id(static_cast<uint32_t>(channel_->getId()));
-
-    auto bluetooth = service->mutable_bluetooth_service();
-
-    if (bluetoothDevice_->isAvailable()) {
-      OPENAUTO_LOG(info) << "[BluetoothService] Local Address: " << bluetoothDevice_->getAdapterAddress();
-
-      // TODO: Also need to re-establish Bluetooth
-      // If the HU wants the MD to skip the Bluetooth Pairing and Connection process, the HU can declare its address as SKIP_THIS_BLUETOOTH
-      bluetooth->set_car_address(bluetoothDevice_->getAdapterAddress());
-
-      // AAP supports bth PIN and Numeric Comparison as pairing methods.
-      bluetooth->add_supported_pairing_methods(
-          aap_protobuf::service::bluetooth::message::BluetoothPairingMethod::BLUETOOTH_PAIRING_PIN);
-      bluetooth->add_supported_pairing_methods(
-          aap_protobuf::service::bluetooth::message::BluetoothPairingMethod::BLUETOOTH_PAIRING_NUMERIC_COMPARISON);
-    } else {
-      OPENAUTO_LOG(info) << "[BluetoothService] Bluetooth Not Available ";
-      bluetooth->set_car_address("");
-      bluetooth->add_supported_pairing_methods(aap_protobuf::service::bluetooth::message::BluetoothPairingMethod::BLUETOOTH_PAIRING_UNAVAILABLE);
-    }
-
-    OPENAUTO_LOG(info) << service->DebugString();
-  }
-
-  void
-  BluetoothService::onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) {
+  void BluetoothService::onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) {
     OPENAUTO_LOG(info) << "[BluetoothService] onChannelOpenRequest()";
     OPENAUTO_LOG(debug) << "[BluetoothService] Channel Id: " << request.service_id() << ", Priority: "
                         << request.priority();

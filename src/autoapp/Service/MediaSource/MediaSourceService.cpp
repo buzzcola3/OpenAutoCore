@@ -59,34 +59,6 @@ namespace f1x::openauto::autoapp::service::mediasource {
   }
 
   /*
-   * Service Discovery
-   */
-
-  /**
-   * Fill Features of Service
-   * @param response
-   */
-  void MediaSourceService::fillFeatures(
-      aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) {
-    OPENAUTO_LOG(info) << "[MediaSourceService] fillFeatures() DUMMY";
-    return;
-
-    auto *service = response.add_channels();
-    service->set_id(static_cast<uint32_t>(channel_->getId()));
-
-    auto *avInputChannel = service->mutable_media_source_service();
-    avInputChannel->set_available_type(
-        aap_protobuf::service::media::shared::message::MediaCodecType::MEDIA_CODEC_AUDIO_PCM);
-
-    auto audioConfig = avInputChannel->mutable_audio_config();
-    audioConfig->set_sampling_rate(audioInput_->getSampleRate());
-    audioConfig->set_number_of_bits(audioInput_->getSampleSize());
-    audioConfig->set_number_of_channels(audioInput_->getChannelCount());
-
-    OPENAUTO_LOG(info) << service->DebugString();
-  }
-
-  /*
    * Base Channel Handling
    */
 
