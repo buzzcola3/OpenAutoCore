@@ -20,7 +20,9 @@
 #include <Channel/Control/ControlServiceChannel.hpp>
 #include <f1x/openauto/autoapp/Service/AndroidAutoEntity.hpp>
 #include <f1x/openauto/Common/Log.hpp>
+#include <f1x/openauto/autoapp/Common/ProtoConfig.hpp>
 #include <google/protobuf/text_format.h>
+#include <google/protobuf/message.h>
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
@@ -178,59 +180,71 @@ namespace f1x {
         void AndroidAutoEntity::onServiceDiscoveryRequest(
             const aap_protobuf::service::control::message::ServiceDiscoveryRequest &request) {
           OPENAUTO_LOG(info) << "[AndroidAutoEntity] onServiceDiscoveryRequest()";
-          OPENAUTO_LOG(debug) << "[AndroidAutoEntity] Type: " << request.label_text() << ", Model: "
-                             << request.device_name();
+          OPENAUTO_LOG(debug) << "[AndroidAutoEntity] Type: " << request.label_text()
+                              << ", Model: " << request.device_name();
 
           aap_protobuf::service::control::message::ServiceDiscoveryResponse serviceDiscoveryResponse;
           serviceDiscoveryResponse.mutable_channels()->Reserve(256);
-          serviceDiscoveryResponse.set_driver_position(aap_protobuf::service::control::message::DriverPosition::DRIVER_POSITION_RIGHT);
+          serviceDiscoveryResponse.set_driver_position(
+              aap_protobuf::service::control::message::DriverPosition::DRIVER_POSITION_RIGHT);
           serviceDiscoveryResponse.set_can_play_native_media_during_vr(false);
           serviceDiscoveryResponse.set_probe_for_support(false);
 
-          auto *connectionConfiguration = serviceDiscoveryResponse.mutable_connection_configuration();
+          // Load connection configuration.
+          auto* connectionConfiguration = serviceDiscoveryResponse.mutable_connection_configuration();
+          f1x::openauto::autoapp::config::loadTextProto("configuration/ConnectionConfiguration.textproto",
+                                                        connectionConfiguration,
+                                                        "ConnectionConfiguration");
 
-          // Always load from runfiles-relative path.
-          std::string cfgPath = "configuration/ConnectionConfiguration.textproto";
+          auto* headUnitInfo = serviceDiscoveryResponse.mutable_headunit_info();
+          f1x::openauto::autoapp::config::loadTextProto("configuration/MutableHeadunitInfo.textproto",
+                                                        headUnitInfo,
+                                                        "MutableHeadunitInfo");
 
-          std::ifstream in1(cfgPath);
-          if (in1) {
-            std::ostringstream ss;
-            ss << in1.rdbuf();
-            if (google::protobuf::TextFormat::ParseFromString(ss.str(), connectionConfiguration)) {
-              OPENAUTO_LOG(info) << "[AndroidAutoEntity] Loaded ServiceDiscoveryResponse from " << cfgPath;
-            } else {
-              OPENAUTO_LOG(error) << "[AndroidAutoEntity] Failed to parse textproto at " << cfgPath << ".";
-            }
-          } else {
-            OPENAUTO_LOG(error) << "[AndroidAutoEntity] Config not found at " << cfgPath << ".";
-          }
+          auto* service = serviceDiscoveryResponse.add_channels();
+          f1x::openauto::autoapp::config::loadTextProto("configuration/InputSourceService.textproto",
+                                                        service,
+                                                        "InputSourceServiceInfo");
 
-          OPENAUTO_LOG(debug) << "[AndroidAutoEntity] " << connectionConfiguration->DebugString();
+          service = serviceDiscoveryResponse.add_channels();
+          f1x::openauto::autoapp::config::loadTextProto("configuration/MediaSourceService.textproto",
+                                                        service,
+                                                        "MediaSourceServiceInfo");
+
+          service = serviceDiscoveryResponse.add_channels();
+          f1x::openauto::autoapp::config::loadTextProto("configuration/SensorService.textproto",
+                                                        service,
+                                                        "SensorServiceInfo");
+
+          service = serviceDiscoveryResponse.add_channels();
+          f1x::openauto::autoapp::config::loadTextProto("configuration/BluetoothService.textproto",
+                                                        service,
+                                                        "BluetoothServiceInfo");
+          
+          service = serviceDiscoveryResponse.add_channels();
+          f1x::openauto::autoapp::config::loadTextProto("configuration/VideoMediaSinkService.textproto",
+                                                        service,
+                                                        "VideoMediaSinkServiceInfo");
+
+          service = serviceDiscoveryResponse.add_channels();
+          f1x::openauto::autoapp::config::loadTextProto("configuration/GuidanceAudioMediaSinkService.textproto",
+                                                        service,
+                                                        "GuidanceAudioMediaSinkServiceInfo");
+
+          service = serviceDiscoveryResponse.add_channels();
+          f1x::openauto::autoapp::config::loadTextProto("configuration/SystemAudioMediaSinkService.textproto",
+                                                        service,
+                                                        "SystemAudioMediaSinkServiceInfo");
+
+          service = serviceDiscoveryResponse.add_channels();
+          f1x::openauto::autoapp::config::loadTextProto("configuration/MediaAudioMediaSinkService.textproto",
+                                                        service,
+                                                        "MediaAudioMediaSinkServiceInfo");
 
 
-          auto *headUnitInfo = serviceDiscoveryResponse.mutable_headunit_info();
-
-          // Always load from runfiles-relative path.
-          cfgPath = "configuration/MutableHeadunitInfo.textproto";
-
-          std::ifstream in2(cfgPath);
-          if (in2) {
-            std::ostringstream ss;
-            ss << in2.rdbuf();
-            if (google::protobuf::TextFormat::ParseFromString(ss.str(), headUnitInfo)) {
-              OPENAUTO_LOG(info) << "[AndroidAutoEntity] Loaded MutableHeadunitInfo from " << cfgPath;
-            } else {
-              OPENAUTO_LOG(error) << "[AndroidAutoEntity] Failed to parse textproto at " << cfgPath << ".";
-            }
-          } else {
-            OPENAUTO_LOG(error) << "[AndroidAutoEntity] Config not found at " << cfgPath << ".";
-          }
-
-          std::for_each(serviceList_.begin(), serviceList_.end(),
-                        std::bind(&IService::fillFeatures, std::placeholders::_1, std::ref(serviceDiscoveryResponse)));
 
           auto promise = aasdk::channel::SendPromise::defer(strand_);
-          promise->then([]() {  },
+          promise->then([]() {},
                         std::bind(&AndroidAutoEntity::onChannelError, this->shared_from_this(), std::placeholders::_1));
           controlServiceChannel_->sendServiceDiscoveryResponse(serviceDiscoveryResponse, std::move(promise));
           controlServiceChannel_->receive(this->shared_from_this());

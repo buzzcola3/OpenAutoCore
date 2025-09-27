@@ -68,7 +68,8 @@ namespace f1x::openauto::autoapp::service::mediasource {
    */
   void MediaSourceService::fillFeatures(
       aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) {
-    OPENAUTO_LOG(info) << "[MediaSourceService] fillFeatures()";
+    OPENAUTO_LOG(info) << "[MediaSourceService] fillFeatures() DUMMY";
+    return;
 
     auto *service = response.add_channels();
     service->set_id(static_cast<uint32_t>(channel_->getId()));
@@ -81,6 +82,8 @@ namespace f1x::openauto::autoapp::service::mediasource {
     audioConfig->set_sampling_rate(audioInput_->getSampleRate());
     audioConfig->set_number_of_bits(audioInput_->getSampleSize());
     audioConfig->set_number_of_channels(audioInput_->getChannelCount());
+
+    OPENAUTO_LOG(info) << service->DebugString();
   }
 
   /*

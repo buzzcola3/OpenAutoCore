@@ -61,7 +61,8 @@ namespace f1x::openauto::autoapp::service::bluetooth {
 
   void BluetoothService::fillFeatures(
       aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) {
-    OPENAUTO_LOG(info) << "[BluetoothService] fillFeatures()";
+    OPENAUTO_LOG(info) << "[BluetoothService] fillFeatures() DUMMY";
+    return;
 
     auto *service = response.add_channels();
     service->set_id(static_cast<uint32_t>(channel_->getId()));
@@ -85,6 +86,8 @@ namespace f1x::openauto::autoapp::service::bluetooth {
       bluetooth->set_car_address("");
       bluetooth->add_supported_pairing_methods(aap_protobuf::service::bluetooth::message::BluetoothPairingMethod::BLUETOOTH_PAIRING_UNAVAILABLE);
     }
+
+    OPENAUTO_LOG(info) << service->DebugString();
   }
 
   void

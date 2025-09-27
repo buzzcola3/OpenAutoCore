@@ -68,9 +68,10 @@ namespace f1x {
 
           void VideoMediaSinkService::fillFeatures(
               aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) {
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] fillFeatures()";
+            OPENAUTO_LOG(info) << "[VideoMediaSinkService] fillFeatures() DUMMY";
             OPENAUTO_LOG(info) << "[VideoMediaSinkService] Channel "
                                << aasdk::messenger::channelIdToString(channel_->getId());
+            return;
 
             auto *service = response.add_channels();
             service->set_id(static_cast<uint32_t>(channel_->getId()));
@@ -96,6 +97,8 @@ namespace f1x {
             OPENAUTO_LOG(info) << "[VideoMediaSinkService] width " << videoMargins.width;
             OPENAUTO_LOG(info) << "[VideoMediaSinkService] height " << videoMargins.height;
             OPENAUTO_LOG(info) << "[VideoMediaSinkService] getScreenDPI " << videoOutput_->getScreenDPI();
+
+            OPENAUTO_LOG(info) << service->DebugString();
           }
 
           void

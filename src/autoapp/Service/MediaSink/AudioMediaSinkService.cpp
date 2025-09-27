@@ -76,6 +76,19 @@ namespace f1x {
             OPENAUTO_LOG(info) << "[AudioMediaSinkService] fillFeatures()";
             OPENAUTO_LOG(info) << "[AudioMediaSinkService] Channel: " << aasdk::messenger::channelIdToString(channel_->getId());
 
+            if(channel_->getId() == aasdk::messenger::ChannelId::MEDIA_SINK_MEDIA_AUDIO) {
+              OPENAUTO_LOG(info) << "DUMMY";
+              return;
+            }
+            if(channel_->getId() == aasdk::messenger::ChannelId::MEDIA_SINK_SYSTEM_AUDIO) {
+              OPENAUTO_LOG(info) << "DUMMY";
+              return;
+            }
+            if(channel_->getId() == aasdk::messenger::ChannelId::MEDIA_SINK_GUIDANCE_AUDIO) {
+              OPENAUTO_LOG(info) << "DUMMY";
+              return;
+            }
+
             auto *service = response.add_channels();
             service->set_id(static_cast<uint32_t>(channel_->getId()));
 
@@ -86,18 +99,18 @@ namespace f1x {
 
             switch (channel_->getId()) {
               case aasdk::messenger::ChannelId::MEDIA_SINK_SYSTEM_AUDIO:
-                OPENAUTO_LOG(info) << "[AudioMediaSinkService] System Audio.";
+                OPENAUTO_LOG(info) << "[AudioMediaSinkService] System Audio. DUMMY";
                 audioChannel->set_audio_type(
                     aap_protobuf::service::media::sink::message::AudioStreamType::AUDIO_STREAM_SYSTEM_AUDIO);
                 break;
 
               case aasdk::messenger::ChannelId::MEDIA_SINK_MEDIA_AUDIO:
-                OPENAUTO_LOG(info) << "[AudioMediaSinkService] Music Audio.";
+                OPENAUTO_LOG(info) << "[AudioMediaSinkService] Music Audio. DUMMY";
                 audioChannel->set_audio_type(aap_protobuf::service::media::sink::message::AudioStreamType::AUDIO_STREAM_MEDIA);
                 break;
 
               case aasdk::messenger::ChannelId::MEDIA_SINK_GUIDANCE_AUDIO:
-                OPENAUTO_LOG(info) << "[AudioMediaSinkService] Guidance Audio.";
+                OPENAUTO_LOG(info) << "[AudioMediaSinkService] Guidance Audio. DUMMY";
                 audioChannel->set_audio_type(
                     aap_protobuf::service::media::sink::message::AudioStreamType::AUDIO_STREAM_GUIDANCE);
                 break;

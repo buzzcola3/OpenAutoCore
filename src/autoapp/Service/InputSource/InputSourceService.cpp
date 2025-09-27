@@ -65,7 +65,8 @@ namespace f1x {
 
           void InputSourceService::fillFeatures(
               aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) {
-            OPENAUTO_LOG(info) << "[InputSourceService] fillFeatures()";
+            OPENAUTO_LOG(info) << "[InputSourceService] fillFeatures() DUMMY";
+            return;
 
             auto *service = response.add_channels();
             service->set_id(static_cast<uint32_t>(channel_->getId()));
@@ -83,6 +84,8 @@ namespace f1x {
 
             touchscreenConfig->set_width(1920);
             touchscreenConfig->set_height(1080);
+
+            OPENAUTO_LOG(info) << service->DebugString();
             
           }
 

@@ -75,7 +75,8 @@ namespace f1x::openauto::autoapp::service::sensor {
 
   void SensorService::fillFeatures(
       aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) {
-    OPENAUTO_LOG(info) << "[SensorService] fillFeatures()";
+    OPENAUTO_LOG(info) << "[SensorService] fillFeatures() DUMMY";
+    return;
 
     auto *service = response.add_channels();
     service->set_id(static_cast<uint32_t>(channel_->getId()));
@@ -87,6 +88,8 @@ namespace f1x::openauto::autoapp::service::sensor {
         aap_protobuf::service::sensorsource::message::SensorType::SENSOR_LOCATION);
     sensorChannel->add_sensors()->set_sensor_type(
         aap_protobuf::service::sensorsource::message::SensorType::SENSOR_NIGHT_MODE);
+
+    OPENAUTO_LOG(info) << service->DebugString();
   }
 
   void SensorService::onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) {

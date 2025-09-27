@@ -1,0 +1,11 @@
+id: 4
+media_sink_service {
+  available_type: MEDIA_CODEC_AUDIO_PCM
+  audio_type: AUDIO_STREAM_MEDIA
+  audio_configs {
+    sampling_rate: 48000
+    number_of_bits: 16
+    number_of_channels: 2
+  }
+  available_while_in_call: true
+}

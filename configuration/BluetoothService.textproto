@@ -1,0 +1,5 @@
+id: 10
+bluetooth_service {
+  car_address: ""
+  supported_pairing_methods: BLUETOOTH_PAIRING_UNAVAILABLE
+}
