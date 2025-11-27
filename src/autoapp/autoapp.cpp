@@ -17,6 +17,7 @@
 */
 
 #include <thread>
+#include "debugglass/debugglass.h"
 #include <USB/USBHub.hpp>
 #include <USB/ConnectedAccessoriesEnumerator.hpp>
 #include <USB/AccessoryModeQueryChain.hpp>
@@ -38,6 +39,8 @@ using ThreadPool = std::vector<std::thread>;
 
 using IoContext = boost::asio::io_context;
 using Strand = boost::asio::strand<IoContext::executor_type>;
+
+static debugglass::DebugGlass gDebugGlassMonitor;
 
 void startUSBWorkers(IoContext& ioContext, libusb_context* usbContext, ThreadPool& threadPool)
 {
@@ -87,6 +90,11 @@ int main(int argc, char* argv[])
 {
     configureLogging();
 
+    if (!gDebugGlassMonitor.Run())
+    {
+        OPENAUTO_LOG(error) << "[DebugGlass] Failed to start debug UI.";
+    }
+
     auto transport = std::make_shared<buzz::autoapp::Transport::Transport>();
 
     libusb_context* usbContext;
@@ -123,6 +131,8 @@ int main(int argc, char* argv[])
     app->waitForUSBDevice();
 
     std::for_each(threadPool.begin(), threadPool.end(), std::bind(&std::thread::join, std::placeholders::_1));
+
+    gDebugGlassMonitor.Stop();
 
     libusb_exit(usbContext);
     return 0;

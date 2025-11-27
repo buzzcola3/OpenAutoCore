@@ -60,3 +60,10 @@ git_override(
     remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
     commit = "abb61a688167623088f8768cc9264798df6a9d10",
 )
+
+bazel_dep(name = "debugglass", version = "0.1.0")
+git_override(
+    module_name = "debugglass",
+    remote = "https://github.com/buzzcola3/debugGlass.git",
+    commit = "be65bee523c5df9617ef5b352b1c896121c26294",
+)

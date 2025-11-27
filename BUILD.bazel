@@ -13,6 +13,7 @@ cc_library(
     deps = [
         "//OpenAutoSDK:OpenAutoSDK",
         "@open_auto_transport",
+        "@debugglass//:debugglass",
     ],
     copts = [
         "-I$(GENDIR)/OpenAutoSDK/protobufs_aap_protobuf_cc_gen",
@@ -27,6 +28,7 @@ cc_binary(
         ":OpenAutoCore",
         "//OpenAutoSDK:OpenAutoSDK",
         "@open_auto_transport//:open_auto_transport",
+        "@debugglass//:debugglass",
         "@openssl",
         "@openssl//:ssl",
         "@openssl//:crypto",
