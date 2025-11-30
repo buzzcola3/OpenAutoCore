@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <thread>
 #include "buzz/autoapp/DebugGlassMonitor.hpp"
+#include "buzz/autoapp/MessengerDiagnostics.hpp"
 #include "debugglass/debugglass.h"
 #include "open_auto_transport/transport.hpp"
 #include <QApplication>
@@ -103,6 +104,8 @@ int main(int argc, char* argv[])
     {
         OPENAUTO_LOG(error) << "[DebugGlass] Failed to start debug UI.";
     }
+
+    buzz::autoapp::InitializeMessengerDiagnostics();
 
     [[maybe_unused]] auto transport = std::make_shared<buzz::autoapp::Transport::Transport>();
 

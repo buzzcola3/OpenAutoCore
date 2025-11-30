@@ -19,6 +19,7 @@
 #include <Channel/Control/ControlServiceChannel.hpp>
 #include <f1x/openauto/autoapp/Service/AndroidAutoEntity.hpp>
 #include <f1x/openauto/Common/Log.hpp>
+#include "buzz/autoapp/FocusDiagnostics.hpp"
 
 namespace f1x {
   namespace openauto {
@@ -217,6 +218,8 @@ namespace f1x {
           OPENAUTO_LOG(debug) << "[AndroidAutoEntity] AudioFocusRequestType received: "
                              << AudioFocusRequestType_Name(request.audio_focus_type());
 
+          buzz::autoapp::RecordAudioFocusRequest(request.audio_focus_type());
+
           /*
            * When the MD starts playing music for example, it sends a gain request. The HU replies:
            * STATE_GAIN - no restrictions
@@ -239,6 +242,8 @@ namespace f1x {
 
           OPENAUTO_LOG(debug) << "[AndroidAutoEntity] AudioFocusStateType determined: "
                              << AudioFocusStateType_Name(audioFocusStateType);
+
+            buzz::autoapp::RecordAudioFocusResponse(audioFocusStateType);
 
           aap_protobuf::service::control::message::AudioFocusNotification response;
           response.set_focus_state(audioFocusStateType);

@@ -165,6 +165,8 @@ set(autoapp_include_directory ${include_directory}/f1x/openauto/autoapp)
 file(GLOB_RECURSE autoapp_source_files ${autoapp_sources_directory}/*.ui ${autoapp_sources_directory}/*.cpp ${autoapp_include_directory}/*.hpp ${autoapp_include_directory}/*.h ${common_include_directory}/*.hpp ${resources_directory}/*.qrc)
 list(APPEND autoapp_source_files
         ${sources_directory}/diagnostics/DebugGlassRuntime.cpp
+        ${sources_directory}/diagnostics/MessengerDiagnostics.cpp
+        ${sources_directory}/diagnostics/FocusDiagnostics.cpp
         ${sources_directory}/open_auto_transport/transport.cpp)
 
 add_executable(autoapp ${autoapp_source_files})
