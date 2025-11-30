@@ -32,6 +32,8 @@
 #include <QVideoWidget>
 #include <QNetworkInterface>
 #include <QStandardItemModel>
+#include <QProcess>
+#include <QStringList>
 #include <iostream>
 #include <fstream>
 #include <cstdio>
@@ -237,4 +239,98 @@ void f1x::openauto::autoapp::ui::MainWindow::tmpChanged()
 
     this->hotspotActive = check_file_exist("/tmp/hotspot_active");
 
+}
+
+void f1x::openauto::autoapp::ui::MainWindow::createDebuglog()
+{
+    QFile logFile(QStringLiteral("/tmp/openauto_debug.log"));
+    if (logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        QTextStream stream(&logFile);
+        stream << QDateTime::currentDateTime().toString(Qt::ISODate)
+               << " captured main-window snapshot" << Qt::endl;
+    }
+}
+
+void f1x::openauto::autoapp::ui::MainWindow::setPairable()
+{
+    if (localDevice == nullptr) {
+        return;
+    }
+
+    using HostMode = QBluetoothLocalDevice::HostMode;
+    const auto currentMode = localDevice->hostMode();
+    const auto nextMode = (currentMode == HostMode::HostDiscoverable)
+                              ? HostMode::HostConnectable
+                              : HostMode::HostDiscoverable;
+    localDevice->setHostMode(nextMode);
+}
+
+void f1x::openauto::autoapp::ui::MainWindow::setMute()
+{
+    if (toggleMute) {
+        return;
+    }
+
+    toggleMute = true;
+    QProcess::execute(QStringLiteral("/bin/sh"),
+                      {QStringLiteral("-c"), QStringLiteral("amixer set Master mute >/dev/null 2>&1")});
+}
+
+void f1x::openauto::autoapp::ui::MainWindow::setUnMute()
+{
+    if (!toggleMute) {
+        return;
+    }
+
+    toggleMute = false;
+    QProcess::execute(QStringLiteral("/bin/sh"),
+                      {QStringLiteral("-c"), QStringLiteral("amixer set Master unmute >/dev/null 2>&1")});
+}
+
+void f1x::openauto::autoapp::ui::MainWindow::updateNetworkInfo()
+{
+    const auto interfaces = QNetworkInterface::allInterfaces();
+    QStringList summary;
+    for (const auto &iface : interfaces) {
+        if (!(iface.flags() & QNetworkInterface::IsUp) || (iface.flags() & QNetworkInterface::IsLoopBack)) {
+            continue;
+        }
+
+        const auto entries = iface.addressEntries();
+        for (const auto &entry : entries) {
+            if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
+                summary << QStringLiteral("%1 %2").arg(iface.humanReadableName(), entry.ip().toString());
+            }
+        }
+    }
+
+    QFile infoFile(QStringLiteral("/tmp/openauto_network_info"));
+    if (infoFile.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
+        QTextStream stream(&infoFile);
+        if (summary.isEmpty()) {
+            stream << "offline" << Qt::endl;
+        } else {
+            stream << summary.join('\n') << Qt::endl;
+        }
+    }
+}
+
+void f1x::openauto::autoapp::ui::MainWindow::on_horizontalSliderBrightness_valueChanged(int value)
+{
+    const QByteArray payload = QByteArray::number(value);
+    const auto writeValue = [&payload](const QString &path) {
+        QFile file(path);
+        if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+            file.write(payload);
+        }
+    };
+
+    if (QFile::exists(brightnessFilename)) {
+        writeValue(brightnessFilename);
+        return;
+    }
+
+    if (QFile::exists(brightnessFilenameAlt)) {
+        writeValue(brightnessFilenameAlt);
+    }
 }

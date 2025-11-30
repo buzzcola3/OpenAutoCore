@@ -16,7 +16,11 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cstddef>
 #include <thread>
+#include "buzz/autoapp/DebugGlassMonitor.hpp"
+#include "debugglass/debugglass.h"
+#include "open_auto_transport/transport.hpp"
 #include <QApplication>
 #include <QScreen>
 #include <QDesktopWidget>
@@ -40,6 +44,12 @@
 namespace autoapp = f1x::openauto::autoapp;
 using ThreadPool = std::vector<std::thread>;
 
+namespace {
+
+constexpr std::size_t kUsbWorkerCount = 4;
+
+}
+
 void startUSBWorkers(boost::asio::io_service& ioService, libusb_context* usbContext, ThreadPool& threadPool)
 {
     auto usbWorker = [&ioService, usbContext]() {
@@ -47,14 +57,15 @@ void startUSBWorkers(boost::asio::io_service& ioService, libusb_context* usbCont
 
         while(!ioService.stopped())
         {
-            libusb_handle_events_timeout_completed(usbContext, &libusbEventTimeout, nullptr);
+            const int result = libusb_handle_events_timeout_completed(usbContext, &libusbEventTimeout, nullptr);
+            buzz::autoapp::RecordDebugGlassUsbEvent(result);
         }
     };
 
-    threadPool.emplace_back(usbWorker);
-    threadPool.emplace_back(usbWorker);
-    threadPool.emplace_back(usbWorker);
-    threadPool.emplace_back(usbWorker);
+    for(std::size_t worker = 0; worker < kUsbWorkerCount; ++worker)
+    {
+        threadPool.emplace_back(usbWorker);
+    }
 }
 
 void startIOServiceWorkers(boost::asio::io_service& ioService, ThreadPool& threadPool)
@@ -88,12 +99,21 @@ int main(int argc, char* argv[])
 {
     configureLogging();
 
+    if (!buzz::autoapp::gDebugGlassMonitor.Run())
+    {
+        OPENAUTO_LOG(error) << "[DebugGlass] Failed to start debug UI.";
+    }
+
+    [[maybe_unused]] auto transport = std::make_shared<buzz::autoapp::Transport::Transport>();
+
     libusb_context* usbContext;
     if(libusb_init(&usbContext) != 0)
     {
         OPENAUTO_LOG(error) << "[AutoApp] libusb_init failed.";
+        buzz::autoapp::gDebugGlassMonitor.Stop();
         return 1;
     }
+    buzz::autoapp::InitializeDebugGlassUsbMonitor(usbContext, kUsbWorkerCount);
 
     boost::asio::io_service ioService;
     boost::asio::io_service::work work(ioService);
@@ -274,5 +294,6 @@ int main(int argc, char* argv[])
     std::for_each(threadPool.begin(), threadPool.end(), std::bind(&std::thread::join, std::placeholders::_1));
 
     libusb_exit(usbContext);
+    buzz::autoapp::gDebugGlassMonitor.Stop();
     return result;
 }

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5.1)
 
-project(openauto CXX)
+project(openauto C CXX)
 
 message(STATUS "OpenAuto")
 
@@ -46,7 +46,12 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules/")
 
 set(AAP_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/OpenAutoSDK")
+set(AASDK_ROOT_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/OpenAutoSDK/include")
 set(AASDK_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/OpenAutoSDK/include/aasdk")
+set(DEBUGGLASS_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/DebugGlass")
+set(GLFW_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/glfw")
+set(IMGUI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui")
+set(GLAD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/DebugGlass/third_party/glad")
 
 
 # Configure Boost
@@ -77,6 +82,54 @@ find_package(OpenSSL REQUIRED)
 find_package(taglib REQUIRED)
 find_package(blkid REQUIRED)
 find_package(gps REQUIRED)
+find_package(OpenGL REQUIRED)
+
+# Third-party UI diagnostics stack (GLFW + ImGui + GLAD + DebugGlass)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+add_subdirectory(${GLFW_DIR})
+
+add_library(glad STATIC
+        ${GLAD_DIR}/src/glad.c)
+target_include_directories(glad PUBLIC ${GLAD_DIR}/include)
+
+set(IMGUI_SOURCES
+        ${IMGUI_DIR}/imgui.cpp
+        ${IMGUI_DIR}/imgui_demo.cpp
+        ${IMGUI_DIR}/imgui_draw.cpp
+        ${IMGUI_DIR}/imgui_tables.cpp
+        ${IMGUI_DIR}/imgui_widgets.cpp
+        ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+        ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp)
+
+add_library(imgui STATIC ${IMGUI_SOURCES})
+target_include_directories(imgui PUBLIC
+        ${IMGUI_DIR}
+        ${IMGUI_DIR}/backends
+        ${GLAD_DIR}/include
+        ${GLFW_DIR}/include)
+target_link_libraries(imgui PUBLIC glad glfw)
+target_compile_definitions(imgui PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
+
+set(DEBUGGLASS_SOURCES
+        ${DEBUGGLASS_INCLUDE_DIR}/debugglass/debugglass.cpp
+        ${DEBUGGLASS_INCLUDE_DIR}/debugglass/subwindow_registry.cpp
+        ${DEBUGGLASS_INCLUDE_DIR}/debugglass/widgets/graph.cpp
+        ${DEBUGGLASS_INCLUDE_DIR}/debugglass/widgets/message_monitor.cpp
+        ${DEBUGGLASS_INCLUDE_DIR}/debugglass/widgets/structure.cpp
+        ${DEBUGGLASS_INCLUDE_DIR}/debugglass/widgets/tab.cpp
+        ${DEBUGGLASS_INCLUDE_DIR}/debugglass/widgets/variable.cpp)
+
+add_library(debugglass STATIC ${DEBUGGLASS_SOURCES})
+target_include_directories(debugglass PUBLIC
+        ${DEBUGGLASS_INCLUDE_DIR}
+        ${IMGUI_DIR}
+        ${IMGUI_DIR}/backends
+        ${GLAD_DIR}/include
+        ${GLFW_DIR}/include)
+target_link_libraries(debugglass PUBLIC imgui)
 
 # Add GStreamer, is likely needed for qt5multimedia to work
 find_package(PkgConfig REQUIRED)
@@ -98,6 +151,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}
         ${include_directory}
         ${PROTOBUF_INCLUDE_DIR}
         ${AAP_PROTOBUF_INCLUDE_DIR}
+        ${DEBUGGLASS_INCLUDE_DIR}
+        ${AASDK_ROOT_INCLUDE_DIR}
         ${AASDK_INCLUDE_DIR})
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
@@ -108,11 +163,18 @@ set(autoapp_sources_directory ${sources_directory}/autoapp)
 set(autoapp_include_directory ${include_directory}/f1x/openauto/autoapp)
 
 file(GLOB_RECURSE autoapp_source_files ${autoapp_sources_directory}/*.ui ${autoapp_sources_directory}/*.cpp ${autoapp_include_directory}/*.hpp ${autoapp_include_directory}/*.h ${common_include_directory}/*.hpp ${resources_directory}/*.qrc)
+list(APPEND autoapp_source_files
+        ${sources_directory}/diagnostics/DebugGlassRuntime.cpp
+        ${sources_directory}/open_auto_transport/transport.cpp)
 
 add_executable(autoapp ${autoapp_source_files})
 
 add_dependencies(autoapp aasdk)
-target_include_directories(autoapp PUBLIC ${AAP_PROTOBUF_INCLUDE_DIR} ${AASDK_INCLUDE_DIR})
+target_include_directories(autoapp PUBLIC
+        ${AAP_PROTOBUF_INCLUDE_DIR}
+        ${DEBUGGLASS_INCLUDE_DIR}
+        ${AASDK_ROOT_INCLUDE_DIR}
+        ${AASDK_INCLUDE_DIR})
 
 target_link_libraries(autoapp PUBLIC
         libusb
@@ -132,7 +194,9 @@ target_link_libraries(autoapp PUBLIC
         ${GPS_LIBRARIES}
         ${PROTOBUF_LIBRARIES}
         ${GST_LIBRARIES}      # Link against GStreamer libraries
-        ${GSTAPP_LIBRARIES})   # Link against GStreamer App libraries
+        ${GSTAPP_LIBRARIES}   # Link against GStreamer App libraries
+        debugglass
+        OpenGL::GL)
 
 set(PROGRAM_VERSION_STRING "${OPENAUTO_BUILD_MAJOR_RELEASE}.${OPENAUTO_BUILD_MINOR_RELEASE}.${OPENAUTO_BUILD_INCREMENTAL}+${OPENAUTO_BUILD_DATE}")
 
