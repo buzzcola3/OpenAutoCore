@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include <f1x/openauto/autoapp/Projection/IAudioInput.hpp>
 
 namespace f1x
@@ -49,6 +51,9 @@ private:
     uint32_t channelCount_;
     uint32_t sampleSize_;
     uint32_t sampleRate_;
+    std::size_t frameSizeBytes_;
+    std::atomic<bool> opened_{false};
+    std::atomic<bool> active_{false};
 };
 
 }

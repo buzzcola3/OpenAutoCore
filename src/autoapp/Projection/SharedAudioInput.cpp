@@ -16,6 +16,10 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <algorithm>
+#include <cstdint>
+#include <utility>
+
 #include <f1x/openauto/autoapp/Projection/SharedAudioInput.hpp>
 #include <f1x/openauto/Common/Log.hpp>
 
@@ -28,42 +32,63 @@ namespace autoapp
 namespace projection
 {
 
+namespace {
+constexpr uint32_t kFrameDurationMs = 20;
+
+std::size_t ComputeFrameSizeBytes(uint32_t channelCount, uint32_t sampleSizeBits, uint32_t sampleRateHz)
+{
+    const auto bytesPerSample = static_cast<std::size_t>(std::max<uint32_t>(1u, (sampleSizeBits + 7u) / 8u));
+    const auto samplesPerFrame = static_cast<std::size_t>(std::max<uint32_t>(1u, (sampleRateHz * kFrameDurationMs) / 1000u));
+    return std::max<std::size_t>(bytesPerSample * channelCount * samplesPerFrame, bytesPerSample);
+}
+}
+
 SharedAudioInput::SharedAudioInput(uint32_t channelCount, uint32_t sampleSize, uint32_t sampleRate)
     : channelCount_(channelCount)
     , sampleSize_(sampleSize)
     , sampleRate_(sampleRate)
+    , frameSizeBytes_(ComputeFrameSizeBytes(channelCount, sampleSize, sampleRate))
 {
-    OPENAUTO_LOG(info) << "[SharedAudioInput] Dummy audio input created.";
+    OPENAUTO_LOG(info) << "[SharedAudioInput] Silent audio input created with frame size " << frameSizeBytes_ << " bytes.";
 }
 
 bool SharedAudioInput::open()
 {
-    // A dummy device is always "open".
+    opened_.store(true, std::memory_order_relaxed);
     return true;
 }
 
 bool SharedAudioInput::isActive() const
 {
-    // A dummy device is never "active".
-    return false;
+    return active_.load(std::memory_order_relaxed);
 }
 
 void SharedAudioInput::read(ReadPromise::Pointer promise)
 {
-    // A dummy device never provides data, so we reject the promise
-    // to prevent the caller from waiting forever.
-    promise->reject();
+    if (!active_.load(std::memory_order_relaxed))
+    {
+        promise->reject();
+        return;
+    }
+
+    aasdk::common::Data buffer(frameSizeBytes_, 0U);
+    promise->resolve(std::move(buffer));
 }
 
 void SharedAudioInput::start(StartPromise::Pointer promise)
 {
-    // A dummy device can "start" successfully without doing anything.
+    if (!opened_.load(std::memory_order_relaxed))
+    {
+        opened_.store(true, std::memory_order_relaxed);
+    }
+
+    active_.store(true, std::memory_order_relaxed);
     promise->resolve();
 }
 
 void SharedAudioInput::stop()
 {
-    // Nothing to do.
+    active_.store(false, std::memory_order_relaxed);
 }
 
 uint32_t SharedAudioInput::getSampleSize() const
