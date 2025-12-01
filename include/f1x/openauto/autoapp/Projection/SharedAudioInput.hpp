@@ -49,6 +49,7 @@ private:
     uint32_t channelCount_;
     uint32_t sampleSize_;
     uint32_t sampleRate_;
+    bool active_;
 };
 
 }

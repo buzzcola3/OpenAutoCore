@@ -16,6 +16,8 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <algorithm>
+
 #include <f1x/openauto/autoapp/Projection/SharedAudioInput.hpp>
 #include <f1x/openauto/Common/Log.hpp>
 
@@ -32,6 +34,7 @@ SharedAudioInput::SharedAudioInput(uint32_t channelCount, uint32_t sampleSize, u
     : channelCount_(channelCount)
     , sampleSize_(sampleSize)
     , sampleRate_(sampleRate)
+    , active_(false)
 {
     OPENAUTO_LOG(info) << "[SharedAudioInput] Dummy audio input created.";
 }
@@ -44,26 +47,35 @@ bool SharedAudioInput::open()
 
 bool SharedAudioInput::isActive() const
 {
-    // A dummy device is never "active".
-    return false;
+    return active_;
 }
 
 void SharedAudioInput::read(ReadPromise::Pointer promise)
 {
-    // A dummy device never provides data, so we reject the promise
-    // to prevent the caller from waiting forever.
-    promise->reject();
+    if(!active_)
+    {
+        promise->reject();
+        return;
+    }
+
+    // Produce ~10 ms of silence to keep the channel flowing.
+    const uint32_t framesPerChunk = std::max(1u, sampleRate_ / 100u);
+    const uint32_t bytesPerSample = sampleSize_ / 8;
+    const size_t bufferSize = static_cast<size_t>(framesPerChunk) * channelCount_ * bytesPerSample;
+
+    aasdk::common::Data buffer(bufferSize, 0);
+    promise->resolve(std::move(buffer));
 }
 
 void SharedAudioInput::start(StartPromise::Pointer promise)
 {
-    // A dummy device can "start" successfully without doing anything.
+    active_ = true;
     promise->resolve();
 }
 
 void SharedAudioInput::stop()
 {
-    // Nothing to do.
+    active_ = false;
 }
 
 uint32_t SharedAudioInput::getSampleSize() const
