@@ -47,11 +47,11 @@ bazel_dep(name = "openssl", version = "3.3.1.bcr.1")
 
 bazel_dep(name = "capnp-cpp", version = "1.1.0")
 
-bazel_dep(name = "open_auto_transport", version = "0.0.1")
+bazel_dep(name = "open_auto_transport", version = "0.0.6")
 git_override(
     module_name = "open_auto_transport",
     remote = "https://github.com/buzzcola3/OpenAutoTransport.git",
-    commit = "4bb6f0291a695984416f44fb1fd459f0d8b209e1",
+    commit = "96a419f004948806991c6d858bac319337177e15",
 )
 
 bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
@@ -65,5 +65,5 @@ bazel_dep(name = "debugglass", version = "0.1.0")
 git_override(
     module_name = "debugglass",
     remote = "https://github.com/buzzcola3/debugGlass.git",
-    commit = "be65bee523c5df9617ef5b352b1c896121c26294",
+    commit = "e4fcf0b7228de529cca182cd3b5eb2833c60b74d",
 )

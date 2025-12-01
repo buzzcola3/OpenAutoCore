@@ -41,6 +41,7 @@ namespace f1x {
           void PhoneStatusService::start() {
             boost::asio::dispatch(strand_, [this, self = this->shared_from_this()]() {
               OPENAUTO_LOG(info) << "[PhoneStatusService] start()";
+              channel_->receive(self);
             });
           }
 
@@ -70,12 +71,14 @@ namespace f1x {
             const aap_protobuf::shared::MessageStatus status = aap_protobuf::shared::MessageStatus::STATUS_SUCCESS;
             response.set_status(status);
 
+            auto self = this->shared_from_this();
             auto promise = aasdk::channel::SendPromise::defer(strand_);
-            promise->then([]() {}, std::bind(&PhoneStatusService::onChannelError, this->shared_from_this(),
-                                             std::placeholders::_1));
+            promise->then([self]() {
+                             self->channel_->receive(self);
+                           },
+                           std::bind(&PhoneStatusService::onChannelError, self,
+                                     std::placeholders::_1));
             channel_->sendChannelOpenResponse(response, std::move(promise));
-
-            channel_->receive(this->shared_from_this());
           }
 
 

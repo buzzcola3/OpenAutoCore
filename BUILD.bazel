@@ -1,8 +1,36 @@
 cc_library(
+    name = "debugglass_monitor_interface",
+    hdrs = ["include/buzz/autoapp/DebugGlassMonitor.hpp"],
+    strip_include_prefix = "include",
+    deps = [
+        "@debugglass//:debugglass",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "proto_debug_recorder",
+    srcs = ["src/autoapp/Debug/ProtoDebugRecorder.cpp"],
+    hdrs = [
+        "include/buzz/autoapp/ProtoDebugRecorder.hpp",
+        "include/buzz/autoapp/ProtoTrace.hpp",
+    ],
+    strip_include_prefix = "include",
+    deps = [
+        ":debugglass_monitor_interface",
+        "@protobuf//:protobuf",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
     name = "OpenAutoCore",
     srcs = glob(
         ["src/autoapp/**/*.cpp"],
-        exclude = ["src/**/*.ut.cpp"],  # Exclude unit test files
+        exclude = [
+            "src/**/*.ut.cpp",  # Exclude unit test files
+            "src/autoapp/Debug/ProtoDebugRecorder.cpp",
+        ],
     ),
     hdrs = glob(
             [
@@ -12,6 +40,7 @@ cc_library(
     strip_include_prefix = "include",
     deps = [
         "//OpenAutoSDK:OpenAutoSDK",
+        ":proto_debug_recorder",
         "@open_auto_transport",
         "@debugglass//:debugglass",
     ],

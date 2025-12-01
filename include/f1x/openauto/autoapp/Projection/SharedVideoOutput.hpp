@@ -19,9 +19,15 @@
 #pragma once
 
 #include <f1x/openauto/autoapp/Projection/VideoOutput.hpp>
-#include <cstdint>
+#include <atomic>
 #include <boost/asio/io_context.hpp>
+#include <condition_variable>
+#include <cstdint>
+#include <deque>
 #include <memory>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 // Forward-declare Transport to avoid heavy includes in header.
 namespace buzz { namespace autoapp { namespace Transport { class Transport; } } }
@@ -34,7 +40,7 @@ class SharedVideoOutput : public VideoOutput {
   SharedVideoOutput(boost::asio::io_context& io_context,
                     configuration::IConfiguration::Pointer configuration,
                     std::shared_ptr<buzz::autoapp::Transport::Transport> transport);
-  ~SharedVideoOutput() override = default;
+  ~SharedVideoOutput() override;
 
   bool open() override;
   bool init() override;
@@ -42,7 +48,26 @@ class SharedVideoOutput : public VideoOutput {
   void stop() override;
 
  private:
+  struct Frame {
+    uint64_t timestamp{0};
+    std::vector<uint8_t> data;
+  };
+
+  void startWorker();
+  void stopWorker();
+  void workerLoop();
+  void enqueueFrame(uint64_t timestamp, const aasdk::common::DataConstBuffer& buffer);
+
+  static constexpr std::size_t kMaxQueueDepth = 8;
+
   std::shared_ptr<buzz::autoapp::Transport::Transport> transport_;
+  std::mutex queueMutex_;
+  std::condition_variable queueCv_;
+  std::deque<Frame> frameQueue_;
+  std::thread workerThread_;
+  std::atomic<bool> shuttingDown_{false};
+  std::atomic<bool> workerStarted_{false};
+  std::atomic<uint64_t> droppedFrames_{0};
 };
 
 }}}}

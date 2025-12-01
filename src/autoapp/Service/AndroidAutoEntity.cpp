@@ -26,6 +26,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include "buzz/autoapp/FocusDebug.hpp"
 
 using IoContext = boost::asio::io_context;
 using Strand = boost::asio::strand<IoContext::executor_type>;
@@ -203,6 +204,8 @@ namespace f1x {
           OPENAUTO_LOG(info) << "[AndroidAutoEntity] onAudioFocusRequest()";
           OPENAUTO_LOG(debug) << "[AndroidAutoEntity] AudioFocusRequestType received: "
                              << AudioFocusRequestType_Name(request.audio_focus_type());
+          buzz::autoapp::debug::RecordAudioFocusRequest(
+              AudioFocusRequestType_Name(request.audio_focus_type()));
 
           /*
            * When the MD starts playing music for example, it sends a gain request. The HU replies:
@@ -226,6 +229,8 @@ namespace f1x {
 
           OPENAUTO_LOG(debug) << "[AndroidAutoEntity] AudioFocusStateType determined: "
                              << AudioFocusStateType_Name(audioFocusStateType);
+            buzz::autoapp::debug::RecordAudioFocusResponse(
+              AudioFocusStateType_Name(audioFocusStateType));
 
           aap_protobuf::service::control::message::AudioFocusNotification response;
           response.set_focus_state(audioFocusStateType);
@@ -285,12 +290,33 @@ namespace f1x {
 
         void AndroidAutoEntity::onPingRequest(const aap_protobuf::service::control::message::PingRequest& request) {
           OPENAUTO_LOG(info) << "[AndroidAutoEntity] onPingRequest()";
+          aap_protobuf::service::control::message::PingResponse response;
+          response.set_timestamp(request.timestamp());
+          if (request.has_data()) {
+            response.set_data(request.data());
+          }
+
+          auto promise = aasdk::channel::SendPromise::defer(strand_);
+          promise->then([]() {},
+                        std::bind(&AndroidAutoEntity::onChannelError, this->shared_from_this(),
+                                  std::placeholders::_1));
+          controlServiceChannel_->sendPingResponse(response, std::move(promise));
           controlServiceChannel_->receive(this->shared_from_this());
         }
 
         void AndroidAutoEntity::onVoiceSessionRequest(
             const aap_protobuf::service::control::message::VoiceSessionNotification &request) {
           OPENAUTO_LOG(info) << "[AndroidAutoEntity] onVoiceSessionRequest()";
+          aap_protobuf::service::control::message::VoiceSessionNotification response;
+          if (request.has_status()) {
+            response.set_status(request.status());
+          }
+
+          auto promise = aasdk::channel::SendPromise::defer(strand_);
+          promise->then([]() {},
+                        std::bind(&AndroidAutoEntity::onChannelError, this->shared_from_this(),
+                                  std::placeholders::_1));
+          controlServiceChannel_->sendVoiceSessionFocusResponse(response, std::move(promise));
           controlServiceChannel_->receive(this->shared_from_this());
         }
 

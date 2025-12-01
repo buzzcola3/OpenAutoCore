@@ -18,6 +18,7 @@
 
 #include <fstream>
 #include <f1x/openauto/autoapp/Service/MediaSink/VideoMediaSinkService.hpp>
+#include "buzz/autoapp/FocusDebug.hpp"
 
 namespace f1x {
   namespace openauto {
@@ -168,6 +169,10 @@ namespace f1x {
               const aap_protobuf::service::media::video::message::VideoFocusRequestNotification &request) {
             OPENAUTO_LOG(info) << "[VideoMediaSinkService] onVideoFocusRequest()";
             OPENAUTO_LOG(info) << "[VideoMediaSinkService] Display index: " << request.disp_channel_id() << ", focus mode: " << VideoFocusMode_Name(request.mode()) << ", focus reason: " << VideoFocusReason_Name(request.reason());
+            buzz::autoapp::debug::RecordVideoFocusRequest(
+                request.disp_channel_id(),
+                VideoFocusMode_Name(request.mode()),
+                VideoFocusReason_Name(request.reason()));
 
             if (request.mode() ==
                 aap_protobuf::service::media::video::message::VideoFocusMode::VIDEO_FOCUS_NATIVE) {
@@ -198,6 +203,9 @@ namespace f1x {
             promise->then([]() { }, std::bind(&VideoMediaSinkService::onChannelError, this->shared_from_this(),
                                              std::placeholders::_1));
             channel_->sendVideoFocusIndication(videoFocusIndication, std::move(promise));
+            buzz::autoapp::debug::RecordVideoFocusResponse(
+                VideoFocusMode_Name(videoFocusIndication.focus()),
+                videoFocusIndication.unsolicited());
           }
         }
       }

@@ -76,7 +76,6 @@ namespace f1x::openauto::autoapp::service::sensor {
   void SensorService::onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) {
     OPENAUTO_LOG(info) << "[SensorService] onChannelOpenRequest()";
     SENSOR_LOG_DEBUG("Channel Id: " << request.service_id() << ", Priority: " << request.priority());
-
     aap_protobuf::service::control::message::ChannelOpenResponse response;
     const aap_protobuf::shared::MessageStatus status = aap_protobuf::shared::MessageStatus::STATUS_SUCCESS;
     response.set_status(status);
@@ -93,7 +92,6 @@ namespace f1x::openauto::autoapp::service::sensor {
       const aap_protobuf::service::sensorsource::message::SensorRequest &request) {
     OPENAUTO_LOG(info) << "[SensorService] onSensorStartRequest()";
     SENSOR_LOG_DEBUG("Request Type: " << request.type());
-
     aap_protobuf::service::sensorsource::message::SensorStartResponseMessage response;
     response.set_status(aap_protobuf::shared::MessageStatus::STATUS_SUCCESS);
 
