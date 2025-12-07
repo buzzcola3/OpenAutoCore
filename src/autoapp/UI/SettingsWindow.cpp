@@ -81,9 +81,6 @@ namespace f1x::openauto::autoapp::ui {
     QString time_text_hour = time.toString("hh");
     QString time_text_minute = time.toString("mm");
 
-    QString wifi_ssid = configuration_->getCSValue("WIFI_SSID");
-    QString wifi2_ssid = configuration_->getCSValue("WIFI2_SSID");
-
     QTimer *refresh = new QTimer(this);
     connect(refresh, SIGNAL(timeout()), this, SLOT(updateInfo()));
     refresh->start(5000);
@@ -351,6 +348,85 @@ namespace f1x::openauto::autoapp::ui {
     ui_->tab2->hide();
     ui_->tab3->hide();
     ui_->tab4->show();
+  }
+
+  void SettingsWindow::updateNetworkInfo() {
+    QStringList interfaceSummaries;
+    const auto interfaces = QNetworkInterface::allInterfaces();
+    for (const auto &iface : interfaces) {
+      const auto flags = iface.flags();
+      if (!(flags & QNetworkInterface::IsUp) || !(flags & QNetworkInterface::IsRunning) ||
+          (flags & QNetworkInterface::IsLoopBack)) {
+        continue;
+      }
+
+      QString address;
+      const auto entries = iface.addressEntries();
+      for (const auto &entry : entries) {
+        if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
+          address = entry.ip().toString();
+          break;
+        }
+      }
+
+      if (address.isEmpty() && !entries.isEmpty()) {
+        address = entries.front().ip().toString();
+      }
+
+      interfaceSummaries << QStringLiteral("%1: %2")
+                            .arg(iface.humanReadableName(), address.isEmpty() ? tr("no address") : address);
+    }
+
+    if (interfaceSummaries.isEmpty()) {
+      interfaceSummaries << tr("No active network interfaces detected.");
+    }
+
+    const auto summaryText = interfaceSummaries.join('\n');
+    ui_->tab3->setToolTip(summaryText);
+  }
+
+  void SettingsWindow::on_pushButtonNetwork0_clicked() {
+    const auto ssid = configuration_->getCSValue("WIFI_SSID");
+    const auto password = configuration_->getCSValue("WIFI_PSK");
+
+    QString message;
+    if (ssid.isEmpty()) {
+      message = tr("Primary Wi-Fi profile is not configured.");
+    } else {
+      message = tr("SSID: %1").arg(ssid);
+      if (!password.isEmpty()) {
+        message.append('\n' + tr("Password: %1").arg(password));
+      }
+    }
+
+    QMessageBox::information(this, tr("Primary Wi-Fi"), message);
+  }
+
+  void SettingsWindow::on_pushButtonNetwork1_clicked() {
+    const auto ssid = configuration_->getCSValue("WIFI2_SSID");
+    const auto password = configuration_->getCSValue("WIFI2_PSK");
+
+    QString message;
+    if (ssid.isEmpty()) {
+      message = tr("Secondary Wi-Fi profile is not configured.");
+    } else {
+      message = tr("SSID: %1").arg(ssid);
+      if (!password.isEmpty()) {
+        message.append('\n' + tr("Password: %1").arg(password));
+      }
+    }
+
+    QMessageBox::information(this, tr("Secondary Wi-Fi"), message);
+  }
+
+  void SettingsWindow::updateInfo() {
+    this->updateNetworkInfo();
+    this->updateSystemInfo();
+  }
+
+  void SettingsWindow::show_tab5() {
+    // Placeholder tab handler: default to the "Input" configuration tab.
+    this->show_tab4();
   }
 
 

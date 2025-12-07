@@ -16,6 +16,7 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <algorithm>
 #include <QApplication>
 #include <f1x/openauto/autoapp/UI/MainWindow.hpp>
 #include <QFileInfo>
@@ -32,11 +33,61 @@
 #include <QVideoWidget>
 #include <QNetworkInterface>
 #include <QStandardItemModel>
+#include <QAbstractSocket>
+#include <QIODevice>
+#include <QStringList>
+#include <QByteArray>
 #include <iostream>
 #include <fstream>
 #include <cstdio>
 #include <unistd.h>
 #include <f1x/openauto/Common/Log.hpp>
+
+namespace {
+QStringList collectNetworkSummaries() {
+    QStringList summaries;
+    const auto interfaces = QNetworkInterface::allInterfaces();
+    for (const auto &iface : interfaces) {
+        const auto flags = iface.flags();
+        if (!(flags & QNetworkInterface::IsUp) || !(flags & QNetworkInterface::IsRunning) ||
+            (flags & QNetworkInterface::IsLoopBack)) {
+            continue;
+        }
+
+        QString address;
+        const auto entries = iface.addressEntries();
+        for (const auto &entry : entries) {
+            if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
+                address = entry.ip().toString();
+                break;
+            }
+        }
+
+        if (address.isEmpty() && !entries.isEmpty()) {
+            address = entries.front().ip().toString();
+        }
+
+        summaries << QStringLiteral("%1: %2")
+                         .arg(iface.humanReadableName(), address.isEmpty() ? QStringLiteral("(no address)") : address);
+    }
+
+    return summaries;
+}
+
+bool writeValueToFile(const QString &path, const QByteArray &value) {
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        return false;
+    }
+
+    if (!value.isEmpty()) {
+        file.write(value);
+    }
+
+    file.close();
+    return true;
+}
+}
 
 namespace f1x
 {
@@ -237,4 +288,90 @@ void f1x::openauto::autoapp::ui::MainWindow::tmpChanged()
 
     this->hotspotActive = check_file_exist("/tmp/hotspot_active");
 
+}
+
+void f1x::openauto::autoapp::ui::MainWindow::updateNetworkInfo()
+{
+    const auto summaries = collectNetworkSummaries();
+    const QString tooltip = summaries.isEmpty()
+        ? tr("No active network interfaces detected.")
+        : summaries.join(QLatin1Char('\n'));
+
+    ui_->pushButtonSettings->setToolTip(tooltip);
+    ui_->pushButtonExit->setToolTip(tooltip);
+}
+
+void f1x::openauto::autoapp::ui::MainWindow::setMute()
+{
+    if (toggleMute) {
+        return;
+    }
+
+    toggleMute = true;
+    if (!writeValueToFile(QStringLiteral("/tmp/openauto_muted"), QByteArray("1\n"))) {
+        OPENAUTO_LOG(warning) << "[MainWindow] Unable to persist mute flag.";
+    }
+}
+
+void f1x::openauto::autoapp::ui::MainWindow::setUnMute()
+{
+    if (!toggleMute) {
+        return;
+    }
+
+    toggleMute = false;
+    QFile::remove(QStringLiteral("/tmp/openauto_muted"));
+}
+
+void f1x::openauto::autoapp::ui::MainWindow::setPairable()
+{
+    if (localDevice == nullptr) {
+        return;
+    }
+
+    localDevice->setHostMode(QBluetoothLocalDevice::HostDiscoverable);
+    QTimer::singleShot(60000, this, [this]() {
+        if (localDevice != nullptr) {
+            localDevice->setHostMode(QBluetoothLocalDevice::HostConnectable);
+        }
+    });
+}
+
+void f1x::openauto::autoapp::ui::MainWindow::createDebuglog()
+{
+    const QString filePath = QStringLiteral("/tmp/openauto-debug-%1.log")
+                                 .arg(QDateTime::currentDateTimeUtc().toString("yyyyMMdd-HHmmss"));
+    QFile logFile(filePath);
+    if (!logFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::warning(this, tr("Debug log"), tr("Unable to create %1").arg(filePath));
+        return;
+    }
+
+    QTextStream stream(&logFile);
+    stream << "OpenAuto Debug Snapshot" << '\n';
+    stream << "Timestamp: " << QDateTime::currentDateTime().toString(Qt::ISODate) << '\n';
+    stream << "Night mode: " << (nightModeEnabled ? "yes" : "no") << '\n';
+    stream << "Hotspot active: " << (hotspotActive ? "yes" : "no") << '\n';
+
+    const auto summaries = collectNetworkSummaries();
+    stream << "Network interfaces:" << '\n';
+    for (const auto &line : summaries) {
+        stream << "  - " << line << '\n';
+    }
+
+    logFile.close();
+    QMessageBox::information(this, tr("Debug log"), tr("Saved snapshot to %1").arg(filePath));
+}
+
+void f1x::openauto::autoapp::ui::MainWindow::on_horizontalSliderBrightness_valueChanged(int value)
+{
+    const int clamped = std::max(0, std::min(255, value));
+    const QByteArray payload = QByteArray::number(clamped) + '\n';
+
+    if (!writeValueToFile(brightnessFilename, payload) && !writeValueToFile(brightnessFilenameAlt, payload)) {
+        OPENAUTO_LOG(warning) << "[MainWindow] Unable to update brightness value.";
+        return;
+    }
+
+    std::snprintf(brightness_str, sizeof(brightness_str), "%d", clamped);
 }

@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Launch autoapp outside of the snap-provided runtime to avoid GLIBC mismatches.
+set -euo pipefail
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TARGET="${PROJECT_ROOT}/bin/autoapp"
+
+if [[ ! -x "${TARGET}" ]]; then
+  echo "error: ${TARGET} is missing or not executable. Build the project first." >&2
+  exit 1
+fi
+
+SYSTEM_LIBS="/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu"
+SDK_LIBS="${PROJECT_ROOT}/OpenAutoSDK/lib"
+LD_PATH_VALUE="${SDK_LIBS}:${SYSTEM_LIBS}"
+DEFAULT_PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+ESSENTIAL_VARS=(
+  HOME USER LOGNAME SHELL DISPLAY WAYLAND_DISPLAY XAUTHORITY
+  DBUS_SESSION_BUS_ADDRESS PULSE_SERVER XDG_RUNTIME_DIR
+  LANG LC_ALL LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
+  QT_IM_MODULE QT_QPA_PLATFORM QT_QPA_PLATFORMTHEME XMODIFIERS
+)
+
+ENV_ARGS=()
+for var in "${ESSENTIAL_VARS[@]}"; do
+  if [[ -n "${!var-}" ]]; then
+    ENV_ARGS+=("${var}=${!var}")
+  fi
+done
+
+exec env -i \
+  "LD_LIBRARY_PATH=${LD_PATH_VALUE}" \
+  "PATH=${DEFAULT_PATH}" \
+  "PWD=${PROJECT_ROOT}" \
+  "TERM=${TERM:-xterm-256color}" \
+  "${ENV_ARGS[@]}" \
+  "${TARGET}" "$@"
