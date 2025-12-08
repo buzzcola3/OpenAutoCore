@@ -2,7 +2,6 @@
 lib/
 bin/
 build/
-.vscode/
 openauto.ini
 CMakeLists.txt.user
 /cmake-build-*/
