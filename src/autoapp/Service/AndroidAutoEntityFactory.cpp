@@ -24,6 +24,8 @@
 #include <Messenger/MessageInStream.hpp>
 #include <Messenger/MessageOutStream.hpp>
 #include <Messenger/Messenger.hpp>
+#include <Messenger/MessageSender.hpp>
+#include <Messenger/MessageInStreamInterceptor.hpp>
 #include <f1x/openauto/autoapp/Service/AndroidAutoEntityFactory.hpp>
 #include <f1x/openauto/autoapp/Service/AndroidAutoEntity.hpp>
 #include <f1x/openauto/autoapp/Service/Pinger.hpp>
@@ -60,6 +62,9 @@ namespace f1x {
                                                                            ioService_, transport, cryptor),
                                                                        std::make_shared<aasdk::messenger::MessageOutStream>(
                                                                            ioService_, transport, cryptor)));
+
+            auto messageSender = std::make_shared<aasdk::messenger::MessageSender>(messenger, ioService_);
+            aasdk::messenger::interceptor::setMessageSender(std::move(messageSender));
 
           auto serviceList = serviceFactory_.create(messenger);
           auto pinger(std::make_shared<Pinger>(ioService_, 5000));

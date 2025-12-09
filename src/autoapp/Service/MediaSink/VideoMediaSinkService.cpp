@@ -127,25 +127,7 @@ namespace f1x {
           }
 
           void VideoMediaSinkService::onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) {
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] onChannelOpenRequest()";
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] Channel Id: " << request.service_id() << ", Priority: "
-                               << request.priority();
-
-            const aap_protobuf::shared::MessageStatus status = videoOutput_->open()
-                                                               ? aap_protobuf::shared::MessageStatus::STATUS_SUCCESS
-                                                               : aap_protobuf::shared::MessageStatus::STATUS_INTERNAL_ERROR;
-
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] Status determined: "
-                               << aap_protobuf::shared::MessageStatus_Name(status);
-
-            aap_protobuf::service::control::message::ChannelOpenResponse response;
-            response.set_status(status);
-
-            auto promise = aasdk::channel::SendPromise::defer(strand_);
-            promise->then([]() {}, std::bind(&VideoMediaSinkService::onChannelError, this->shared_from_this(),
-                                             std::placeholders::_1));
-            channel_->sendChannelOpenResponse(response, std::move(promise));
-            channel_->receive(this->shared_from_this());
+            OPENAUTO_LOG(info) << "[VideoMediaSinkService] DELETE ME";
           }
 
           void VideoMediaSinkService::onMediaChannelStartIndication(
