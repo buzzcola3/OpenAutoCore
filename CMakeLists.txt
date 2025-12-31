@@ -157,8 +157,5 @@ target_link_libraries(btservice PUBLIC
 set_target_properties(autoapp
         PROPERTIES VERSION ${PROGRAM_VERSION_STRING} SOVERSION ${OPENAUTO_BUILD_INCREMENTAL})
 
-# Install rules
-#install(TARGETS autoapp btservice
-#        EXPORT aasdkTargets
-#        RUNTIME DESTINATION bin
-#)
+install(TARGETS autoapp
+        RUNTIME DESTINATION bin)

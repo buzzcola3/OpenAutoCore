@@ -127,7 +127,25 @@ namespace f1x {
           }
 
           void VideoMediaSinkService::onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) {
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] DELETE ME";
+            OPENAUTO_LOG(info) << "[VideoMediaSinkService] onChannelOpenRequest()";
+            OPENAUTO_LOG(info) << "[VideoMediaSinkService] Channel Id: " << request.service_id() << ", Priority: "
+                               << request.priority();
+
+            const aap_protobuf::shared::MessageStatus status = videoOutput_->open()
+                                                               ? aap_protobuf::shared::MessageStatus::STATUS_SUCCESS
+                                                               : aap_protobuf::shared::MessageStatus::STATUS_INTERNAL_ERROR;
+
+            OPENAUTO_LOG(info) << "[VideoMediaSinkService] Status determined: "
+                               << aap_protobuf::shared::MessageStatus_Name(status);
+
+            aap_protobuf::service::control::message::ChannelOpenResponse response;
+            response.set_status(status);
+
+            auto promise = aasdk::channel::SendPromise::defer(strand_);
+            promise->then([]() {}, std::bind(&VideoMediaSinkService::onChannelError, this->shared_from_this(),
+                                             std::placeholders::_1));
+            channel_->sendChannelOpenResponse(response, std::move(promise));
+            channel_->receive(this->shared_from_this());
           }
 
           void VideoMediaSinkService::onMediaChannelStartIndication(
@@ -152,25 +170,11 @@ namespace f1x {
 
           void VideoMediaSinkService::onMediaWithTimestampIndication(aasdk::messenger::Timestamp::ValueType timestamp,
                                                                      const aasdk::common::DataConstBuffer &buffer) {
-            OPENAUTO_LOG(debug) << "[VideoMediaSinkService] onMediaWithTimestampIndication()";
-            OPENAUTO_LOG(debug) << "[VideoMediaSinkService] Channel Id: "
-                               << aasdk::messenger::channelIdToString(channel_->getId()) << ", session: " << session_;
-
             videoOutput_->write(timestamp, buffer);
-
-            aap_protobuf::service::media::source::message::Ack indication;
-            indication.set_session_id(session_);
-            indication.set_ack(1);
-
-            auto promise = aasdk::channel::SendPromise::defer(strand_);
-            promise->then([]() {}, std::bind(&VideoMediaSinkService::onChannelError, this->shared_from_this(),
-                                             std::placeholders::_1));
-            channel_->sendMediaAckIndication(indication, std::move(promise));
             channel_->receive(this->shared_from_this());
           }
 
           void VideoMediaSinkService::onMediaIndication(const aasdk::common::DataConstBuffer &buffer) {
-            OPENAUTO_LOG(debug) << "[VideoMediaSinkService] onMediaIndication()";
             this->onMediaWithTimestampIndication(0, buffer);
           }
 

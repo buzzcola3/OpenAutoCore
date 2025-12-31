@@ -1,12 +1,26 @@
 #!/usr/bin/env bash
-# Wrapper to run gdb with the same clean environment that runnec uses.
+# Wrapper to run gdb with the same clean environment that runnec uses against the Bazel-built binary.
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TARGET="${PROJECT_ROOT}/bazel-bin/autoapp_bazel"
+
+if [[ -n "${RUNNEC_TARGET:-}" ]]; then
+  TARGET="${RUNNEC_TARGET}"
+fi
+
+if [[ ! -x "${TARGET}" ]]; then
+  echo "error: ${TARGET} is missing or not executable. Build the project first." >&2
+  exit 1
+fi
+
 SYSTEM_LIBS="/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu"
-SDK_LIBS="${PROJECT_ROOT}/OpenAutoSDK/lib"
-LD_PATH_VALUE="${SDK_LIBS}:${SYSTEM_LIBS}"
+BAZEL_LIBS="${PROJECT_ROOT}/bazel-bin/OpenAutoSDK:${PROJECT_ROOT}/bazel-bin"
+LD_PATH_VALUE="${BAZEL_LIBS}:${SYSTEM_LIBS}"
 DEFAULT_PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+RUNFILES_DIR="${TARGET}.runfiles"
+RUNFILES_MANIFEST="${TARGET}.runfiles_manifest"
 
 ESSENTIAL_VARS=(
   HOME USER LOGNAME SHELL DISPLAY WAYLAND_DISPLAY XAUTHORITY
@@ -27,6 +41,8 @@ exec env -i \
   "PATH=${DEFAULT_PATH}" \
   "PWD=${PROJECT_ROOT}" \
   "TERM=${TERM:-xterm-256color}" \
+  "RUNFILES_DIR=${RUNFILES_DIR}" \
+  "RUNFILES_MANIFEST_FILE=${RUNFILES_MANIFEST}" \
   "QT_QPA_PLATFORM=${QT_QPA_PLATFORM:-xcb}" \
   "QT_IM_MODULE=${QT_IM_MODULE:-}" \
   "QT_QPA_PLATFORMTHEME=${QT_QPA_PLATFORMTHEME:-}" \
@@ -41,4 +57,4 @@ exec env -i \
   "USER=${USER:-}" \
   "LOGNAME=${LOGNAME:-}" \
   "SHELL=${SHELL:-/bin/bash}" \
-  "/usr/bin/gdb" "$@"
+  "/usr/bin/gdb" --args "${TARGET}" "$@"

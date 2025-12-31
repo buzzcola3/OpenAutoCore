@@ -2,6 +2,9 @@
 lib/
 bin/
 build/
+/bazel-bin/
+/bazel-out/
+/bazel-*/
 openauto.ini
 CMakeLists.txt.user
 /cmake-build-*/

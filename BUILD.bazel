@@ -1,0 +1,197 @@
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
+
+filegroup(
+    name = "cmake_srcs",
+    srcs = glob([
+        "**",
+    ], exclude = [
+        "bazel-*/**",
+        "build/**",
+        "bin/**",
+        "lib/**",
+        "OpenAutoSDK/lib/**",
+    ]),
+)
+
+cmake(
+    name = "autoapp_cmake",
+    lib_source = ":cmake_srcs",
+    cache_entries = {
+        "CMAKE_BUILD_TYPE": "Release",
+    },
+    build_args = ["-j"],
+    targets = ["autoapp", "aasdk", "aap_protobuf"],
+    install = True,
+    out_binaries = ["autoapp"],
+    out_shared_libs = ["libaasdk.so", "libaap_protobuf.so"],
+)
+
+filegroup(
+    name = "autoapp",
+    srcs = ["bin/autoapp"],
+    visibility = ["//visibility:public"],
+)
+
+genrule(
+    name = "uic_mainwindow",
+    srcs = ["src/autoapp/UI/mainwindow.ui"],
+    outs = ["ui_mainwindow.h"],
+    cmd = "uic $(location src/autoapp/UI/mainwindow.ui) -o $@",
+)
+
+genrule(
+    name = "uic_settingswindow",
+    srcs = ["src/autoapp/UI/settingswindow.ui"],
+    outs = ["ui_settingswindow.h"],
+    cmd = "uic $(location src/autoapp/UI/settingswindow.ui) -o $@",
+)
+
+genrule(
+    name = "rcc_resources",
+    srcs = ["assets/resources.qrc"] + glob(["assets/*"], exclude = ["assets/resources.qrc"]),
+    outs = ["qrc_resources.cpp"],
+    cmd = "rcc $(location assets/resources.qrc) -o $@",
+)
+
+genrule(
+    name = "moc_input_device",
+    srcs = ["include/f1x/openauto/autoapp/Projection/InputDevice.hpp"],
+    outs = ["moc_InputDevice.cpp"],
+    cmd = "moc $(location include/f1x/openauto/autoapp/Projection/InputDevice.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp -Iinclude/f1x/openauto/Common",
+)
+
+genrule(
+    name = "moc_local_bluetooth_device",
+    srcs = ["include/f1x/openauto/autoapp/Projection/LocalBluetoothDevice.hpp"],
+    outs = ["moc_LocalBluetoothDevice.cpp"],
+    cmd = "moc $(location include/f1x/openauto/autoapp/Projection/LocalBluetoothDevice.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp -Iinclude/f1x/openauto/Common",
+)
+
+genrule(
+    name = "moc_qt_audio_input",
+    srcs = ["include/f1x/openauto/autoapp/Projection/QtAudioInput.hpp"],
+    outs = ["moc_QtAudioInput.cpp"],
+    cmd = "moc $(location include/f1x/openauto/autoapp/Projection/QtAudioInput.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp -Iinclude/f1x/openauto/Common",
+)
+
+genrule(
+    name = "moc_qt_audio_output",
+    srcs = ["include/f1x/openauto/autoapp/Projection/QtAudioOutput.hpp"],
+    outs = ["moc_QtAudioOutput.cpp"],
+    cmd = "moc $(location include/f1x/openauto/autoapp/Projection/QtAudioOutput.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp -Iinclude/f1x/openauto/Common",
+)
+
+genrule(
+    name = "moc_qt_video_output",
+    srcs = ["include/f1x/openauto/autoapp/Projection/QtVideoOutput.hpp"],
+    outs = ["moc_QtVideoOutput.cpp"],
+    cmd = "moc $(location include/f1x/openauto/autoapp/Projection/QtVideoOutput.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp -Iinclude/f1x/openauto/Common",
+)
+
+genrule(
+    name = "moc_main_window",
+    srcs = ["include/f1x/openauto/autoapp/UI/MainWindow.hpp"],
+    outs = ["moc_MainWindow.cpp"],
+    cmd = "moc $(location include/f1x/openauto/autoapp/UI/MainWindow.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp -Iinclude/f1x/openauto/Common",
+)
+
+genrule(
+    name = "moc_settings_window",
+    srcs = ["include/f1x/openauto/autoapp/UI/SettingsWindow.hpp"],
+    outs = ["moc_SettingsWindow.cpp"],
+    cmd = "moc $(location include/f1x/openauto/autoapp/UI/SettingsWindow.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp -Iinclude/f1x/openauto/Common",
+)
+
+cc_binary(
+    name = "autoapp_bazel",
+    srcs = glob([
+        "src/autoapp/**/*.cpp",
+    ], exclude = [
+        "bazel-*/**",
+    ]) + glob([
+        "include/f1x/openauto/autoapp/**/*.hpp",
+        "include/f1x/openauto/Common/**/*.hpp",
+    ], exclude = [
+        "bazel-*/**",
+    ]) + [
+        ":rcc_resources",
+        ":moc_input_device",
+        ":moc_local_bluetooth_device",
+        ":moc_qt_audio_input",
+        ":moc_qt_audio_output",
+        ":moc_qt_video_output",
+        ":moc_main_window",
+        ":moc_settings_window",
+        ":uic_mainwindow",
+        ":uic_settingswindow",
+    ],
+    includes = [
+        "include",
+        "include/f1x/openauto",
+        "include/f1x/openauto/Common",
+        "include/f1x/openauto/autoapp",
+    ],
+    copts = [
+        "-Wall",
+        "-pedantic",
+        "-fPIC",
+        "-DBOOST_ALL_DYN_LINK",
+        "-DQT_WIDGETS_LIB",
+        "-DQT_GUI_LIB",
+        "-DQT_CORE_LIB",
+        "-DQT_NETWORK_LIB",
+        "-DQT_BLUETOOTH_LIB",
+        "-DQT_DBUS_LIB",
+        "-DQT_MULTIMEDIA_LIB",
+        "-DQT_MULTIMEDIAWIDGETS_LIB",
+        "-isystem/usr/include/libusb-1.0",
+        "-isystem/usr/include/x86_64-linux-gnu/qt5",
+        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtCore",
+        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtGui",
+        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
+        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtNetwork",
+        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtBluetooth",
+        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtDBus",
+        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtMultimedia",
+        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtMultimediaWidgets",
+        "-isystem/usr/include/gstreamer-1.0",
+        "-isystem/usr/include/glib-2.0",
+        "-isystem/usr/include/x86_64-linux-gnu",
+        "-isystem/usr/include/taglib",
+        "-isystem/usr/include/blkid",
+    ],
+    linkopts = [
+        "-lusb-1.0",
+        "-lssl",
+        "-lcrypto",
+        "-lboost_system",
+        "-lboost_log",
+        "-lboost_log_setup",
+        "-lboost_thread",
+        "-lboost_filesystem",
+        "-lQt5MultimediaWidgets",
+        "-lQt5Multimedia",
+        "-lQt5Widgets",
+        "-lQt5Gui",
+        "-lQt5Bluetooth",
+        "-lQt5Network",
+        "-lQt5DBus",
+        "-lQt5Core",
+        "-lgstapp-1.0",
+        "-lgstbase-1.0",
+        "-lgstreamer-1.0",
+        "-lgobject-2.0",
+        "-lglib-2.0",
+        "-ltag",
+        "-lz",
+        "-lblkid",
+        "-lgps",
+        "-pthread",
+    ],
+    deps = [
+        "//OpenAutoSDK:aap_protobuf_cc",
+        "//OpenAutoSDK:aasdk",
+        "//third_party/glib:glibconfig",
+    ],
+    visibility = ["//visibility:public"],
+)

@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
-# Launch autoapp outside of the snap-provided runtime to avoid GLIBC mismatches.
+# Launch Bazel-built autoapp outside of the snap-provided runtime to avoid GLIBC mismatches.
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TARGET="${PROJECT_ROOT}/bin/autoapp"
+TARGET="${PROJECT_ROOT}/bazel-bin/autoapp_bazel"
+
+if [[ -n "${RUNNEC_TARGET:-}" ]]; then
+  TARGET="${RUNNEC_TARGET}"
+fi
 
 if [[ ! -x "${TARGET}" ]]; then
   echo "error: ${TARGET} is missing or not executable. Build the project first." >&2
@@ -11,9 +15,12 @@ if [[ ! -x "${TARGET}" ]]; then
 fi
 
 SYSTEM_LIBS="/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu"
-SDK_LIBS="${PROJECT_ROOT}/OpenAutoSDK/lib"
-LD_PATH_VALUE="${SDK_LIBS}:${SYSTEM_LIBS}"
+BAZEL_LIBS="${PROJECT_ROOT}/bazel-bin/OpenAutoSDK:${PROJECT_ROOT}/bazel-bin"
+LD_PATH_VALUE="${BAZEL_LIBS}:${SYSTEM_LIBS}"
 DEFAULT_PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+RUNFILES_DIR="${TARGET}.runfiles"
+RUNFILES_MANIFEST="${TARGET}.runfiles_manifest"
 
 ESSENTIAL_VARS=(
   HOME USER LOGNAME SHELL DISPLAY WAYLAND_DISPLAY XAUTHORITY
@@ -34,5 +41,7 @@ exec env -i \
   "PATH=${DEFAULT_PATH}" \
   "PWD=${PROJECT_ROOT}" \
   "TERM=${TERM:-xterm-256color}" \
+  "RUNFILES_DIR=${RUNFILES_DIR}" \
+  "RUNFILES_MANIFEST_FILE=${RUNFILES_MANIFEST}" \
   "${ENV_ARGS[@]}" \
   "${TARGET}" "$@"

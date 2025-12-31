@@ -57,13 +57,13 @@ namespace f1x {
           auto cryptor(std::make_shared<aasdk::messenger::Cryptor>(std::move(sslWrapper)));
           cryptor->init();
 
-          auto messenger(std::make_shared<aasdk::messenger::Messenger>(ioService_,
-                                                                       std::make_shared<aasdk::messenger::MessageInStream>(
-                                                                           ioService_, transport, cryptor),
-                                                                       std::make_shared<aasdk::messenger::MessageOutStream>(
-                                                                           ioService_, transport, cryptor)));
+              auto messageOutStream = std::make_shared<aasdk::messenger::MessageOutStream>(ioService_, transport, cryptor);
+              auto messenger(std::make_shared<aasdk::messenger::Messenger>(ioService_,
+                                             std::make_shared<aasdk::messenger::MessageInStream>(
+                                               ioService_, transport, cryptor),
+                                             messageOutStream));
 
-            auto messageSender = std::make_shared<aasdk::messenger::MessageSender>(messenger, ioService_);
+              auto messageSender = std::make_shared<aasdk::messenger::MessageSender>(ioService_, transport, cryptor);
             aasdk::messenger::interceptor::setMessageSender(std::move(messageSender));
 
           auto serviceList = serviceFactory_.create(messenger);
