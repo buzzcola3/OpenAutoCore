@@ -1,0 +1,46 @@
+package(default_visibility = ["//visibility:public"])
+
+proto_library(
+    name = "aap_protobuf_proto",
+    srcs = glob(["protobuf/aap_protobuf/**/*.proto"]),
+    strip_import_prefix = "protobuf",
+)
+
+cc_proto_library(
+    name = "aap_protobuf_cc",
+    deps = [":aap_protobuf_proto"],
+)
+
+cc_library(
+    name = "aasdk",
+    srcs = glob([
+        "src/**/*.cpp",
+    ], exclude = [
+        "src/**/*.ut.cpp",
+    ]),
+    hdrs = glob([
+        "include/aasdk/**/*.hpp",
+    ]),
+    deps = [":aap_protobuf_cc"],
+    includes = [
+        "include/aasdk",
+    ],
+    defines = [
+        "BOOST_ALL_DYN_LINK",
+    ],
+    copts = [
+        "-Wall",
+        "-pedantic",
+        "-fPIC",
+        "-isystem/usr/include/libusb-1.0",
+    ],
+    linkopts = [
+        "-lusb-1.0",
+        "-lssl",
+        "-lcrypto",
+        "-lboost_system",
+        "-lboost_log",
+        "-lboost_log_setup",
+        "-pthread",
+    ],
+)
