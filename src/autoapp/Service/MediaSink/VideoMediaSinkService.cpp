@@ -105,15 +105,8 @@ namespace f1x {
                                << aasdk::messenger::channelIdToString(channel_->getId()) << ", Codec: "
                                << MediaCodecType_Name(request.type());
 
-
-            auto status = videoOutput_->init()
-                          ? aap_protobuf::service::media::shared::message::Config::STATUS_READY
-                          : aap_protobuf::service::media::shared::message::Config::STATUS_WAIT;
-
-            OPENAUTO_LOG(debug) << "[VideoMediaSinkService] setup status: " << Config_Status_Name(status);
-
             aap_protobuf::service::media::shared::message::Config response;
-            response.set_status(status);
+            response.set_status(aap_protobuf::service::media::shared::message::Config::STATUS_READY);
             response.set_max_unacked(1);
             response.add_configuration_indices(0);
 
@@ -127,25 +120,6 @@ namespace f1x {
           }
 
           void VideoMediaSinkService::onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) {
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] onChannelOpenRequest()";
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] Channel Id: " << request.service_id() << ", Priority: "
-                               << request.priority();
-
-            const aap_protobuf::shared::MessageStatus status = videoOutput_->open()
-                                                               ? aap_protobuf::shared::MessageStatus::STATUS_SUCCESS
-                                                               : aap_protobuf::shared::MessageStatus::STATUS_INTERNAL_ERROR;
-
-            OPENAUTO_LOG(info) << "[VideoMediaSinkService] Status determined: "
-                               << aap_protobuf::shared::MessageStatus_Name(status);
-
-            aap_protobuf::service::control::message::ChannelOpenResponse response;
-            response.set_status(status);
-
-            auto promise = aasdk::channel::SendPromise::defer(strand_);
-            promise->then([]() {}, std::bind(&VideoMediaSinkService::onChannelError, this->shared_from_this(),
-                                             std::placeholders::_1));
-            channel_->sendChannelOpenResponse(response, std::move(promise));
-            channel_->receive(this->shared_from_this());
           }
 
           void VideoMediaSinkService::onMediaChannelStartIndication(
@@ -170,12 +144,9 @@ namespace f1x {
 
           void VideoMediaSinkService::onMediaWithTimestampIndication(aasdk::messenger::Timestamp::ValueType timestamp,
                                                                      const aasdk::common::DataConstBuffer &buffer) {
-            videoOutput_->write(timestamp, buffer);
-            channel_->receive(this->shared_from_this());
           }
 
           void VideoMediaSinkService::onMediaIndication(const aasdk::common::DataConstBuffer &buffer) {
-            this->onMediaWithTimestampIndication(0, buffer);
           }
 
           void VideoMediaSinkService::onChannelError(const aasdk::error::Error &e) {

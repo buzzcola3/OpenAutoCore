@@ -38,7 +38,7 @@ namespace aasdk {
 
     void TCPWrapper::asyncConnect(boost::asio::ip::tcp::socket &socket, const std::string &hostname, uint16_t port,
                                   ConnectHandler handler) {
-      socket.async_connect(boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(hostname), port),
+      socket.async_connect(boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address(hostname), port),
                            std::move(handler));
     }
 
@@ -46,7 +46,7 @@ namespace aasdk {
     TCPWrapper::connect(boost::asio::ip::tcp::socket &socket, const std::string &hostname, uint16_t port) {
       boost::system::error_code ec;
       socket.set_option(boost::asio::ip::tcp::no_delay(true), ec);
-      socket.connect(boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(hostname), port), ec);
+      socket.connect(boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address(hostname), port), ec);
       return ec;
     }
 

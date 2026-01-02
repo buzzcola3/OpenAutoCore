@@ -57,4 +57,4 @@ exec env -i \
   "USER=${USER:-}" \
   "LOGNAME=${LOGNAME:-}" \
   "SHELL=${SHELL:-/bin/bash}" \
-  "/usr/bin/gdb" --args "${TARGET}" "$@"
+  "/usr/bin/gdb" "$@" --args "${TARGET}"

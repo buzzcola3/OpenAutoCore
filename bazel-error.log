@@ -1,0 +1,2609 @@
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //:autoapp_bazel (1 packages loaded, 0 targets configured)
+Analyzing: target //:autoapp_bazel (1 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //:autoapp_bazel (1 packages loaded, 152 targets configured).
+DEBUG: Sandbox debug output for CppCompile //:autoapp_bazel:
+1767297187.154844300: src/main/tools/linux-sandbox.cc:165: calling pipe(2)...
+1767297187.154887183: src/main/tools/linux-sandbox.cc:177: Netns is 0
+1767297187.154891443: src/main/tools/linux-sandbox.cc:188: calling clone(2)...
+1767297187.155678902: src/main/tools/linux-sandbox.cc:204: linux-sandbox-pid1 has PID 3931268
+1767297187.155830457: src/main/tools/linux-sandbox-pid1.cc:705: Pid1Main started
+1767297187.156212838: src/main/tools/linux-sandbox.cc:212: done manipulating pipes
+1767297187.156432907: src/main/tools/linux-sandbox-pid1.cc:290: bind mount: /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1311/_hermetic_tmp -> /tmp
+1767297187.156467339: src/main/tools/linux-sandbox-pid1.cc:308: writable: /dev/shm
+1767297187.156497859: src/main/tools/linux-sandbox-pid1.cc:308: writable: /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1311/execroot/_main
+1767297187.156520628: src/main/tools/linux-sandbox-pid1.cc:308: writable: /tmp
+1767297187.156533199: src/main/tools/linux-sandbox-pid1.cc:325: working dir: /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1311/execroot/_main
+1767297187.156649485: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /
+1767297187.156660031: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /dev
+1767297187.156669110: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /dev/pts
+1767297187.156677631: src/main/tools/linux-sandbox-pid1.cc:400: remount rw: /dev/shm
+1767297187.156686221: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /dev/mqueue
+1767297187.156694881: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /dev/hugepages
+1767297187.156703891: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run
+1767297187.156711923: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/lock
+1767297187.156720094: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/rpc_pipefs
+1767297187.156727846: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/snapd/ns
+1767297187.156737275: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/docker/netns/40a5ac58897b
+1767297187.156744888: src/main/tools/linux-sandbox-pid1.cc:423: remount(nullptr, /run/docker/netns/40a5ac58897b, nullptr, 4129, nullptr) failure (Permission denied) ignored
+1767297187.156755992: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/docker/netns/20b77a569820
+1767297187.156762138: src/main/tools/linux-sandbox-pid1.cc:423: remount(nullptr, /run/docker/netns/20b77a569820, nullptr, 4129, nullptr) failure (Permission denied) ignored
+1767297187.156767307: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/user/1000
+1767297187.156777294: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/user/1000/doc
+1767297187.156825624: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/user/1000/gvfs
+1767297187.156834494: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys
+1767297187.156842665: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/kernel/security
+1767297187.156854748: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/fs/cgroup
+1767297187.156865922: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/fs/pstore
+1767297187.156874932: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/firmware/efi/efivars
+1767297187.156888341: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/fs/bpf
+1767297187.156899586: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/kernel/debug
+1767297187.156909992: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/kernel/tracing
+1767297187.156920119: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/fs/fuse/connections
+1767297187.156932411: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/kernel/config
+1767297187.156942887: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /proc
+1767297187.156950151: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /proc/sys/fs/binfmt_misc
+1767297187.156963002: src/main/tools/linux-sandbox-pid1.cc:423: remount(nullptr, /proc/sys/fs/binfmt_misc, nullptr, 2101281, nullptr) failure (Operation not permitted) ignored
+1767297187.157296423: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /proc/sys/fs/binfmt_misc
+1767297187.157316398: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/bare/5
+1767297187.157325477: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/code/212
+1767297187.157333229: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/code/215
+1767297187.157340772: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core/17247
+1767297187.157348734: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core/17272
+1767297187.157356487: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core18/2959
+1767297187.157364239: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core18/2976
+1767297187.157371293: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core20/2682
+1767297187.157377858: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core20/2686
+1767297187.157384563: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core22/2163
+1767297187.157414525: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core22/2193
+1767297187.157422137: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core24/1237
+1767297187.157429820: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/firefox/7477
+1767297187.157436525: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/firmware-updater/167
+1767297187.157444067: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/firmware-updater/210
+1767297187.157451680: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/gnome-42-2204/202
+1767297187.157460829: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/gimp/542
+1767297187.157468931: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/gnome-42-2204/226
+1767297187.157476963: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/gnome-46-2404/125
+1767297187.157485064: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/gnome-46-2404/145
+1767297187.157494702: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/gtk-common-themes/1535
+1767297187.157745641: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/kf6-core24/34
+1767297187.157760378: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/mesa-2404/1165
+1767297187.157771273: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/mesa-2404/912
+1767297187.157780003: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/node-red/883
+1767297187.157787616: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/qbittorrent-arnatious/86
+1767297187.157795648: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/snap-store/1270
+1767297187.157803749: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/snap-store/1300
+1767297187.157811013: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/snapd/25202
+1767297187.157819045: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/snapd/25577
+1767297187.157831406: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/snapd-desktop-integration/253
+1767297187.157863813: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/snapd-desktop-integration/315
+1767297187.157871984: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/telegram-desktop/6869
+1767297187.157879248: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/telegram-desktop/6883
+1767297187.157886721: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/thunderbird/877
+1767297187.157894263: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/thunderbird/919
+1767297187.157902016: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /boot/efi
+1767297187.157934213: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /var/lib/docker/overlay2/d0eb7b97ff7c047ee4d34d40fcfdfdcb1a50c107868178bc7fbf06bba089910f/merged
+1767297187.157940987: src/main/tools/linux-sandbox-pid1.cc:423: remount(nullptr, /var/lib/docker/overlay2/d0eb7b97ff7c047ee4d34d40fcfdfdcb1a50c107868178bc7fbf06bba089910f/merged, nullptr, 2101281, nullptr) failure (Permission denied) ignored
+1767297187.157952720: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /var/lib/docker/overlay2/87c2c3c152af352033461024435ae784fb66f91d88db28c185768f7fccabd1e2/merged
+1767297187.157958378: src/main/tools/linux-sandbox-pid1.cc:423: remount(nullptr, /var/lib/docker/overlay2/87c2c3c152af352033461024435ae784fb66f91d88db28c185768f7fccabd1e2/merged, nullptr, 2101281, nullptr) failure (Permission denied) ignored
+1767297187.157963546: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core24/1243
+1767297187.157981774: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/vlc/4273
+1767297187.157993647: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/firefox/7559
+1767297187.158001819: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/vlc/4274
+1767297187.158009501: src/main/tools/linux-sandbox-pid1.cc:400: remount rw: /tmp
+1767297187.158027520: src/main/tools/linux-sandbox-pid1.cc:400: remount rw: /dev/shm
+1767297187.158035203: src/main/tools/linux-sandbox-pid1.cc:400: remount rw: /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1311/execroot/_main
+1767297187.158045190: src/main/tools/linux-sandbox-pid1.cc:400: remount rw: /tmp
+1767297187.158051895: src/main/tools/linux-sandbox-pid1.cc:400: remount rw: /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1311/execroot/_main
+1767297187.159289759: src/main/tools/linux-sandbox-pid1.cc:508: calling fork...
+1767297187.159566540: src/main/tools/linux-sandbox-pid1.cc:545: child started with PID 2
+1767297187.627676784: src/main/tools/linux-sandbox-pid1.cc:562: wait returned pid=2, status=0x00
+1767297187.627695781: src/main/tools/linux-sandbox-pid1.cc:580: child exited normally with code 0
+1767297187.629340959: src/main/tools/linux-sandbox.cc:253: child exited normally with code 0
+
+Run this command to start an interactive shell in an identical sandboxed environment:
+(cd /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1311/execroot/_main && \
+  exec env - \
+    PATH=/home/buzz/.cache/bazelisk/downloads/sha256/18255229d933b8da10151bdef223a302744296b09af8af1988c93faa1ea3c71f/bin:/home/buzz/FlutterSDK/flutter/bin/cache/dart-sdk/bin/:/home/buzz/.config/Code/User/globalStorage/github.copilot-chat/debugCommand:/home/buzz/.config/Code/User/globalStorage/github.copilot-chat/copilotCli:/home/buzz/.local/bin:/home/buzz/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin \
+    PWD=/proc/self/cwd \
+    TMPDIR=/tmp \
+  /home/buzz/.cache/bazel/_bazel_buzz/install/6cdc996ece0b0131935fd3ccb4802557/linux-sandbox -t 15 -w /dev/shm -w /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1311/execroot/_main -w /tmp -M /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1311/_hermetic_tmp -m /tmp -S /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1311/stats.out -D /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1311/debug.out -- /bin/sh -i)
+[16 / 125] Compiling OpenAutoSDK/src/USB/USBWrapper.cpp; 1s linux-sandbox ... (12 actions running)
+DEBUG: Sandbox debug output for CppCompile //:autoapp_bazel:
+1767297187.159878101: src/main/tools/linux-sandbox.cc:165: calling pipe(2)...
+1767297187.159916723: src/main/tools/linux-sandbox.cc:177: Netns is 0
+1767297187.159920565: src/main/tools/linux-sandbox.cc:188: calling clone(2)...
+1767297187.160433408: src/main/tools/linux-sandbox.cc:204: linux-sandbox-pid1 has PID 3931274
+1767297187.160453872: src/main/tools/linux-sandbox-pid1.cc:705: Pid1Main started
+1767297187.160555002: src/main/tools/linux-sandbox.cc:212: done manipulating pipes
+1767297187.161260816: src/main/tools/linux-sandbox-pid1.cc:290: bind mount: /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1316/_hermetic_tmp -> /tmp
+1767297187.161292804: src/main/tools/linux-sandbox-pid1.cc:308: writable: /dev/shm
+1767297187.161306283: src/main/tools/linux-sandbox-pid1.cc:308: writable: /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1316/execroot/_main
+1767297187.161325210: src/main/tools/linux-sandbox-pid1.cc:308: writable: /tmp
+1767297187.161337223: src/main/tools/linux-sandbox-pid1.cc:325: working dir: /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1316/execroot/_main
+1767297187.161421172: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /
+1767297187.161430810: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /dev
+1767297187.161438422: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /dev/pts
+1767297187.161445965: src/main/tools/linux-sandbox-pid1.cc:400: remount rw: /dev/shm
+1767297187.161453578: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /dev/mqueue
+1767297187.161461819: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /dev/hugepages
+1767297187.161468454: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run
+1767297187.161475578: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/lock
+1767297187.161482702: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/rpc_pipefs
+1767297187.161490384: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/snapd/ns
+1767297187.161498486: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/docker/netns/40a5ac58897b
+1767297187.161504632: src/main/tools/linux-sandbox-pid1.cc:423: remount(nullptr, /run/docker/netns/40a5ac58897b, nullptr, 4129, nullptr) failure (Permission denied) ignored
+1767297187.161515108: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/docker/netns/20b77a569820
+1767297187.161520416: src/main/tools/linux-sandbox-pid1.cc:423: remount(nullptr, /run/docker/netns/20b77a569820, nullptr, 4129, nullptr) failure (Permission denied) ignored
+1767297187.161525235: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/user/1000
+1767297187.161532848: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/user/1000/doc
+1767297187.161564346: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /run/user/1000/gvfs
+1767297187.161572727: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys
+1767297187.161580479: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/kernel/security
+1767297187.161590606: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/fs/cgroup
+1767297187.161599476: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/fs/pstore
+1767297187.161608556: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/firmware/efi/efivars
+1767297187.161618263: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/fs/bpf
+1767297187.161627273: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/kernel/debug
+1767297187.161635724: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/kernel/tracing
+1767297187.161645152: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/fs/fuse/connections
+1767297187.161654721: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /sys/kernel/config
+1767297187.161663451: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /proc
+1767297187.161671413: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /proc/sys/fs/binfmt_misc
+1767297187.161680003: src/main/tools/linux-sandbox-pid1.cc:423: remount(nullptr, /proc/sys/fs/binfmt_misc, nullptr, 2101281, nullptr) failure (Operation not permitted) ignored
+1767297187.161711432: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /proc/sys/fs/binfmt_misc
+1767297187.161721558: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/bare/5
+1767297187.161729171: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/code/212
+1767297187.161736714: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/code/215
+1767297187.161743908: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core/17247
+1767297187.161751660: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core/17272
+1767297187.161758714: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core18/2959
+1767297187.161766327: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core18/2976
+1767297187.161773450: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core20/2682
+1767297187.161780225: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core20/2686
+1767297187.161787838: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core22/2163
+1767297187.161815076: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core22/2193
+1767297187.161822619: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core24/1237
+1767297187.161830161: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/firefox/7477
+1767297187.161837844: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/firmware-updater/167
+1767297187.161845596: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/firmware-updater/210
+1767297187.161853139: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/gnome-42-2204/202
+1767297187.161860682: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/gimp/542
+1767297187.161867876: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/gnome-42-2204/226
+1767297187.161875628: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/gnome-46-2404/125
+1767297187.161883241: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/gnome-46-2404/145
+1767297187.161899723: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/gtk-common-themes/1535
+1767297187.161924726: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/kf6-core24/34
+1767297187.161932339: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/mesa-2404/1165
+1767297187.161939533: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/mesa-2404/912
+1767297187.161945818: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/node-red/883
+1767297187.161953012: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/qbittorrent-arnatious/86
+1767297187.161960485: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/snap-store/1270
+1767297187.161967679: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/snap-store/1300
+1767297187.161986745: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/snapd/25202
+1767297187.161994358: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/snapd/25577
+1767297187.162001552: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/snapd-desktop-integration/253
+1767297187.162029628: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/snapd-desktop-integration/315
+1767297187.162037380: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/telegram-desktop/6869
+1767297187.162044923: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/telegram-desktop/6883
+1767297187.162052117: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/thunderbird/877
+1767297187.162059660: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/thunderbird/919
+1767297187.162066993: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /boot/efi
+1767297187.162096955: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /var/lib/docker/overlay2/d0eb7b97ff7c047ee4d34d40fcfdfdcb1a50c107868178bc7fbf06bba089910f/merged
+1767297187.162103240: src/main/tools/linux-sandbox-pid1.cc:423: remount(nullptr, /var/lib/docker/overlay2/d0eb7b97ff7c047ee4d34d40fcfdfdcb1a50c107868178bc7fbf06bba089910f/merged, nullptr, 2101281, nullptr) failure (Permission denied) ignored
+1767297187.162113088: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /var/lib/docker/overlay2/87c2c3c152af352033461024435ae784fb66f91d88db28c185768f7fccabd1e2/merged
+1767297187.162118745: src/main/tools/linux-sandbox-pid1.cc:423: remount(nullptr, /var/lib/docker/overlay2/87c2c3c152af352033461024435ae784fb66f91d88db28c185768f7fccabd1e2/merged, nullptr, 2101281, nullptr) failure (Permission denied) ignored
+1767297187.162123145: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/core24/1243
+1767297187.162130897: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/vlc/4273
+1767297187.162138021: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/firefox/7559
+1767297187.162144517: src/main/tools/linux-sandbox-pid1.cc:400: remount ro: /snap/vlc/4274
+1767297187.162151640: src/main/tools/linux-sandbox-pid1.cc:400: remount rw: /tmp
+1767297187.162166866: src/main/tools/linux-sandbox-pid1.cc:400: remount rw: /dev/shm
+1767297187.162173989: src/main/tools/linux-sandbox-pid1.cc:400: remount rw: /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1316/execroot/_main
+1767297187.162182859: src/main/tools/linux-sandbox-pid1.cc:400: remount rw: /tmp
+1767297187.162189494: src/main/tools/linux-sandbox-pid1.cc:400: remount rw: /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1316/execroot/_main
+1767297187.162242993: src/main/tools/linux-sandbox-pid1.cc:508: calling fork...
+1767297187.162464878: src/main/tools/linux-sandbox-pid1.cc:545: child started with PID 2
+1767297189.133638824: src/main/tools/linux-sandbox-pid1.cc:562: wait returned pid=2, status=0x100
+1767297189.133658449: src/main/tools/linux-sandbox-pid1.cc:580: child exited normally with code 1
+1767297189.134380048: src/main/tools/linux-sandbox.cc:253: child exited normally with code 1
+
+Run this command to start an interactive shell in an identical sandboxed environment:
+(cd /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1316/execroot/_main && \
+  exec env - \
+    PATH=/home/buzz/.cache/bazelisk/downloads/sha256/18255229d933b8da10151bdef223a302744296b09af8af1988c93faa1ea3c71f/bin:/home/buzz/FlutterSDK/flutter/bin/cache/dart-sdk/bin/:/home/buzz/.config/Code/User/globalStorage/github.copilot-chat/debugCommand:/home/buzz/.config/Code/User/globalStorage/github.copilot-chat/copilotCli:/home/buzz/.local/bin:/home/buzz/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin \
+    PWD=/proc/self/cwd \
+    TMPDIR=/tmp \
+  /home/buzz/.cache/bazel/_bazel_buzz/install/6cdc996ece0b0131935fd3ccb4802557/linux-sandbox -t 15 -w /dev/shm -w /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1316/execroot/_main -w /tmp -M /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1316/_hermetic_tmp -m /tmp -S /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1316/stats.out -D /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1316/debug.out -- /bin/sh -i)
+ERROR: /home/buzz/Projects/working_aa/BUILD.bazel:132:10: Compiling moc_QtAudioOutput.cpp failed: (Exit 1): linux-sandbox failed: error executing CppCompile command 
+  (cd /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1316/execroot/_main && \
+  exec env - \
+    PATH=/home/buzz/.cache/bazelisk/downloads/sha256/18255229d933b8da10151bdef223a302744296b09af8af1988c93faa1ea3c71f/bin:/home/buzz/FlutterSDK/flutter/bin/cache/dart-sdk/bin/:/home/buzz/.config/Code/User/globalStorage/github.copilot-chat/debugCommand:/home/buzz/.config/Code/User/globalStorage/github.copilot-chat/copilotCli:/home/buzz/.local/bin:/home/buzz/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin \
+    PWD=/proc/self/cwd \
+    TMPDIR=/tmp \
+  /home/buzz/.cache/bazel/_bazel_buzz/install/6cdc996ece0b0131935fd3ccb4802557/linux-sandbox -t 15 -w /dev/shm -w /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1316/execroot/_main -w /tmp -M /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1316/_hermetic_tmp -m /tmp -S /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1316/stats.out -D /home/buzz/.cache/bazel/_bazel_buzz/79f641498c72e62afa630c77bc327167/sandbox/linux-sandbox/1316/debug.out -- /usr/bin/gcc -U_FORTIFY_SOURCE -fstack-protector -Wall -Wunused-but-set-parameter -Wno-free-nonheap-object -fno-omit-frame-pointer -g '-std=c++17' -MD -MF bazel-out/k8-dbg/bin/_objs/autoapp_bazel/moc_QtAudioOutput.pic.d '-frandom-seed=bazel-out/k8-dbg/bin/_objs/autoapp_bazel/moc_QtAudioOutput.pic.o' -fPIC -DBOOST_ALL_DYN_LINK -iquote . -iquote bazel-out/k8-dbg/bin -iquote external/protobuf+ -iquote bazel-out/k8-dbg/bin/external/protobuf+ -iquote external/abseil-cpp+ -iquote bazel-out/k8-dbg/bin/external/abseil-cpp+ -iquote external/zlib+ -iquote bazel-out/k8-dbg/bin/external/zlib+ -iquote external/bazel_tools -iquote bazel-out/k8-dbg/bin/external/bazel_tools -Ibazel-out/k8-dbg/bin/OpenAutoSDK/_virtual_includes/aap_protobuf_proto -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/_virtual_includes/protobuf -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/_virtual_includes/internal_visibility -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/_virtual_includes/port -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/_virtual_includes/protobuf_lite -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/_virtual_includes/arena -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/_virtual_includes/arena_align -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/stubs/_virtual_includes/lite -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/_virtual_includes/arena_allocation_policy -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/_virtual_includes/arena_cleanup -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/_virtual_includes/string_block -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/_virtual_includes/endian -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/_virtual_includes/varint_shuffle -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/io/_virtual_includes/io -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/io/_virtual_includes/io_win32 -Ibazel-out/k8-dbg/bin/external/protobuf+/third_party/utf8_range/_virtual_includes/utf8_validity -Ibazel-out/k8-dbg/bin/external/protobuf+/third_party/utf8_range/_virtual_includes/utf8_range -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/io/_virtual_includes/gzip_stream -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/stubs/_virtual_includes/stubs -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/io/_virtual_includes/printer -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/io/_virtual_includes/zero_copy_sink -Ibazel-out/k8-dbg/bin/external/protobuf+/src/google/protobuf/io/_virtual_includes/tokenizer -Ithird_party/open_auto_transport/include -isystem include -isystem bazel-out/k8-dbg/bin/include -isystem include/f1x/openauto -isystem bazel-out/k8-dbg/bin/include/f1x/openauto -isystem include/f1x/openauto/Common -isystem bazel-out/k8-dbg/bin/include/f1x/openauto/Common -isystem include/f1x/openauto/autoapp -isystem bazel-out/k8-dbg/bin/include/f1x/openauto/autoapp -isystem external/zlib+/zlib/include -isystem bazel-out/k8-dbg/bin/external/zlib+/zlib/include -isystem OpenAutoSDK/include/aasdk -isystem bazel-out/k8-dbg/bin/OpenAutoSDK/include/aasdk -isystem third_party/glib -isystem bazel-out/k8-dbg/bin/third_party/glib -Wall -pedantic -fPIC -DBOOST_ALL_DYN_LINK -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NETWORK_LIB -DQT_BLUETOOTH_LIB -DQT_DBUS_LIB -DQT_MULTIMEDIA_LIB -DQT_MULTIMEDIAWIDGETS_LIB -isystem/usr/include/libusb-1.0 -isystem/usr/include/x86_64-linux-gnu/qt5 -isystem/usr/include/x86_64-linux-gnu/qt5/QtCore -isystem/usr/include/x86_64-linux-gnu/qt5/QtGui -isystem/usr/include/x86_64-linux-gnu/qt5/QtWidgets -isystem/usr/include/x86_64-linux-gnu/qt5/QtNetwork -isystem/usr/include/x86_64-linux-gnu/qt5/QtBluetooth -isystem/usr/include/x86_64-linux-gnu/qt5/QtDBus -isystem/usr/include/x86_64-linux-gnu/qt5/QtMultimedia -isystem/usr/include/x86_64-linux-gnu/qt5/QtMultimediaWidgets -isystem/usr/include/gstreamer-1.0 -isystem/usr/include/glib-2.0 -isystem/usr/include/x86_64-linux-gnu -isystem/usr/include/taglib -isystem/usr/include/blkid -Iexternal/open_auto_transport/include -Ithird_party/open_auto_transport/include -isystem/usr/include/capnp -c bazel-out/k8-dbg/bin/moc_QtAudioOutput.cpp -o bazel-out/k8-dbg/bin/_objs/autoapp_bazel/moc_QtAudioOutput.pic.o -fno-canonical-system-headers -Wno-builtin-macro-redefined '-D__DATE__="redacted"' '-D__TIMESTAMP__="redacted"' '-D__TIME__="redacted"')
+In file included from /usr/include/kj/memory.h:24,
+                 from /usr/include/kj/array.h:24,
+                 from /usr/include/kj/string.h:25,
+                 from /usr/include/capnp/common.h:29,
+                 from /usr/include/capnp/endian.h:24,
+                 from /usr/include/x86_64-linux-gnu/sys/types.h:176,
+                 from /usr/include/stdlib.h:514,
+                 from /usr/include/c++/13/cstdlib:79,
+                 from /usr/include/c++/13/bits/stl_algo.h:71,
+                 from /usr/include/c++/13/algorithm:61,
+                 from /usr/include/x86_64-linux-gnu/qt5/QtCore/qglobal.h:142,
+                 from /usr/include/x86_64-linux-gnu/qt5/QtCore/qiodevice.h:43,
+                 from /usr/include/x86_64-linux-gnu/qt5/QtMultimedia/qaudiooutput.h:44,
+                 from /usr/include/x86_64-linux-gnu/qt5/QtMultimedia/QAudioOutput:1,
+                 from bazel-out/k8-dbg/bin/../../../include/f1x/openauto/autoapp/Projection/QtAudioOutput.hpp:21,
+                 from bazel-out/k8-dbg/bin/moc_QtAudioOutput.cpp:10:
+/usr/include/kj/common.h:454:1: error: template with C linkage
+  454 | template <typename T> struct NoInfer_ { typedef T Type; };
+      | ^~~~~~~~
+In file included from /usr/include/features.h:502,
+                 from /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h:39,
+                 from /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h:679,
+                 from /usr/include/c++/13/bits/memoryfwd.h:48,
+                 from /usr/include/c++/13/memory:63,
+                 from bazel-out/k8-dbg/bin/moc_QtAudioOutput.cpp:9:
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:455:1: error: template with C linkage
+  455 | template <typename T> using NoInfer = typename NoInfer_<T>::Type;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:459:1: error: template with C linkage
+  459 | template <typename T> struct RemoveConst_ { typedef T Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:460:1: error: template with C linkage
+  460 | template <typename T> struct RemoveConst_<const T> { typedef T Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:461:1: error: template with C linkage
+  461 | template <typename T> using RemoveConst = typename RemoveConst_<T>::Type;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:463:1: error: template with C linkage
+  463 | template <typename> struct IsLvalueReference_ { static constexpr bool value = false; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:464:1: error: template with C linkage
+  464 | template <typename T> struct IsLvalueReference_<T&> { static constexpr bool value = true; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:465:1: error: template with C linkage
+  465 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:468:1: error: template with C linkage
+  468 | template <typename T> struct Decay_ { typedef T Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:469:1: error: template with C linkage
+  469 | template <typename T> struct Decay_<T&> { typedef typename Decay_<T>::Type Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:470:1: error: template with C linkage
+  470 | template <typename T> struct Decay_<T&&> { typedef typename Decay_<T>::Type Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:471:1: error: template with C linkage
+  471 | template <typename T> struct Decay_<T[]> { typedef typename Decay_<T*>::Type Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:472:1: error: template with C linkage
+  472 | template <typename T> struct Decay_<const T[]> { typedef typename Decay_<const T*>::Type Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:473:1: error: template with C linkage
+  473 | template <typename T, size_t s> struct Decay_<T[s]> { typedef typename Decay_<T*>::Type Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:474:1: error: template with C linkage
+  474 | template <typename T, size_t s> struct Decay_<const T[s]> { typedef typename Decay_<const T*>::Type Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:475:1: error: template with C linkage
+  475 | template <typename T> struct Decay_<const T> { typedef typename Decay_<T>::Type Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:476:1: error: template with C linkage
+  476 | template <typename T> struct Decay_<volatile T> { typedef typename Decay_<T>::Type Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:477:1: error: template with C linkage
+  477 | template <typename T> using Decay = typename Decay_<T>::Type;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:479:1: error: template with C linkage
+  479 | template <bool b> struct EnableIf_;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:480:1: error: template specialization with C linkage
+  480 | template <> struct EnableIf_<true> { typedef void Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:481:1: error: template with C linkage
+  481 | template <bool b> using EnableIf = typename EnableIf_<b>::Type;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:487:1: error: template with C linkage
+  487 | template <typename...> struct VoidSfinae_ { using Type = void; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:488:1: error: template with C linkage
+  488 | template <typename... Ts> using VoidSfinae = typename VoidSfinae_<Ts...>::Type;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:491:1: error: template with C linkage
+  491 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:549:1: error: template with C linkage
+  549 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:556:1: error: template with C linkage
+  556 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:559:1: error: template with C linkage
+  559 | template <typename T> struct IsConst_ { static constexpr bool value = false; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:560:1: error: template with C linkage
+  560 | template <typename T> struct IsConst_<const T> { static constexpr bool value = true; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:561:1: error: template with C linkage
+  561 | template <typename T> constexpr bool isConst() { return IsConst_<T>::value; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:563:1: error: template with C linkage
+  563 | template <typename T> struct EnableIfNotConst_ { typedef T Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:564:1: error: template with C linkage
+  564 | template <typename T> struct EnableIfNotConst_<const T>;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:565:1: error: template with C linkage
+  565 | template <typename T> using EnableIfNotConst = typename EnableIfNotConst_<T>::Type;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:567:1: error: template with C linkage
+  567 | template <typename T> struct EnableIfConst_;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:568:1: error: template with C linkage
+  568 | template <typename T> struct EnableIfConst_<const T> { typedef T Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:569:1: error: template with C linkage
+  569 | template <typename T> using EnableIfConst = typename EnableIfConst_<T>::Type;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:571:1: error: template with C linkage
+  571 | template <typename T> struct RemoveConstOrDisable_ { struct Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:572:1: error: template with C linkage
+  572 | template <typename T> struct RemoveConstOrDisable_<const T> { typedef T Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:573:1: error: template with C linkage
+  573 | template <typename T> using RemoveConstOrDisable = typename RemoveConstOrDisable_<T>::Type;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:575:1: error: template with C linkage
+  575 | template <typename T> struct IsReference_ { static constexpr bool value = false; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:576:1: error: template with C linkage
+  576 | template <typename T> struct IsReference_<T&> { static constexpr bool value = true; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:577:1: error: template with C linkage
+  577 | template <typename T> constexpr bool isReference() { return IsReference_<T>::value; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:579:1: error: template with C linkage
+  579 | template <typename From, typename To>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:581:1: error: template with C linkage
+  581 | template <typename From, typename To>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:583:1: error: template with C linkage
+  583 | template <typename From, typename To>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:588:1: error: template with C linkage
+  588 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:602:1: error: template with C linkage
+  602 | template <typename T, typename U> struct IsSameType_ { static constexpr bool value = false; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:603:1: error: template with C linkage
+  603 | template <typename T> struct IsSameType_<T, T> { static constexpr bool value = true; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:604:1: error: template with C linkage
+  604 | template <typename T, typename U> constexpr bool isSameType() { return IsSameType_<T, U>::value; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:606:1: error: template with C linkage
+  606 | template <typename T> constexpr bool isIntegral() { return false; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:607:1: error: template specialization with C linkage
+  607 | template <> constexpr bool isIntegral<char>() { return true; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:608:1: error: template specialization with C linkage
+  608 | template <> constexpr bool isIntegral<signed char>() { return true; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:609:1: error: template specialization with C linkage
+  609 | template <> constexpr bool isIntegral<short>() { return true; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:610:1: error: template specialization with C linkage
+  610 | template <> constexpr bool isIntegral<int>() { return true; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:611:1: error: template specialization with C linkage
+  611 | template <> constexpr bool isIntegral<long>() { return true; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:612:1: error: template specialization with C linkage
+  612 | template <> constexpr bool isIntegral<long long>() { return true; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:613:1: error: template specialization with C linkage
+  613 | template <> constexpr bool isIntegral<unsigned char>() { return true; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:614:1: error: template specialization with C linkage
+  614 | template <> constexpr bool isIntegral<unsigned short>() { return true; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:615:1: error: template specialization with C linkage
+  615 | template <> constexpr bool isIntegral<unsigned int>() { return true; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:616:1: error: template specialization with C linkage
+  616 | template <> constexpr bool isIntegral<unsigned long>() { return true; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:617:1: error: template specialization with C linkage
+  617 | template <> constexpr bool isIntegral<unsigned long long>() { return true; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:619:1: error: template with C linkage
+  619 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:625:1: error: template with C linkage
+  625 | template <typename T, typename U>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:645:1: error: template with C linkage
+  645 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:656:1: error: template with C linkage
+  656 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:693:1: error: template with C linkage
+  693 | template<typename T> constexpr T&& mv(T& t) noexcept { return static_cast<T&&>(t); }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:694:1: error: template with C linkage
+  694 | template<typename T> constexpr T&& fwd(NoInfer<T>& t) noexcept { return static_cast<T&&>(t); }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:696:1: error: template with C linkage
+  696 | template<typename T> constexpr T cp(T& t) noexcept { return t; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:697:1: error: template with C linkage
+  697 | template<typename T> constexpr T cp(const T& t) noexcept { return t; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:700:1: error: template with C linkage
+  700 | template <typename T, typename U, bool takeT, bool uOK = true> struct ChooseType_;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:701:1: error: template with C linkage
+  701 | template <typename T, typename U> struct ChooseType_<T, U, true, true> { typedef T Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:702:1: error: template with C linkage
+  702 | template <typename T, typename U> struct ChooseType_<T, U, true, false> { typedef T Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:703:1: error: template with C linkage
+  703 | template <typename T, typename U> struct ChooseType_<T, U, false, true> { typedef U Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:705:1: error: template with C linkage
+  705 | template <typename T, typename U>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:708:1: error: template with C linkage
+  708 | template <typename T, typename U>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:713:1: error: template with C linkage
+  713 | template <typename T, typename U>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:718:1: error: template with C linkage
+  718 | template <typename T, size_t s>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:720:1: error: template with C linkage
+  720 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:727:3: error: template with C linkage
+  727 |   template <typename T>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:731:3: error: template with C linkage
+  731 |   template <typename T>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:757:3: error: template with C linkage
+  757 |   template <typename T>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:761:3: error: template with C linkage
+  761 |   template <typename T>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:799:1: error: template with C linkage
+  799 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:801:1: error: template with C linkage
+  801 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:804:1: error: template with C linkage
+  804 | template <uint bits>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:828:23: error: conflicting declaration of C function 'constexpr bool kj::isNaN(double)'
+  828 | inline constexpr bool isNaN(double f) { return f != f; }
+      |                       ^~~~~
+/usr/include/kj/common.h:827:23: note: previous declaration 'constexpr bool kj::isNaN(float)'
+  827 | inline constexpr bool isNaN(float f) { return f != f; }
+      |                       ^~~~~
+/usr/include/kj/common.h:842:1: error: template with C linkage
+  842 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:886:1: error: template with C linkage
+  886 | template <typename T, typename U>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:891:1: error: template with C linkage
+  891 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:899:1: error: template with C linkage
+  899 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:907:1: error: template with C linkage
+  907 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:916:1: error: template with C linkage
+  916 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:961:1: error: template with C linkage
+  961 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:969:1: error: template with C linkage
+  969 | template <typename Inner, class Mapping>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1007:1: error: template with C linkage
+ 1007 | template <typename Inner, typename Mapping>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1053:1: error: template with C linkage
+ 1053 | template <typename T, typename... Params>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1058:1: error: template with C linkage
+ 1058 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1086:1: error: template with C linkage
+ 1086 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1091:1: error: template with C linkage
+ 1091 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1299:1: error: template with C linkage
+ 1299 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1301:1: error: template with C linkage
+ 1301 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1303:1: error: template with C linkage
+ 1303 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1305:1: error: template with C linkage
+ 1305 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1307:1: error: template with C linkage
+ 1307 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1310:1: error: template with C linkage
+ 1310 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1375:1: error: template with C linkage
+ 1375 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1587:1: error: template with C linkage
+ 1587 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1687:1: error: template with C linkage
+ 1687 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1690:1: error: template with C linkage
+ 1690 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1876:1: error: template specialization with C linkage
+ 1876 | template <>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1886:1: error: template specialization with C linkage
+ 1886 | template <>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1896:1: error: template specialization with C linkage
+ 1896 | template <>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1906:1: error: template specialization with C linkage
+ 1906 | template <>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1919:1: error: template with C linkage
+ 1919 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1925:1: error: template with C linkage
+ 1925 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1934:1: error: template with C linkage
+ 1934 | template <typename To, typename From>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1941:1: error: template with C linkage
+ 1941 | template <typename To, typename From>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1962:1: error: template with C linkage
+ 1962 | template <typename To, typename From>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:1985:1: error: template with C linkage
+ 1985 | template <typename Func>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/common.h:2018:1: error: template with C linkage
+ 2018 | template <typename Func>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:30:1: error: template with C linkage
+   30 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:62:1: error: template with C linkage
+   62 | template <typename T> struct RefOrVoid_ { typedef T& Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:63:1: error: template specialization with C linkage
+   63 | template <> struct RefOrVoid_<void> { typedef void Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:64:1: error: template specialization with C linkage
+   64 | template <> struct RefOrVoid_<const void> { typedef void Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:66:1: error: template with C linkage
+   66 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:72:1: error: template with C linkage
+   72 | template <typename T, bool isPolymorphic = _kj_internal_isPolymorphic((T*)nullptr)>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:75:1: error: template with C linkage
+   75 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:86:1: error: template with C linkage
+   86 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:97:1: error: template with C linkage
+   97 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:102:1: error: template with C linkage
+  102 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:132:3: error: template with C linkage
+  132 |   template <typename T>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:143:3: error: template with C linkage
+  143 |   template <typename T, bool polymorphic = _kj_internal_isPolymorphic((T*)nullptr)>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:147:1: error: template with C linkage
+  147 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:159:1: error: template with C linkage
+  159 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:174:1: error: template with C linkage
+  174 | template <typename T, typename StaticDisposer = decltype(nullptr)>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:177:1: error: template with C linkage
+  177 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:300:1: error: template specialization with C linkage
+  300 | template <>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:306:1: error: template specialization with C linkage
+  306 | template <>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:312:1: error: template with C linkage
+  312 | template <typename T, typename StaticDisposer>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:414:1: error: template with C linkage
+  414 | template <typename T, typename D>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:432:1: error: template with C linkage
+  432 | template <typename T, typename D>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:434:1: error: template with C linkage
+  434 | template <typename T, typename D>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:436:1: error: template with C linkage
+  436 | template <typename T, typename D>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:443:1: error: template with C linkage
+  443 | template <typename T, typename D>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:554:1: error: template with C linkage
+  554 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:570:1: error: template with C linkage
+  570 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:574:1: error: template with C linkage
+  574 | template <typename T, void(*F)(T*)>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:584:1: error: template with C linkage
+  584 | template <typename T, void(*F)(T*)>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:589:1: error: template with C linkage
+  589 | template <typename T, typename... Params>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:599:1: error: template with C linkage
+  599 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:611:1: error: template with C linkage
+  611 | template <auto F, typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:620:1: error: template with C linkage
+  620 | template <typename T, typename... Attachments>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:627:1: error: template with C linkage
+  627 | template <typename T, typename... Attachments>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:638:1: error: template with C linkage
+  638 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:663:1: error: template with C linkage
+  663 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:672:1: error: template with C linkage
+  672 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:679:1: error: template with C linkage
+  679 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:686:1: error: template with C linkage
+  686 | template <typename... T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:689:1: error: template specialization with C linkage
+  689 | template <>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:692:1: error: template with C linkage
+  692 | template <typename First, typename... Rest>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:703:1: error: template with C linkage
+  703 | template <typename... T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:709:1: error: template with C linkage
+  709 | template <typename T, typename StaticDisposer>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:720:1: error: template with C linkage
+  720 | template <typename T, typename D>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:726:1: error: template with C linkage
+  726 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:743:1: error: template with C linkage
+  743 | template <typename T, typename... Attachments>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:749:1: error: template with C linkage
+  749 | template <typename T, typename... Attachments>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/memory.h:756:1: error: template with C linkage
+  756 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:51:3: error: template with C linkage
+   51 |   template <typename T>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:59:3: error: template with C linkage
+   59 |   template <typename T, bool hasTrivialDestructor = KJ_HAS_TRIVIAL_DESTRUCTOR(T)>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:124:1: error: template with C linkage
+  124 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:272:3: error: template with C linkage
+  272 |   template <typename T>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:274:3: error: template with C linkage
+  274 |   template <typename T>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:288:3: error: template with C linkage
+  288 |   template <typename T, bool hasTrivialConstructor = KJ_HAS_TRIVIAL_CONSTRUCTOR(T),
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:295:1: error: template with C linkage
+  295 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:303:1: error: template with C linkage
+  303 | template <typename T> Array<T> heapArray(const T* content, size_t size);
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:304:1: error: template with C linkage
+  304 | template <typename T> Array<T> heapArray(ArrayPtr<T> content);
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:305:1: error: template with C linkage
+  305 | template <typename T> Array<T> heapArray(ArrayPtr<const T> content);
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:306:1: error: template with C linkage
+  306 | template <typename T, typename Iterator> Array<T> heapArray(Iterator begin, Iterator end);
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:307:1: error: template with C linkage
+  307 | template <typename T> Array<T> heapArray(std::initializer_list<T> init);
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:310:1: error: template with C linkage
+  310 | template <typename T, typename Container>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:312:1: error: template with C linkage
+  312 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:318:1: error: template with C linkage
+  318 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:504:1: error: template with C linkage
+  504 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:516:1: error: template with C linkage
+  516 | template <typename T, size_t fixedSize>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:543:1: error: template with C linkage
+  543 | template <typename T, size_t fixedSize>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:591:1: error: template with C linkage
+  591 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:606:1: error: template with C linkage
+  606 | template <typename T, size_t s>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:626:1: error: template with C linkage
+  626 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:634:1: error: template with C linkage
+  634 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:647:1: error: template with C linkage
+  647 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:654:1: error: template with C linkage
+  654 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:661:1: error: template with C linkage
+  661 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:671:1: error: template with C linkage
+  671 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:685:1: error: template with C linkage
+  685 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:690:1: error: template with C linkage
+  690 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:695:1: error: template with C linkage
+  695 | template <typename Element, typename Iterator, bool move, bool = canMemcpy<Element>()>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:698:1: error: template with C linkage
+  698 | template <typename T, bool move>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:708:1: error: template with C linkage
+  708 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:718:1: error: template with C linkage
+  718 | template <typename T, typename Iterator, bool move>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:731:1: error: template with C linkage
+  731 | template <typename T, typename Iterator>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:766:1: error: template with C linkage
+  766 | template <typename T, typename Iterator>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:805:1: error: template with C linkage
+  805 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:811:1: error: template with C linkage
+  811 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:818:1: error: template with C linkage
+  818 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:825:1: error: template with C linkage
+  825 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:832:1: error: template with C linkage
+  832 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:839:1: error: template with C linkage
+  839 | template <typename T, typename Iterator> Array<T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:846:1: error: template with C linkage
+  846 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:852:1: error: template with C linkage
+  852 | template <typename T, typename... Params>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:858:1: error: template with C linkage
+  858 | template <typename T, typename... Params>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:868:1: error: template with C linkage
+  868 | template <typename... T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:876:1: error: template with C linkage
+  876 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/array.h:894:1: error: template with C linkage
+  894 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:40:25: error: literal operator with C linkage
+   40 | constexpr kj::StringPtr operator "" _kj(const char* str, size_t n);
+      |                         ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:56:34: error: literal operator with C linkage
+   56 | constexpr kj::LiteralStringConst operator "" _kjc(const char* str, size_t n);
+      |                                  ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:101:3: error: template with C linkage
+  101 |   template <
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:109:3: error: template with C linkage
+  109 |   template <
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:160:3: error: template with C linkage
+  160 |   template <typename T>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:167:3: error: template with C linkage
+  167 |   template <typename T>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:171:3: error: template with C linkage
+  171 |   template <typename... Attachments>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:179:75: error: 'kj::StringPtr operator""_kj(const char*, size_t)' should have been declared inside '::'
+  179 |   friend constexpr StringPtr (::operator "" _kj)(const char* str, size_t n);
+      |                                                                           ^
+/usr/include/kj/string.h:179:31: error: literal operator with C linkage
+  179 |   friend constexpr StringPtr (::operator "" _kj)(const char* str, size_t n);
+      |                               ^~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:191:1: error: template specialization with C linkage
+  191 | template <> char StringPtr::parseAs<char>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:192:1: error: template specialization with C linkage
+  192 | template <> signed char StringPtr::parseAs<signed char>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:193:1: error: template specialization with C linkage
+  193 | template <> unsigned char StringPtr::parseAs<unsigned char>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:194:1: error: template specialization with C linkage
+  194 | template <> short StringPtr::parseAs<short>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:195:1: error: template specialization with C linkage
+  195 | template <> unsigned short StringPtr::parseAs<unsigned short>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:196:1: error: template specialization with C linkage
+  196 | template <> int StringPtr::parseAs<int>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:197:1: error: template specialization with C linkage
+  197 | template <> unsigned StringPtr::parseAs<unsigned>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:198:1: error: template specialization with C linkage
+  198 | template <> long StringPtr::parseAs<long>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:199:1: error: template specialization with C linkage
+  199 | template <> unsigned long StringPtr::parseAs<unsigned long>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:200:1: error: template specialization with C linkage
+  200 | template <> long long StringPtr::parseAs<long long>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:201:1: error: template specialization with C linkage
+  201 | template <> unsigned long long StringPtr::parseAs<unsigned long long>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:202:1: error: template specialization with C linkage
+  202 | template <> float StringPtr::parseAs<float>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:203:1: error: template specialization with C linkage
+  203 | template <> double StringPtr::parseAs<double>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:205:1: error: template specialization with C linkage
+  205 | template <> Maybe<char> StringPtr::tryParseAs<char>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:206:1: error: template specialization with C linkage
+  206 | template <> Maybe<signed char> StringPtr::tryParseAs<signed char>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:207:1: error: template specialization with C linkage
+  207 | template <> Maybe<unsigned char> StringPtr::tryParseAs<unsigned char>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:208:1: error: template specialization with C linkage
+  208 | template <> Maybe<short> StringPtr::tryParseAs<short>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:209:1: error: template specialization with C linkage
+  209 | template <> Maybe<unsigned short> StringPtr::tryParseAs<unsigned short>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:210:1: error: template specialization with C linkage
+  210 | template <> Maybe<int> StringPtr::tryParseAs<int>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:211:1: error: template specialization with C linkage
+  211 | template <> Maybe<unsigned> StringPtr::tryParseAs<unsigned>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:212:1: error: template specialization with C linkage
+  212 | template <> Maybe<long> StringPtr::tryParseAs<long>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:213:1: error: template specialization with C linkage
+  213 | template <> Maybe<unsigned long> StringPtr::tryParseAs<unsigned long>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:214:1: error: template specialization with C linkage
+  214 | template <> Maybe<long long> StringPtr::tryParseAs<long long>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:215:1: error: template specialization with C linkage
+  215 | template <> Maybe<unsigned long long> StringPtr::tryParseAs<unsigned long long>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:216:1: error: template specialization with C linkage
+  216 | template <> Maybe<float> StringPtr::tryParseAs<float>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:217:1: error: template specialization with C linkage
+  217 | template <> Maybe<double> StringPtr::tryParseAs<double>() const;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:225:85: error: 'kj::LiteralStringConst operator""_kjc(const char*, size_t)' should have been declared inside '::'
+  225 |   friend constexpr LiteralStringConst (::operator "" _kjc)(const char* str, size_t n);
+      |                                                                                     ^
+/usr/include/kj/string.h:225:40: error: literal operator with C linkage
+  225 |   friend constexpr LiteralStringConst (::operator "" _kjc)(const char* str, size_t n);
+      |                                        ^~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:323:3: error: template with C linkage
+  323 |   template <typename T>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:327:3: error: template with C linkage
+  327 |   template <typename T>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:423:3: error: template with C linkage
+  423 |   template <typename T>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:427:3: error: template with C linkage
+  427 |   template <typename T>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:435:13: error: conflicting declaration of C function 'bool kj::operator==(const char*, const String&)'
+  435 | inline bool operator==(const char* a, const String& b) { return b == a; }
+      |             ^~~~~~~~
+/usr/include/kj/string.h:187:13: note: previous declaration 'bool kj::operator==(const char*, const StringPtr&)'
+  187 | inline bool operator==(const char* a, const StringPtr& b) { return b == a; }
+      |             ^~~~~~~~
+/usr/include/kj/string.h:436:13: error: conflicting declaration of C function 'bool kj::operator!=(const char*, const String&)'
+  436 | inline bool operator!=(const char* a, const String& b) { return b != a; }
+      |             ^~~~~~~~
+/usr/include/kj/string.h:188:13: note: previous declaration 'bool kj::operator!=(const char*, const StringPtr&)'
+  188 | inline bool operator!=(const char* a, const StringPtr& b) { return b != a; }
+      |             ^~~~~~~~
+/usr/include/kj/string.h:443:8: error: conflicting declaration of C function 'kj::String kj::heapString(const char*)'
+  443 | String heapString(const char* value);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h:439:8: note: previous declaration 'kj::String kj::heapString(size_t)'
+  439 | String heapString(size_t size);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h:444:8: error: conflicting declaration of C function 'kj::String kj::heapString(const char*, size_t)'
+  444 | String heapString(const char* value, size_t size);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h:439:8: note: previous declaration 'kj::String kj::heapString(size_t)'
+  439 | String heapString(size_t size);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h:445:8: error: conflicting declaration of C function 'kj::String kj::heapString(StringPtr)'
+  445 | String heapString(StringPtr value);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h:439:8: note: previous declaration 'kj::String kj::heapString(size_t)'
+  439 | String heapString(size_t size);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h:446:8: error: conflicting declaration of C function 'kj::String kj::heapString(const String&)'
+  446 | String heapString(const String& value);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h:439:8: note: previous declaration 'kj::String kj::heapString(size_t)'
+  439 | String heapString(size_t size);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h:447:8: error: conflicting declaration of C function 'kj::String kj::heapString(ArrayPtr<const char>)'
+  447 | String heapString(ArrayPtr<const char> value);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h:439:8: note: previous declaration 'kj::String kj::heapString(size_t)'
+  439 | String heapString(size_t size);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h:467:1: error: template with C linkage
+  467 | template <typename... Rest>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:469:1: error: template with C linkage
+  469 | template <typename... Rest>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:475:1: error: template with C linkage
+  475 | template <typename First, typename... Rest>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:485:1: error: template with C linkage
+  485 | template <typename... Params>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:499:1: error: template with C linkage
+  499 | template <typename First, typename... Rest>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:510:1: error: template with C linkage
+  510 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:514:1: error: template with C linkage
+  514 | template <typename T, typename... Rest>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:516:1: error: template with C linkage
+  516 | template <typename T, typename... Rest>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:518:1: error: template with C linkage
+  518 | template <typename T, typename... Rest>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:520:1: error: template with C linkage
+  520 | template <typename T, typename... Rest>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:543:3: error: template with C linkage
+  543 |   template<size_t n>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:547:3: error: template with C linkage
+  547 |   template<size_t n>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:592:3: error: template with C linkage
+  592 |   template <typename T, typename Result = decltype(instance<T>().toString())>
+      |   ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:600:1: error: template with C linkage
+  600 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:614:51: error: conflicting declaration of C function 'kj::CappedArray<char, 5> kj::hex(short unsigned int)'
+  614 | CappedArray<char, sizeof(unsigned short) * 2 + 1> hex(unsigned short i);
+      |                                                   ^~~
+/usr/include/kj/string.h:613:50: note: previous declaration 'kj::CappedArray<char, 3> kj::hex(unsigned char)'
+  613 | CappedArray<char, sizeof(unsigned char) * 2 + 1> hex(unsigned char i);
+      |                                                  ^~~
+/usr/include/kj/string.h:615:49: error: conflicting declaration of C function 'kj::CappedArray<char, 9> kj::hex(unsigned int)'
+  615 | CappedArray<char, sizeof(unsigned int) * 2 + 1> hex(unsigned int i);
+      |                                                 ^~~
+/usr/include/kj/string.h:613:50: note: previous declaration 'kj::CappedArray<char, 3> kj::hex(unsigned char)'
+  613 | CappedArray<char, sizeof(unsigned char) * 2 + 1> hex(unsigned char i);
+      |                                                  ^~~
+/usr/include/kj/string.h:616:50: error: conflicting declaration of C function 'kj::CappedArray<char, 17> kj::hex(long unsigned int)'
+  616 | CappedArray<char, sizeof(unsigned long) * 2 + 1> hex(unsigned long i);
+      |                                                  ^~~
+/usr/include/kj/string.h:613:50: note: previous declaration 'kj::CappedArray<char, 3> kj::hex(unsigned char)'
+  613 | CappedArray<char, sizeof(unsigned char) * 2 + 1> hex(unsigned char i);
+      |                                                  ^~~
+/usr/include/kj/string.h:617:55: error: conflicting declaration of C function 'kj::CappedArray<char, 17> kj::hex(long long unsigned int)'
+  617 | CappedArray<char, sizeof(unsigned long long) * 2 + 1> hex(unsigned long long i);
+      |                                                       ^~~
+/usr/include/kj/string.h:613:50: note: previous declaration 'kj::CappedArray<char, 3> kj::hex(unsigned char)'
+  613 | CappedArray<char, sizeof(unsigned char) * 2 + 1> hex(unsigned char i);
+      |                                                  ^~~
+/usr/include/kj/string.h:619:1: error: template with C linkage
+  619 | template <typename... Params>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:633:1: error: template with C linkage
+  633 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:637:1: error: template with C linkage
+  637 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:660:1: error: template with C linkage
+  660 | template <typename... Params>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:684:1: error: template with C linkage
+  684 | template <typename T, typename = decltype(toCharSequence(kj::instance<T&>()))>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:689:1: error: template with C linkage
+  689 | template <typename T, typename = decltype(toCharSequence(kj::instance<const T&>()))>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:749:1: error: template with C linkage
+  749 | template <typename... Attachments>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:807:15: error: conflicting declaration of C function 'kj::String kj::heapString(const char*)'
+  807 | inline String heapString(const char* value) {
+      |               ^~~~~~~~~~
+/usr/include/kj/string.h:439:8: note: previous declaration 'kj::String kj::heapString(size_t)'
+  439 | String heapString(size_t size);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h: In function 'kj::String kj::heapString(const char*)':
+/usr/include/kj/string.h:808:21: error: invalid conversion from 'const char*' to 'size_t' {aka 'long unsigned int'} [-fpermissive]
+  808 |   return heapString(value, strlen(value));
+      |                     ^~~~~
+      |                     |
+      |                     const char*
+/usr/include/kj/string.h:808:20: error: too many arguments to function 'kj::String kj::heapString(size_t)'
+  808 |   return heapString(value, strlen(value));
+      |          ~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~
+/usr/include/kj/string.h:439:8: note: declared here
+  439 | String heapString(size_t size);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h: At global scope:
+/usr/include/kj/string.h:810:15: error: conflicting declaration of C function 'kj::String kj::heapString(StringPtr)'
+  810 | inline String heapString(StringPtr value) {
+      |               ^~~~~~~~~~
+/usr/include/kj/string.h:439:8: note: previous declaration 'kj::String kj::heapString(size_t)'
+  439 | String heapString(size_t size);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h: In function 'kj::String kj::heapString(StringPtr)':
+/usr/include/kj/string.h:811:32: error: invalid conversion from 'const char*' to 'size_t' {aka 'long unsigned int'} [-fpermissive]
+  811 |   return heapString(value.begin(), value.size());
+      |                     ~~~~~~~~~~~^~
+      |                                |
+      |                                const char*
+/usr/include/kj/string.h:811:20: error: too many arguments to function 'kj::String kj::heapString(size_t)'
+  811 |   return heapString(value.begin(), value.size());
+      |          ~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/kj/string.h:439:8: note: declared here
+  439 | String heapString(size_t size);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h: At global scope:
+/usr/include/kj/string.h:813:15: error: conflicting declaration of C function 'kj::String kj::heapString(const String&)'
+  813 | inline String heapString(const String& value) {
+      |               ^~~~~~~~~~
+/usr/include/kj/string.h:439:8: note: previous declaration 'kj::String kj::heapString(size_t)'
+  439 | String heapString(size_t size);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h: In function 'kj::String kj::heapString(const String&)':
+/usr/include/kj/string.h:814:32: error: invalid conversion from 'const char*' to 'size_t' {aka 'long unsigned int'} [-fpermissive]
+  814 |   return heapString(value.begin(), value.size());
+      |                     ~~~~~~~~~~~^~
+      |                                |
+      |                                const char*
+/usr/include/kj/string.h:814:20: error: too many arguments to function 'kj::String kj::heapString(size_t)'
+  814 |   return heapString(value.begin(), value.size());
+      |          ~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/kj/string.h:439:8: note: declared here
+  439 | String heapString(size_t size);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h: At global scope:
+/usr/include/kj/string.h:816:15: error: conflicting declaration of C function 'kj::String kj::heapString(ArrayPtr<const char>)'
+  816 | inline String heapString(ArrayPtr<const char> value) {
+      |               ^~~~~~~~~~
+/usr/include/kj/string.h:439:8: note: previous declaration 'kj::String kj::heapString(size_t)'
+  439 | String heapString(size_t size);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h: In function 'kj::String kj::heapString(ArrayPtr<const char>)':
+/usr/include/kj/string.h:817:32: error: invalid conversion from 'const char*' to 'size_t' {aka 'long unsigned int'} [-fpermissive]
+  817 |   return heapString(value.begin(), value.size());
+      |                     ~~~~~~~~~~~^~
+      |                                |
+      |                                const char*
+/usr/include/kj/string.h:817:20: error: too many arguments to function 'kj::String kj::heapString(size_t)'
+  817 |   return heapString(value.begin(), value.size());
+      |          ~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/kj/string.h:439:8: note: declared here
+  439 | String heapString(size_t size);
+      |        ^~~~~~~~~~
+/usr/include/kj/string.h: At global scope:
+/usr/include/kj/string.h:822:1: error: template with C linkage
+  822 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:892:1: error: template with C linkage
+  892 | template <typename T, typename... Rest>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:897:1: error: template with C linkage
+  897 | template <typename T, typename... Rest>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:902:1: error: template with C linkage
+  902 | template <typename T, typename... Rest>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:907:1: error: template with C linkage
+  907 | template <typename T, typename... Rest>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:913:1: error: template with C linkage
+  913 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:915:1: error: template with C linkage
+  915 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:920:1: error: template with C linkage
+  920 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:927:25: error: literal operator with C linkage
+  927 | constexpr kj::StringPtr operator "" _kj(const char* str, size_t n) {
+      |                         ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/kj/string.h:931:34: error: literal operator with C linkage
+  931 | constexpr kj::LiteralStringConst operator "" _kjc(const char* str, size_t n) {
+      |                                  ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:133:1: error: template with C linkage
+  133 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:140:1: error: template with C linkage
+  140 | template <typename T, typename = void> struct Kind_;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:142:1: error: template specialization with C linkage
+  142 | template <> struct Kind_<Void> { static constexpr Kind kind = Kind::PRIMITIVE; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:143:1: error: template specialization with C linkage
+  143 | template <> struct Kind_<bool> { static constexpr Kind kind = Kind::PRIMITIVE; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:144:1: error: template specialization with C linkage
+  144 | template <> struct Kind_<int8_t> { static constexpr Kind kind = Kind::PRIMITIVE; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:145:1: error: template specialization with C linkage
+  145 | template <> struct Kind_<int16_t> { static constexpr Kind kind = Kind::PRIMITIVE; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:146:1: error: template specialization with C linkage
+  146 | template <> struct Kind_<int32_t> { static constexpr Kind kind = Kind::PRIMITIVE; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:147:1: error: template specialization with C linkage
+  147 | template <> struct Kind_<int64_t> { static constexpr Kind kind = Kind::PRIMITIVE; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:148:1: error: template specialization with C linkage
+  148 | template <> struct Kind_<uint8_t> { static constexpr Kind kind = Kind::PRIMITIVE; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:149:1: error: template specialization with C linkage
+  149 | template <> struct Kind_<uint16_t> { static constexpr Kind kind = Kind::PRIMITIVE; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:150:1: error: template specialization with C linkage
+  150 | template <> struct Kind_<uint32_t> { static constexpr Kind kind = Kind::PRIMITIVE; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:151:1: error: template specialization with C linkage
+  151 | template <> struct Kind_<uint64_t> { static constexpr Kind kind = Kind::PRIMITIVE; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:152:1: error: template specialization with C linkage
+  152 | template <> struct Kind_<float> { static constexpr Kind kind = Kind::PRIMITIVE; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:153:1: error: template specialization with C linkage
+  153 | template <> struct Kind_<double> { static constexpr Kind kind = Kind::PRIMITIVE; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:154:1: error: template specialization with C linkage
+  154 | template <> struct Kind_<Text> { static constexpr Kind kind = Kind::BLOB; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:155:1: error: template specialization with C linkage
+  155 | template <> struct Kind_<Data> { static constexpr Kind kind = Kind::BLOB; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:157:1: error: template with C linkage
+  157 | template <typename T> struct Kind_<T, kj::VoidSfinae<typename T::_capnpPrivate::IsStruct>> {
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:160:1: error: template with C linkage
+  160 | template <typename T> struct Kind_<T, kj::VoidSfinae<typename T::_capnpPrivate::IsInterface>> {
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:163:1: error: template with C linkage
+  163 | template <typename T> struct Kind_<T, kj::VoidSfinae<typename schemas::EnumInfo<T>::IsEnum>> {
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:169:1: error: template with C linkage
+  169 | template <typename T, Kind k = _::Kind_<T>::kind>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:190:1: error: template with C linkage
+  190 | template <typename T, Kind k = kind<T>()>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:199:1: error: template with C linkage
+  199 | template <typename T, Kind k = CAPNP_KIND(T)>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:213:1: error: template with C linkage
+  213 | template <typename T> struct ListElementType_;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:214:1: error: template with C linkage
+  214 | template <typename T> struct ListElementType_<List<T>> { typedef T Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:215:1: error: template with C linkage
+  215 | template <typename T> using ListElementType = typename ListElementType_<T>::Type;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:218:1: error: template with C linkage
+  218 | template <typename T, Kind k> struct Kind_<List<T, k>> {
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:223:1: error: template with C linkage
+  223 | template <typename T, Kind k = CAPNP_KIND(T)> struct ReaderFor_ { typedef typename T::Reader Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:224:1: error: template with C linkage
+  224 | template <typename T> struct ReaderFor_<T, Kind::PRIMITIVE> { typedef T Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:225:1: error: template with C linkage
+  225 | template <typename T> struct ReaderFor_<T, Kind::ENUM> { typedef T Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:226:1: error: template with C linkage
+  226 | template <typename T> struct ReaderFor_<T, Kind::INTERFACE> { typedef typename T::Client Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:227:1: error: template with C linkage
+  227 | template <typename T> using ReaderFor = typename ReaderFor_<T>::Type;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:230:1: error: template with C linkage
+  230 | template <typename T, Kind k = CAPNP_KIND(T)> struct BuilderFor_ { typedef typename T::Builder Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:231:1: error: template with C linkage
+  231 | template <typename T> struct BuilderFor_<T, Kind::PRIMITIVE> { typedef T Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:232:1: error: template with C linkage
+  232 | template <typename T> struct BuilderFor_<T, Kind::ENUM> { typedef T Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:233:1: error: template with C linkage
+  233 | template <typename T> struct BuilderFor_<T, Kind::INTERFACE> { typedef typename T::Client Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:234:1: error: template with C linkage
+  234 | template <typename T> using BuilderFor = typename BuilderFor_<T>::Type;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:237:1: error: template with C linkage
+  237 | template <typename T, Kind k = CAPNP_KIND(T)> struct PipelineFor_ { typedef typename T::Pipeline Type;};
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:238:1: error: template with C linkage
+  238 | template <typename T> struct PipelineFor_<T, Kind::INTERFACE> { typedef typename T::Client Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:239:1: error: template with C linkage
+  239 | template <typename T> using PipelineFor = typename PipelineFor_<T>::Type;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:241:1: error: template with C linkage
+  241 | template <typename T, Kind k = CAPNP_KIND(T)> struct TypeIfEnum_;
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:242:1: error: template with C linkage
+  242 | template <typename T> struct TypeIfEnum_<T, Kind::ENUM> { typedef T Type; };
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:244:1: error: template with C linkage
+  244 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:247:1: error: template with C linkage
+  247 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:251:1: error: template with C linkage
+  251 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:255:1: error: template with C linkage
+  255 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:259:1: error: template with C linkage
+  259 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:263:1: error: template with C linkage
+  263 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:267:1: error: template with C linkage
+  267 | template <typename T, typename = void>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:270:1: error: template with C linkage
+  270 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:275:1: error: template with C linkage
+  275 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:280:1: error: template with C linkage
+  280 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:287:1: error: template with C linkage
+  287 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:292:1: error: template with C linkage
+  292 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:301:1: error: template with C linkage
+  301 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:314:1: error: template with C linkage
+  314 | template <typename T, Kind k = CAPNP_KIND(T)>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:569:1: error: template with C linkage
+  569 | template <uint width, typename T = uint>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:571:1: error: template with C linkage
+  571 | template <uint width, typename T = uint>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:573:1: error: template with C linkage
+  573 | template <uint width, typename T = uint>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:575:1: error: template with C linkage
+  575 | template <uint width, typename T = uint>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:577:1: error: template with C linkage
+  577 | template <uint width, typename T = uint>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:612:1: error: template with C linkage
+  612 | template <uint width>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:614:1: error: template with C linkage
+  614 | template <uint width>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:616:1: error: template with C linkage
+  616 | template <uint width>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:618:1: error: template with C linkage
+  618 | template <uint width>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:624:1: error: template with C linkage
+  624 | template <uint i> inline constexpr uint bounded() { return i; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:625:1: error: template with C linkage
+  625 | template <typename T> inline constexpr T bounded(T i) { return i; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:626:1: error: template with C linkage
+  626 | template <typename T> inline constexpr T unbound(T i) { return i; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:628:1: error: template with C linkage
+  628 | template <typename T, typename U> inline constexpr T unboundAs(U i) { return i; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:630:1: error: template with C linkage
+  630 | template <uint64_t requestedMax, typename T> inline constexpr uint unboundMax(T i) { return i; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:631:1: error: template with C linkage
+  631 | template <uint bits, typename T> inline constexpr uint unboundMaxBits(T i) { return i; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:633:1: error: template with C linkage
+  633 | template <uint newMax, typename T, typename ErrorFunc>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:639:1: error: template with C linkage
+  639 | template <typename T, typename ErrorFunc>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:645:1: error: template with C linkage
+  645 | template <uint bits, typename T, typename ErrorFunc = ThrowOverflow>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:651:1: error: template with C linkage
+  651 | template <typename T, typename ErrorFunc = ThrowOverflow>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:657:1: error: template with C linkage
+  657 | template <typename T, typename U> inline constexpr T upgradeBound(U i) { return i; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:659:1: error: template with C linkage
+  659 | template <uint bits, typename T> inline constexpr T assumeBits(T i) { return i; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:660:1: error: template with C linkage
+  660 | template <uint64_t max, typename T> inline constexpr T assumeMax(T i) { return i; }
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:662:1: error: template with C linkage
+  662 | template <typename T, typename U, typename ErrorFunc = ThrowOverflow>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:669:1: error: template with C linkage
+  669 | template <typename T, typename U>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:727:1: error: template with C linkage
+  727 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:730:1: error: template with C linkage
+  730 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:733:1: error: template with C linkage
+  733 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:738:1: error: template with C linkage
+  738 | template <typename T, typename U>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/common.h:742:1: error: template with C linkage
+  742 | template <typename T, typename U>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/endian.h:74:1: error: template with C linkage
+   74 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+/usr/include/capnp/endian.h:84:1: error: template with C linkage
+   84 | template <typename T>
+      | ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:27:1: note: 'extern "C"' linkage started here
+   27 | __BEGIN_DECLS
+      | ^~~~~~~~~~~~~
+Target //:autoapp_bazel failed to build
+INFO: Elapsed time: 2.386s, Critical Path: 2.10s
+INFO: 14 processes: 14 action cache hit, 13 internal, 1 linux-sandbox.
+ERROR: Build did NOT complete successfully

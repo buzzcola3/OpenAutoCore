@@ -33,4 +33,8 @@ void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender)
   MEDIA_SINK_VIDEO_HANDLERS.setMessageSender(std::move(sender));
 }
 
+void setVideoTransport(std::shared_ptr<buzz::autoapp::Transport::Transport> transport) {
+  MEDIA_SINK_VIDEO_HANDLERS.setTransport(std::move(transport));
+}
+
 }

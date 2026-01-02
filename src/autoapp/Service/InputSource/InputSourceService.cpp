@@ -181,10 +181,14 @@ namespace f1x {
                   touchLocation->set_y(event.y);
                   touchLocation->set_pointer_id(0);
 
+                  OPENAUTO_LOG(debug) << "[InputSourceService] InputReport: "
+                                      << inputReport.ShortDebugString();
+
                   auto promise = aasdk::channel::SendPromise::defer(strand_);
                   promise->then([]() {}, std::bind(&InputSourceService::onChannelError, this->shared_from_this(),
                                                    std::placeholders::_1));
                   channel_->sendInputReport(inputReport, std::move(promise));
+                  //InputReport: timestamp: 1767343212878340 touch_event { pointer_data { x: 1230 y: 880 pointer_id: 0 } action: ACTION_DOWN }
                 });
           }
         }

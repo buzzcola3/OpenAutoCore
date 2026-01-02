@@ -20,6 +20,9 @@
 
 #include <Messenger/IMessenger.hpp>
 #include <f1x/openauto/autoapp/Service/IService.hpp>
+#include <memory>
+
+namespace buzz { namespace autoapp { namespace Transport { class Transport; } } }
 
 namespace f1x
 {
@@ -36,6 +39,8 @@ public:
     virtual ~IServiceFactory() = default;
 
     virtual ServiceList create(aasdk::messenger::IMessenger::Pointer messenger) = 0;
+
+    virtual std::shared_ptr<buzz::autoapp::Transport::Transport> getTransport() = 0;
 };
 
 }

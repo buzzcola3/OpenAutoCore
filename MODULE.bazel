@@ -8,6 +8,17 @@ bazel_dep(name = "rules_python", version = "0.39.0")
 # ensure consistent checksum under Bzlmod.
 bazel_dep(name = "rules_foreign_cc", version = "0.10.1")
 
+# OpenAutoTransport shared-memory transport for video/audio/data piping.
+bazel_dep(name = "open_auto_transport", version = "0.0.1")
+
+git_override(
+	module_name = "open_auto_transport",
+	remote = "https://github.com/buzzcola3/OpenAutoTransport.git",
+	branch = "development",
+	patches = ["third_party/patches/open_auto_transport_no_hermetic.patch"],
+	patch_strip = 1,
+)
+
 archive_override(
 	module_name = "rules_foreign_cc",
 	urls = ["https://github.com/bazelbuild/rules_foreign_cc/archive/refs/tags/0.10.1.tar.gz"],

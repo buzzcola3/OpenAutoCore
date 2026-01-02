@@ -74,6 +74,13 @@ namespace f1x::openauto::autoapp::service {
     return serviceList;
   }
 
+  std::shared_ptr<buzz::autoapp::Transport::Transport> ServiceFactory::getTransport() {
+    if (transport_ == nullptr) {
+      transport_ = std::make_shared<buzz::autoapp::Transport::Transport>();
+    }
+    return transport_;
+  }
+
   IService::Pointer ServiceFactory::createBluetoothService(aasdk::messenger::IMessenger::Pointer messenger) {
     OPENAUTO_LOG(info) << "[ServiceFactory] createBluetoothService()";
     projection::IBluetoothDevice::Pointer bluetoothDevice;

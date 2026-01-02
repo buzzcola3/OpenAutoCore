@@ -41,11 +41,7 @@ namespace aasdk::channel {
   }
 
   void Channel::send(messenger::Message::Pointer message, SendPromise::Pointer promise) {
-#if BOOST_VERSION < 106600
-    auto sendPromise = messenger::SendPromise::defer(strand_.get_io_service());
-#else
-    auto sendPromise = messenger::SendPromise::defer(strand_.context());
-#endif
+    auto sendPromise = messenger::SendPromise::defer(strand_);
 
     io::PromiseLink<>::forward(*sendPromise, std::move(promise));
     messenger_->enqueueSend(std::move(message), std::move(sendPromise));

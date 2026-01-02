@@ -5,7 +5,7 @@
       "name": "Debug autoapp",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/autoapp",
+      "program": "${workspaceFolder}/bazel-bin/autoapp_bazel",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
@@ -18,7 +18,7 @@
           "ignoreFailures": true
         }
       ],
-      "preLaunchTask": "build-autoapp",
+      "preLaunchTask": "bazel-build-autoapp",
       "externalConsole": false
     }
   ]

@@ -20,6 +20,7 @@
 #include <QApplication>
 #include <QScreen>
 #include <QDesktopWidget>
+#include <chrono>
 #include <USB/USBHub.hpp>
 #include <USB/ConnectedAccessoriesEnumerator.hpp>
 #include <USB/AccessoryModeQueryChain.hpp>
@@ -28,6 +29,7 @@
 #include <TCP/TCPWrapper.hpp>
 #include <boost/log/utility/setup.hpp>
 #include <f1x/openauto/autoapp/App.hpp>
+#include <Messenger/MessageInStreamInterceptor.hpp>
 #include <f1x/openauto/autoapp/Configuration/IConfiguration.hpp>
 #include <f1x/openauto/autoapp/Configuration/RecentAddressesList.hpp>
 #include <f1x/openauto/autoapp/Service/AndroidAutoEntityFactory.hpp>
@@ -217,6 +219,17 @@ int main(int argc, char* argv[])
     aasdk::usb::AccessoryModeQueryFactory queryFactory(usbWrapper, ioService);
     aasdk::usb::AccessoryModeQueryChainFactory queryChainFactory(usbWrapper, ioService, queryFactory);
     autoapp::service::ServiceFactory serviceFactory(ioService, configuration);
+
+    auto transport = serviceFactory.getTransport();
+    if (transport && !transport->isRunning()) {
+        if (!transport->startAsA(std::chrono::microseconds{1000}, false)) {
+            OPENAUTO_LOG(error) << "[AutoApp] Failed to start OpenAutoTransport at startup.";
+        } else {
+            OPENAUTO_LOG(info) << "[AutoApp] OpenAutoTransport started at startup (side A).";
+        }
+    }
+    aasdk::messenger::interceptor::setVideoTransport(transport);
+
     autoapp::service::AndroidAutoEntityFactory androidAutoEntityFactory(ioService, configuration, serviceFactory);
 
     auto usbHub(std::make_shared<aasdk::usb::USBHub>(usbWrapper, ioService, queryChainFactory));

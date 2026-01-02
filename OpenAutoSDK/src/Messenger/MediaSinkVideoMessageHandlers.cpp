@@ -6,6 +6,8 @@
 #include <Messenger/MessageType.hpp>
 #include <Messenger/Timestamp.hpp>
 #include <Common/Log.hpp>
+#include <open_auto_transport/transport.hpp>
+#include <open_auto_transport/wire.hpp>
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -134,7 +136,7 @@ bool MediaSinkVideoMessageHandlers::handleChannelOpenRequest(const ::aasdk::mess
                           ::aasdk::messenger::MessageType::CONTROL,
                           Control::MESSAGE_CHANNEL_OPEN_RESPONSE,
                           response);
-    return false;
+    return true;
   } else {
     AASDK_LOG(error) << "[MediaSinkVideoMessageHandlers] MessageSender not configured; cannot send response.";
     return false;
@@ -161,8 +163,15 @@ bool MediaSinkVideoMessageHandlers::handleMediaData(const ::aasdk::messenger::Me
   if (hasTimestamp) {
     ::aasdk::messenger::Timestamp ts(common::DataConstBuffer(data, size));
     AASDK_LOG(debug) << "[MediaSinkVideoMessageHandlers] Detected timestamped media frame, ts=" << ts.getValue();
+    if (ensureTransportStarted()) {
+      transport_->send(buzz::wire::MsgType::VIDEO, ts.getValue(), data, size);
+    }
   } else {
     AASDK_LOG(debug) << "[MediaSinkVideoMessageHandlers] Media frame without timestamp.";
+    const auto tsNow = resolveTimestamp(false, 0);
+    if (ensureTransportStarted()) {
+      transport_->send(buzz::wire::MsgType::VIDEO, tsNow, data, size);
+    }
   }
 
   aap_protobuf::service::media::source::message::Ack ack;
@@ -175,7 +184,7 @@ bool MediaSinkVideoMessageHandlers::handleMediaData(const ::aasdk::messenger::Me
                         aap_protobuf::service::media::sink::MediaMessageId::MEDIA_MESSAGE_ACK,
                         ack);
 
-  return false; // to see the video data in the app layer, TODO set to true
+  return true; // to see the video data in the app layer, TODO set to true
 }
 
 bool MediaSinkVideoMessageHandlers::handleCodecConfig(const ::aasdk::messenger::Message& message,
@@ -184,23 +193,44 @@ bool MediaSinkVideoMessageHandlers::handleCodecConfig(const ::aasdk::messenger::
   AASDK_LOG(debug) << "[MediaSinkVideoMessageHandlers] codec configuration blob size=" << size
                    << " bytes on channel " << channelIdToString(message.getChannelId());
 
-  const auto preview = std::min<std::size_t>(size, 64);
-  if (preview > 0) {
-    std::ostringstream oss;
-    oss << "[MediaSinkVideoMessageHandlers] codec config preview (" << preview << "/" << size << " bytes): ";
-    for (size_t i = 0; i < preview; ++i) {
-      oss << std::hex << std::setw(2) << std::setfill('0')
-          << static_cast<unsigned int>(static_cast<unsigned char>(data[i])) << ' ';
-    }
-    AASDK_LOG(debug) << oss.str();
-  }
-
-  return false;
+  return handleMediaData(message, data, size);;
 }
 
 void MediaSinkVideoMessageHandlers::setMessageSender(
     std::shared_ptr<::aasdk::messenger::MessageSender> sender) {
   sender_ = std::move(sender);
+}
+
+void MediaSinkVideoMessageHandlers::setTransport(
+    std::shared_ptr<buzz::autoapp::Transport::Transport> transport) {
+  transport_ = std::move(transport);
+}
+
+bool MediaSinkVideoMessageHandlers::ensureTransportStarted() const {
+  if (transport_ && transport_->isRunning()) {
+    return true;
+  }
+
+  if (!transport_) {
+    transport_ = std::make_shared<buzz::autoapp::Transport::Transport>();
+  }
+
+  // Use defaults: Side A creator, no cleanup to allow existing readers.
+  if (!transport_->startAsA(std::chrono::microseconds{1000}, false)) {
+    AASDK_LOG(error) << "[MediaSinkVideoMessageHandlers] Failed to start OpenAutoTransport (side A).";
+    return false;
+  }
+
+  return transport_->isRunning();
+}
+
+uint64_t MediaSinkVideoMessageHandlers::resolveTimestamp(bool hasTimestamp, uint64_t parsedTs) const {
+  if (hasTimestamp) {
+    return parsedTs;
+  }
+
+  const auto now = std::chrono::steady_clock::now().time_since_epoch();
+  return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(now).count());
 }
 
 }

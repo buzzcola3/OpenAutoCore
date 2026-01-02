@@ -21,7 +21,10 @@ cc_library(
     hdrs = glob([
         "include/aasdk/**/*.hpp",
     ]),
-    deps = [":aap_protobuf_cc"],
+    deps = [
+        ":aap_protobuf_cc",
+        "@open_auto_transport//:open_auto_transport",
+    ],
     includes = [
         "include/aasdk",
     ],
@@ -29,6 +32,7 @@ cc_library(
         "BOOST_ALL_DYN_LINK",
     ],
     copts = [
+        "-include", "Common/AsioCompat.hpp",
         "-Wall",
         "-pedantic",
         "-fPIC",

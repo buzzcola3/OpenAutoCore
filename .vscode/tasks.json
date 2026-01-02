@@ -20,6 +20,24 @@
       "problemMatcher": [
         "$gcc"
       ]
+    },
+    {
+      "label": "bazel-build-autoapp",
+      "type": "shell",
+      "command": "bazel",
+      "args": [
+        "build",
+        "-c",
+        "dbg",
+        "//:autoapp_bazel"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     }
   ]
 }

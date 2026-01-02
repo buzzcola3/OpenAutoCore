@@ -20,6 +20,7 @@
 
 #include <f1x/openauto/autoapp/Service/IServiceFactory.hpp>
 #include <f1x/openauto/autoapp/Configuration/IConfiguration.hpp>
+#include <open_auto_transport/transport.hpp>
 
 namespace f1x {
   namespace openauto {
@@ -30,6 +31,7 @@ namespace f1x {
         public:
           ServiceFactory(boost::asio::io_service &ioService, configuration::IConfiguration::Pointer configuration);
           ServiceList create(aasdk::messenger::IMessenger::Pointer messenger) override;
+          std::shared_ptr<buzz::autoapp::Transport::Transport> getTransport() override;
 
         private:
           IService::Pointer createBluetoothService(aasdk::messenger::IMessenger::Pointer messenger);
@@ -43,6 +45,7 @@ namespace f1x {
 
           boost::asio::io_service &ioService_;
           configuration::IConfiguration::Pointer configuration_;
+          std::shared_ptr<buzz::autoapp::Transport::Transport> transport_;
         };
 
       }

@@ -8,6 +8,8 @@
 
 #include <memory>
 
+namespace buzz { namespace autoapp { namespace Transport { class Transport; } } }
+
 namespace aasdk::messenger {
 	class Message;
 	class MessageSender;
@@ -17,5 +19,6 @@ namespace aasdk::messenger::interceptor {
 
 bool handleMessage(const ::aasdk::messenger::Message& message);
 void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender);
+void setVideoTransport(std::shared_ptr<buzz::autoapp::Transport::Transport> transport);
 
 }
