@@ -26,7 +26,6 @@
 
 #include <f1x/openauto/autoapp/Service/ServiceFactory.hpp>
 
-#include <f1x/openauto/autoapp/Service/MediaSink/VideoService.hpp>
 #include <f1x/openauto/autoapp/Service/MediaSink/MediaAudioService.hpp>
 #include <f1x/openauto/autoapp/Service/MediaSink/GuidanceAudioService.hpp>
 #include <f1x/openauto/autoapp/Service/MediaSink/SystemAudioService.hpp>
@@ -37,7 +36,6 @@
 #include <f1x/openauto/autoapp/Service/Sensor/SensorService.hpp>
 #include <f1x/openauto/autoapp/Service/Bluetooth/BluetoothService.hpp>
 #include <f1x/openauto/autoapp/Service/InputSource/InputSourceService.hpp>
-#include <f1x/openauto/autoapp/Projection/QtVideoOutput.hpp>
 #include <f1x/openauto/autoapp/Projection/QtAudioOutput.hpp>
 #include <f1x/openauto/autoapp/Projection/QtAudioInput.hpp>
 #include <f1x/openauto/autoapp/Projection/InputDevice.hpp>
@@ -157,13 +155,6 @@ namespace f1x::openauto::autoapp::service {
     serviceList.emplace_back(
         std::make_shared<mediasink::SystemAudioService>(ioService_, messenger, std::move(systemAudioOutput)));
 
-    projection::IVideoOutput::Pointer videoOutput(new projection::QtVideoOutput(configuration_),
-                                                  std::bind(&QObject::deleteLater, std::placeholders::_1));
-
-
-    OPENAUTO_LOG(info) << "[ServiceFactory] Video Channel enabled";
-    serviceList.emplace_back(
-        std::make_shared<mediasink::VideoService>(ioService_, messenger, std::move(videoOutput)));
   }
 
   void ServiceFactory::createMediaSourceServices(f1x::openauto::autoapp::service::ServiceList &serviceList,

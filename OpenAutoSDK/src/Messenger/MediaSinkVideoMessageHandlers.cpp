@@ -2,6 +2,7 @@
 
 #include <Messenger/Message.hpp>
 #include <Messenger/MessageId.hpp>
+#include <Messenger/ChannelId.hpp>
 #include <Messenger/MessageSender.hpp>
 #include <Messenger/MessageType.hpp>
 #include <Messenger/Timestamp.hpp>
@@ -19,10 +20,13 @@
 #include <aap_protobuf/service/control/ControlMessageType.pb.h>
 #include <aap_protobuf/service/control/message/ChannelOpenResponse.pb.h>
 #include <aap_protobuf/shared/MessageStatus.pb.h>
+#include <aap_protobuf/service/media/shared/message/Config.pb.h>
 #include <aap_protobuf/service/media/shared/message/Setup.pb.h>
+#include <aap_protobuf/service/media/shared/message/MediaCodecType.pb.h>
 #include <aap_protobuf/service/media/shared/message/Start.pb.h>
 #include <aap_protobuf/service/media/shared/message/Stop.pb.h>
 #include <aap_protobuf/service/media/sink/MediaMessageId.pb.h>
+#include <aap_protobuf/service/media/video/message/VideoFocusNotification.pb.h>
 #include <aap_protobuf/service/media/video/message/VideoFocusRequestNotification.pb.h>
 #include <aap_protobuf/service/media/source/message/Ack.pb.h>
 
@@ -75,8 +79,7 @@ bool MediaSinkVideoMessageHandlers::handle(const ::aasdk::messenger::Message& me
       handled = handleChannelOpenRequest(message, payloadData, payloadSize);
       break;
     case Media::MEDIA_MESSAGE_SETUP:
-      decodeAndLogPayload<aap_protobuf::service::media::shared::message::Setup>(
-          payloadData, payloadSize, "MediaSetup");
+      handled = handleChannelSetupRequest(message, payloadData, payloadSize);
       break;
     case Media::MEDIA_MESSAGE_START:
       {
@@ -185,6 +188,54 @@ bool MediaSinkVideoMessageHandlers::handleMediaData(const ::aasdk::messenger::Me
                         ack);
 
   return true; // to see the video data in the app layer, TODO set to true
+}
+
+bool MediaSinkVideoMessageHandlers::handleChannelSetupRequest(const ::aasdk::messenger::Message& message,
+                                                              const std::uint8_t* data,
+                                                              std::size_t size) const {
+  aap_protobuf::service::media::shared::message::Setup setup;
+  if (!setup.ParseFromArray(data, static_cast<int>(size))) {
+    AASDK_LOG(error) << "[MediaSinkVideoMessageHandlers] Failed to parse MediaSetup payload";
+    return false;
+  }
+
+  AASDK_LOG(info) << "[MediaSinkVideoMessageHandlers] MediaSetup: channel="
+                  << channelIdToString(message.getChannelId())
+                  << ", codec=" << aap_protobuf::service::media::shared::message::MediaCodecType_Name(setup.type());
+
+  aap_protobuf::service::media::shared::message::Config response;
+  response.set_status(aap_protobuf::service::media::shared::message::Config::STATUS_READY);
+  response.set_max_unacked(1);
+  response.add_configuration_indices(0);
+
+  if (sender_ != nullptr) {
+    sender_->sendProtobuf(
+        message.getChannelId(),
+        message.getEncryptionType(),
+        ::aasdk::messenger::MessageType::SPECIFIC,
+        aap_protobuf::service::media::sink::MediaMessageId::MEDIA_MESSAGE_CONFIG,
+        response);
+
+    AASDK_LOG(debug) << "[MediaSinkVideoMessageHandlers] MediaSetup response: "
+                     << response.ShortDebugString();
+
+    aap_protobuf::service::media::video::message::VideoFocusNotification focus;
+    focus.set_focus(aap_protobuf::service::media::video::message::VideoFocusMode::VIDEO_FOCUS_PROJECTED);
+    focus.set_unsolicited(false);
+
+    sender_->sendProtobuf(
+        message.getChannelId(),
+        message.getEncryptionType(),
+        ::aasdk::messenger::MessageType::SPECIFIC,
+        aap_protobuf::service::media::sink::MediaMessageId::MEDIA_MESSAGE_VIDEO_FOCUS_NOTIFICATION,
+        focus);
+
+    AASDK_LOG(debug) << "[MediaSinkVideoMessageHandlers] Sent VideoFocusNotification after setup.";
+    return true;
+  }
+
+  AASDK_LOG(error) << "[MediaSinkVideoMessageHandlers] MessageSender not configured; cannot send setup response.";
+  return false;
 }
 
 bool MediaSinkVideoMessageHandlers::handleCodecConfig(const ::aasdk::messenger::Message& message,

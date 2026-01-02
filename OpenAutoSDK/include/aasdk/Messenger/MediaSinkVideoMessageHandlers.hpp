@@ -31,6 +31,10 @@ private:
                        const std::uint8_t* data,
                        std::size_t size) const;
 
+  bool handleChannelSetupRequest(const ::aasdk::messenger::Message& message,
+                                 const std::uint8_t* data,
+                                 std::size_t size) const;
+
   bool handleCodecConfig(const ::aasdk::messenger::Message& message,
                          const std::uint8_t* data,
                          std::size_t size) const;
