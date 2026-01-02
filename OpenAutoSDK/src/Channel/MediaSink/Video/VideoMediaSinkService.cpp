@@ -36,7 +36,7 @@ namespace aasdk::channel::mediasink::video {
   }
 
   void VideoMediaSinkService::receive(IVideoMediaSinkServiceEventHandler::Pointer eventHandler) {
-    AASDK_LOG(debug) << "[VideoMediaSinkService] receive()";
+    //AASDK_LOG(debug) << "[VideoMediaSinkService] receive()";
     auto receivePromise = messenger::ReceivePromise::defer(strand_);
     receivePromise->then(
         std::bind(&VideoMediaSinkService::messageHandler, this->shared_from_this(), std::placeholders::_1,
@@ -100,7 +100,7 @@ namespace aasdk::channel::mediasink::video {
 
   void VideoMediaSinkService::messageHandler(messenger::Message::Pointer message,
                                              IVideoMediaSinkServiceEventHandler::Pointer eventHandler) {
-    AASDK_LOG(debug) << "[VideoMediaSinkService] messageHandler()";
+    //AASDK_LOG(debug) << "[VideoMediaSinkService] messageHandler()";
     messenger::MessageId messageId(message->getPayload());
     common::DataConstBuffer payload(message->getPayload(), messageId.getSizeOf());
 
@@ -181,7 +181,7 @@ namespace aasdk::channel::mediasink::video {
 
   void VideoMediaSinkService::handleMediaWithTimestampIndication(const common::DataConstBuffer &payload,
                                                                  IVideoMediaSinkServiceEventHandler::Pointer eventHandler) {
-    AASDK_LOG(debug) << "[VideoMediaSinkService] handleMediaWithTimestampIndication()";
+    //AASDK_LOG(debug) << "[VideoMediaSinkService] handleMediaWithTimestampIndication()";
     if (payload.size >= sizeof(messenger::Timestamp::ValueType)) {
       messenger::Timestamp timestamp(payload);
       eventHandler->onMediaWithTimestampIndication(timestamp.getValue(),

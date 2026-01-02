@@ -57,8 +57,8 @@ namespace aasdk::messenger::interceptor {
 bool MediaSinkVideoMessageHandlers::handle(const ::aasdk::messenger::Message& message) const {
   ++messageCount_;
   const auto& rawPayload = message.getPayload();
-  AASDK_LOG(debug) << "[MediaSinkVideoMessageHandlers] media video message received, size="
-                   << rawPayload.size() << ", total=" << messageCount_;
+  //AASDK_LOG(debug) << "[MediaSinkVideoMessageHandlers] media video message received, size="
+  //                 << rawPayload.size() << ", total=" << messageCount_;
 
   if (rawPayload.size() <= ::aasdk::messenger::MessageId::getSizeOf()) {
     AASDK_LOG(error) << "[MediaSinkVideoMessageHandlers] media video payload too small";
@@ -146,8 +146,8 @@ bool MediaSinkVideoMessageHandlers::handleChannelOpenRequest(const ::aasdk::mess
 bool MediaSinkVideoMessageHandlers::handleMediaData(const ::aasdk::messenger::Message& message,
                                                     const std::uint8_t* data,
                                                     std::size_t size) const {
-  AASDK_LOG(debug) << "[MediaSinkVideoMessageHandlers] media data frame size=" << size
-                   << " bytes on channel " << channelIdToString(message.getChannelId());
+  //AASDK_LOG(debug) << "[MediaSinkVideoMessageHandlers] media data frame size=" << size
+  //                 << " bytes on channel " << channelIdToString(message.getChannelId());
 
   if (sender_ == nullptr) {
     AASDK_LOG(error) << "[MediaSinkVideoMessageHandlers] MessageSender not configured; cannot send media ACK.";
@@ -162,7 +162,7 @@ bool MediaSinkVideoMessageHandlers::handleMediaData(const ::aasdk::messenger::Me
   const bool hasTimestamp = size >= sizeof(::aasdk::messenger::Timestamp::ValueType);
   if (hasTimestamp) {
     ::aasdk::messenger::Timestamp ts(common::DataConstBuffer(data, size));
-    AASDK_LOG(debug) << "[MediaSinkVideoMessageHandlers] Detected timestamped media frame, ts=" << ts.getValue();
+    //AASDK_LOG(debug) << "[MediaSinkVideoMessageHandlers] Detected timestamped media frame, ts=" << ts.getValue();
     if (ensureTransportStarted()) {
       transport_->send(buzz::wire::MsgType::VIDEO, ts.getValue(), data, size);
     }

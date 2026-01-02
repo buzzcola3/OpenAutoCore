@@ -26,13 +26,13 @@ namespace aasdk {
         : receiveStrand_(ioService), sendStrand_(ioService) {}
 
     void Transport::receive(size_t size, ReceivePromise::Pointer promise) {
-      AASDK_LOG(debug) << "[Transport] receive()";
+      //AASDK_LOG(debug) << "[Transport] receive()";
       receiveStrand_.dispatch([this, self = this->shared_from_this(), size, promise = std::move(promise)]() mutable {
         receiveQueue_.emplace_back(std::make_pair(size, std::move(promise)));
 
         if (receiveQueue_.size() == 1) {
           try {
-            AASDK_LOG(debug) << "[Transport] Distribute received data.";
+            //AASDK_LOG(debug) << "[Transport] Distribute received data.";
             this->distributeReceivedData();
           }
           catch (const error::Error &e) {
@@ -46,7 +46,7 @@ namespace aasdk {
 
     void Transport::receiveHandler(size_t bytesTransferred) {
       try {
-        AASDK_LOG(debug) << "[Transport] receiveHandler()";
+        //AASDK_LOG(debug) << "[Transport] receiveHandler()";
         receivedDataSink_.commit(bytesTransferred);
         this->distributeReceivedData();
       }
@@ -58,17 +58,17 @@ namespace aasdk {
     }
 
     void Transport::distributeReceivedData() {
-      AASDK_LOG(debug) << "[Transport] distributeReceivedData()";
+      //AASDK_LOG(debug) << "[Transport] distributeReceivedData()";
       for (auto queueElement = receiveQueue_.begin(); queueElement != receiveQueue_.end();) {
         if (receivedDataSink_.getAvailableSize() < queueElement->first) {
-          AASDK_LOG(debug) << "[Transport] Receiving from buffer.";
+          //AASDK_LOG(debug) << "[Transport] Receiving from buffer.";
           auto buffer = receivedDataSink_.fill();
           this->enqueueReceive(std::move(buffer));
 
           break;
         } else {
           auto data(receivedDataSink_.consume(queueElement->first));
-          AASDK_LOG(debug) << "[Transport] Resolve and clear message.";
+          //AASDK_LOG(debug) << "[Transport] Resolve and clear message.";
           queueElement->second->resolve(std::move(data));
           queueElement = receiveQueue_.erase(queueElement);
         }

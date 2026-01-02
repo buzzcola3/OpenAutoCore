@@ -196,8 +196,8 @@ namespace f1x {
 
           void AudioMediaSinkService::onMediaWithTimestampIndication(aasdk::messenger::Timestamp::ValueType timestamp,
                                                                      const aasdk::common::DataConstBuffer &buffer) {
-            OPENAUTO_LOG(debug) << "[AudioMediaSinkService] onMediaWithTimestampIndication()";
-            OPENAUTO_LOG(debug) << "[AudioMediaSinkService] Channel Id: " << aasdk::messenger::channelIdToString(channel_->getId()) << ", session: " << session_;
+            //OPENAUTO_LOG(debug) << "[AudioMediaSinkService] onMediaWithTimestampIndication()";
+            //OPENAUTO_LOG(debug) << "[AudioMediaSinkService] Channel Id: " << aasdk::messenger::channelIdToString(channel_->getId()) << ", session: " << session_;
 
             audioOutput_->write(timestamp, buffer);
 

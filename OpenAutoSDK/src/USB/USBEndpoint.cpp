@@ -69,7 +69,7 @@ namespace aasdk {
           AASDK_LOG(debug) << "[USBEndpoint] Rejecting Promise " << endpointAddress_ << " size " << buffer.size;
           promise->reject(error::Error(error::ErrorCode::USB_TRANSFER_ALLOCATION));
         } else {
-          AASDK_LOG(debug) << "[USBEndpoint] Fill Bulk Transfer " << endpointAddress_ << " size " << buffer.size;
+          //AASDK_LOG(debug) << "[USBEndpoint] Fill Bulk Transfer " << endpointAddress_ << " size " << buffer.size;
           usbWrapper_.fillBulkTransfer(transfer, handle_, endpointAddress_, buffer.data, buffer.size,
                                        reinterpret_cast<libusb_transfer_cb_fn>(&USBEndpoint::transferHandler), this,
                                        timeout);
@@ -114,7 +114,7 @@ namespace aasdk {
     }
 
     void USBEndpoint::transferHandler(libusb_transfer *transfer) {
-      AASDK_LOG(debug) << "[USBEndpoint] transferHandler()";
+      //AASDK_LOG(debug) << "[USBEndpoint] transferHandler()";
       auto self = reinterpret_cast<USBEndpoint *>(transfer->user_data)->shared_from_this();
 
       self->strand_.dispatch([self, transfer]() mutable {
@@ -126,7 +126,7 @@ namespace aasdk {
         auto promise(std::move(self->transfers_.at(transfer)));
 
         if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
-          AASDK_LOG(debug) << "[Transport] Transfer Complete.";
+          //AASDK_LOG(debug) << "[Transport] Transfer Complete.";
           promise->resolve(transfer->actual_length);
         } else {
           AASDK_LOG(debug) << "[Transport] Transfer Cancelled.";

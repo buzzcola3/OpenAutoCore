@@ -210,7 +210,7 @@ namespace f1x::openauto::autoapp::service::sensor {
   }
 
   void SensorService::sensorPolling() {
-    OPENAUTO_LOG(info) << "[SensorService] sensorPolling()";
+    //OPENAUTO_LOG(info) << "[SensorService] sensorPolling()";
     if (!this->stopPolling) {
       strand_.dispatch([this, self = this->shared_from_this()]() {
         this->isNight = is_file_exist("/tmp/night_mode_enabled");
@@ -245,7 +245,7 @@ namespace f1x::openauto::autoapp::service::sensor {
   }
 
   bool SensorService::is_file_exist(const char *fileName) {
-    OPENAUTO_LOG(info) << "[SensorService] is_file_exist()";
+    //OPENAUTO_LOG(info) << "[SensorService] is_file_exist()";
     std::ifstream ifile(fileName, std::ios::in);
     return ifile.good();
   }

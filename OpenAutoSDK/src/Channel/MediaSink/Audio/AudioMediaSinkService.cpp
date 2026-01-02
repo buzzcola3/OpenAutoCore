@@ -36,7 +36,7 @@ namespace aasdk::channel::mediasink::audio {
   }
 
   void AudioMediaSinkService::receive(IAudioMediaSinkServiceEventHandler::Pointer eventHandler) {
-    AASDK_LOG(debug) << "[AudioMediaSinkService] receive()";
+    //AASDK_LOG(debug) << "[AudioMediaSinkService] receive()";
     auto receivePromise = messenger::ReceivePromise::defer(strand_);
     receivePromise->then(
         std::bind(&AudioMediaSinkService::messageHandler, this->shared_from_this(), std::placeholders::_1,
@@ -88,7 +88,7 @@ namespace aasdk::channel::mediasink::audio {
 
   void AudioMediaSinkService::messageHandler(messenger::Message::Pointer message,
                                              IAudioMediaSinkServiceEventHandler::Pointer eventHandler) {
-    AASDK_LOG(debug) << "[AudioMediaSinkService] messageHandler()";
+    //AASDK_LOG(debug) << "[AudioMediaSinkService] messageHandler()";
     messenger::MessageId messageId(message->getPayload());
     common::DataConstBuffer payload(message->getPayload(), messageId.getSizeOf());
 
@@ -166,7 +166,7 @@ namespace aasdk::channel::mediasink::audio {
 
   void AudioMediaSinkService::handleMediaWithTimestampIndication(const common::DataConstBuffer &payload,
                                                                  IAudioMediaSinkServiceEventHandler::Pointer eventHandler) {
-    AASDK_LOG(debug) << "[AudioMediaSinkService] handleMediaWithTimestampIndication()";
+    //AASDK_LOG(debug) << "[AudioMediaSinkService] handleMediaWithTimestampIndication()";
     if (payload.size >= sizeof(messenger::Timestamp::ValueType)) {
       messenger::Timestamp timestamp(payload);
       eventHandler->onMediaWithTimestampIndication(timestamp.getValue(),

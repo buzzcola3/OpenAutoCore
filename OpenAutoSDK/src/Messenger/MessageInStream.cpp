@@ -31,7 +31,7 @@ namespace aasdk::messenger {
   }
 
   void MessageInStream::startReceive(ReceivePromise::Pointer promise) {
-    AASDK_LOG(debug) << "[MessageInStream] startReceiveCalled()";
+    //AASDK_LOG(debug) << "[MessageInStream] startReceiveCalled()";
     strand_.dispatch([this, self = this->shared_from_this(), promise = std::move(promise)]() mutable {
       if (promise_ == nullptr) {
         promise_ = std::move(promise);
@@ -58,9 +58,9 @@ namespace aasdk::messenger {
   void MessageInStream::receiveFrameHeaderHandler(const common::DataConstBuffer &buffer) {
     FrameHeader frameHeader(buffer);
 
-    AASDK_LOG(debug) << "[MessageInStream] Processing Frame Header: Ch "
-                     << channelIdToString(frameHeader.getChannelId()) << " Fr "
-                     << frameTypeToString(frameHeader.getType());
+    //AASDK_LOG(debug) << "[MessageInStream] Processing Frame Header: Ch "
+    //                 << channelIdToString(frameHeader.getChannelId()) << " Fr "
+    //                 << frameTypeToString(frameHeader.getType());
 
     isValidFrame_ = true;
 
@@ -70,7 +70,7 @@ namespace aasdk::messenger {
       message_ = std::move(bufferedMessage->second);
       messageBuffer_.erase(bufferedMessage);
 
-      AASDK_LOG(debug) << "[MessageInStream] Found existing message.";
+      //AASDK_LOG(debug) << "[MessageInStream] Found existing message.";
 
       if (frameHeader.getType() == FrameType::FIRST || frameHeader.getType() == FrameType::BULK) {
         // If it's first or bulk, we need to override the message anyhow, so we will start again.
@@ -79,7 +79,7 @@ namespace aasdk::messenger {
                                              frameHeader.getMessageType());
       }
     } else {
-      AASDK_LOG(debug) << "[MessageInStream] Could not find existing message.";
+      //AASDK_LOG(debug) << "[MessageInStream] Could not find existing message.";
       // No Message Found in Buffers and this is a middle or last frame, this an error.
       // Still need to process the frame, but we will not resolve at the end.
       message_ = std::make_shared<Message>(frameHeader.getChannelId(), frameHeader.getEncryptionType(),
@@ -150,7 +150,7 @@ namespace aasdk::messenger {
       const bool handled = this->invokeInterceptor(*message_);
 
       if (!handled) {
-        AASDK_LOG(debug) << "[MessageInStream] Resolving message.";
+        //AASDK_LOG(debug) << "[MessageInStream] Resolving message.";
         promise_->resolve(std::move(message_));
         promise_.reset();
         isResolved = true;
