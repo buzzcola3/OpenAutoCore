@@ -75,7 +75,7 @@ namespace aasdk::channel::mediasink::audio {
   void AudioMediaSinkService::sendMediaAckIndication(
       const aap_protobuf::service::media::source::message::Ack &indication,
       SendPromise::Pointer promise) {
-    AASDK_LOG(debug) << "[AudioMediaSinkService] sendMediaAckIndication()";
+    //AASDK_LOG(debug) << "[AudioMediaSinkService] sendMediaAckIndication()";
     auto message(std::make_shared<messenger::Message>(channelId_, messenger::EncryptionType::ENCRYPTED,
                                                       messenger::MessageType::SPECIFIC));
     message->insertPayload(

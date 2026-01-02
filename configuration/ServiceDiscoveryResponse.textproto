@@ -1,0 +1,116 @@
+channels {
+    id: 3
+    media_sink_service {
+      available_type: MEDIA_CODEC_VIDEO_H264_BP
+      video_configs {
+        codec_resolution: VIDEO_800x480
+        frame_rate: VIDEO_FPS_30
+        width_margin: 0
+        height_margin: 0
+        density: 140
+      }
+      available_while_in_call: true
+    }
+  }
+  channels {
+    id: 9
+    media_source_service {
+      available_type: MEDIA_CODEC_AUDIO_PCM
+      audio_config {
+        sampling_rate: 16000
+        number_of_bits: 16
+        number_of_channels: 1
+      }
+    }
+  }
+  channels {
+    id: 1
+    sensor_source_service {
+      sensors {
+        sensor_type: SENSOR_DRIVING_STATUS_DATA
+      }
+      sensors {
+        sensor_type: SENSOR_LOCATION
+      }
+      sensors {
+        sensor_type: SENSOR_NIGHT_MODE
+      }
+    }
+  }
+  channels {
+    id: 8
+    input_source_service {
+      touchscreen {
+        width: 1920
+        height: 1080
+      }
+    }
+  }
+  channels {
+    id: 10
+    bluetooth_service {
+      car_address: ""
+      supported_pairing_methods: BLUETOOTH_PAIRING_UNAVAILABLE
+    }
+  }
+  channels {
+    id: 4
+    media_sink_service {
+      available_type: MEDIA_CODEC_AUDIO_PCM
+      audio_type: AUDIO_STREAM_MEDIA
+      audio_configs {
+        sampling_rate: 48000
+        number_of_bits: 16
+        number_of_channels: 2
+      }
+      available_while_in_call: true
+    }
+  }
+  channels {
+    id: 6
+    media_sink_service {
+      available_type: MEDIA_CODEC_AUDIO_PCM
+      audio_type: AUDIO_STREAM_SYSTEM_AUDIO
+      audio_configs {
+        sampling_rate: 16000
+        number_of_bits: 16
+        number_of_channels: 1
+      }
+      available_while_in_call: true
+    }
+  }
+  channels {
+    id: 5
+    media_sink_service {
+      available_type: MEDIA_CODEC_AUDIO_PCM
+      audio_type: AUDIO_STREAM_GUIDANCE
+      audio_configs {
+        sampling_rate: 16000
+        number_of_bits: 16
+        number_of_channels: 1
+      }
+      available_while_in_call: true
+    }
+  }
+  driver_position: DRIVER_POSITION_RIGHT
+  can_play_native_media_during_vr: false
+  display_name: "OpenAutoCore"
+  probe_for_support: false
+  connection_configuration {
+    ping_configuration {
+      timeout_ms: 3000
+      interval_ms: 1000
+      high_latency_threshold_ms: 200
+      tracked_ping_count: 5
+    }
+  }
+  headunit_info {
+    make: "blank"
+    model: "blank"
+    year: "blank"
+    vehicle_id: "blank"
+    head_unit_make: "blank"
+    head_unit_model: "blank"
+    head_unit_software_build: "1"
+    head_unit_software_version: "1.0"
+  }
