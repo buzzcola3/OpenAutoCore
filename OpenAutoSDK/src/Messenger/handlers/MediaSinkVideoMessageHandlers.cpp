@@ -267,7 +267,7 @@ bool MediaSinkVideoMessageHandlers::ensureTransportStarted() const {
   }
 
   // Use defaults: Side A creator, no cleanup to allow existing readers.
-  if (!transport_->startAsA(std::chrono::microseconds{1000}, false)) {
+  if (!transport_->startAsA(std::chrono::microseconds{1000})) {
     AASDK_LOG(error) << "[MediaSinkVideoMessageHandlers] Failed to start OpenAutoTransport (side A).";
     return false;
   }

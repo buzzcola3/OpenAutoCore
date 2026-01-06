@@ -21,6 +21,7 @@
 #include <QScreen>
 #include <QDesktopWidget>
 #include <chrono>
+#include <limits>
 #include <USB/USBHub.hpp>
 #include <USB/ConnectedAccessoriesEnumerator.hpp>
 #include <USB/AccessoryModeQueryChain.hpp>
@@ -30,6 +31,9 @@
 #include <boost/log/utility/setup.hpp>
 #include <f1x/openauto/autoapp/App.hpp>
 #include <Messenger/MessageInStreamInterceptor.hpp>
+#include <Messenger/InputSourceMessageHandlers.hpp>
+#include <open_auto_transport/wire.hpp>
+#include <aap_protobuf/service/inputsource/message/InputReport.pb.h>
 #include <f1x/openauto/autoapp/Configuration/IConfiguration.hpp>
 #include <f1x/openauto/autoapp/Configuration/RecentAddressesList.hpp>
 #include <f1x/openauto/autoapp/Service/AndroidAutoEntityFactory.hpp>
@@ -229,6 +233,15 @@ int main(int argc, char* argv[])
         }
     }
     aasdk::messenger::interceptor::setVideoTransport(transport);
+
+    if (transport) {
+        static aasdk::messenger::interceptor::InputSourceMessageHandlers touchHandlers;
+        transport->addTypeHandler(
+            buzz::wire::MsgType::TOUCH,
+            [&touchHandlers](uint64_t timestamp, const void* data, std::size_t size) {
+                touchHandlers.onTouchEvent(timestamp, data, size);
+            });
+    }
 
     autoapp::service::AndroidAutoEntityFactory androidAutoEntityFactory(ioService, configuration, serviceFactory);
 

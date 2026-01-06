@@ -136,7 +136,7 @@ void Configuration::reset()
     hideMenuToggle_ = false;
     hideAlpha_ = false;
     showLux_ = false;
-    showCursor_ = false;
+    showCursor_ = true;
     hideBrightnessControl_ = false;
     hideWarning_ = false;
     showNetworkinfo_ = false;
