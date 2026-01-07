@@ -40,7 +40,6 @@
 #include <f1x/openauto/autoapp/Service/ServiceFactory.hpp>
 #include <f1x/openauto/autoapp/Configuration/Configuration.hpp>
 #include <f1x/openauto/autoapp/UI/MainWindow.hpp>
-#include <f1x/openauto/autoapp/UI/SettingsWindow.hpp>
 #include <f1x/openauto/Common/Log.hpp>
 
 namespace autoapp = f1x::openauto::autoapp;
@@ -138,12 +137,6 @@ int main(int argc, char* argv[])
     autoapp::ui::MainWindow mainWindow(configuration);
     //mainWindow.setWindowFlags(Qt::WindowStaysOnTopHint);
 
-    autoapp::ui::SettingsWindow settingsWindow(configuration);
-    //settingsWindow.setWindowFlags(Qt::WindowStaysOnTopHint);
-
-    settingsWindow.setFixedSize(width, height);
-    settingsWindow.adjustSize();
-
     autoapp::configuration::RecentAddressesList recentAddressesList(7);
     recentAddressesList.read();
 
@@ -151,8 +144,6 @@ int main(int argc, char* argv[])
 
     QObject::connect(&mainWindow, &autoapp::ui::MainWindow::exit, []() { system("touch /tmp/shutdown"); std::exit(0); });
     QObject::connect(&mainWindow, &autoapp::ui::MainWindow::reboot, []() { system("touch /tmp/reboot"); std::exit(0); });
-    QObject::connect(&mainWindow, &autoapp::ui::MainWindow::openSettings, &settingsWindow, &autoapp::ui::SettingsWindow::showFullScreen);
-    QObject::connect(&mainWindow, &autoapp::ui::MainWindow::openSettings, &settingsWindow, &autoapp::ui::SettingsWindow::show_tab2);
 
     if (configuration->showCursor() == false) {
         qApplication.setOverrideCursor(Qt::BlankCursor);
@@ -287,12 +278,7 @@ int main(int argc, char* argv[])
         }
     });
 
-    QObject::connect(&mainWindow, &autoapp::ui::MainWindow::CloseAllDialogs, [&settingsWindow]() {
-        settingsWindow.close();
-        OPENAUTO_LOG(debug) << "[AutoApp] Close all possible open dialogs.";
-    });
-
-
+    
     app->waitForUSBDevice();
 
     auto result = qApplication.exec();

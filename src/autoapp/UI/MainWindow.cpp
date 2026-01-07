@@ -136,7 +136,6 @@ MainWindow::MainWindow(configuration::IConfiguration::Pointer configuration, QWi
 
     ui_->setupUi(this);
 
-    connect(ui_->pushButtonSettings, &QPushButton::clicked, this, &MainWindow::openSettings);
     connect(ui_->pushButtonExit, &QPushButton::clicked, this, &MainWindow::toggleExit);
     connect(ui_->pushButtonShutdown, &QPushButton::clicked, this, &MainWindow::exit);
     connect(ui_->pushButtonReboot, &QPushButton::clicked, this, &MainWindow::reboot);
@@ -297,7 +296,6 @@ void f1x::openauto::autoapp::ui::MainWindow::updateNetworkInfo()
         ? tr("No active network interfaces detected.")
         : summaries.join(QLatin1Char('\n'));
 
-    ui_->pushButtonSettings->setToolTip(tooltip);
     ui_->pushButtonExit->setToolTip(tooltip);
 }
 

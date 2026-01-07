@@ -74,7 +74,6 @@ public:
 signals:
     void exit();
     void reboot();
-    void openSettings();
     void toggleCursor();
     void TriggerScriptDay();
     void TriggerScriptNight();
