@@ -154,17 +154,22 @@ bool MediaSinkAudioMessageHandlers::handleMediaData(const ::aasdk::messenger::Me
   }
 
   const bool hasTimestamp = size >= sizeof(::aasdk::messenger::Timestamp::ValueType);
+  constexpr auto timestampBytes = sizeof(::aasdk::messenger::Timestamp::ValueType);
+  const std::uint8_t* frameData = data;
+  std::size_t frameSize = size;
+
+  uint64_t timestamp = 0;
   if (hasTimestamp) {
-    ::aasdk::messenger::Timestamp ts(common::DataConstBuffer(data, size));
-    if (ensureTransportStarted()) {
-      transport_->send(buzz::wire::MsgType::MEDIA_AUDIO, ts.getValue(), data, size);
-      AASDK_LOG(debug) << "[MediaSinkAudioMessageHandlers] Sent audio data with timestamp ts=" << ts.getValue();
-    }
+    ::aasdk::messenger::Timestamp ts(common::DataConstBuffer(data, timestampBytes));
+    timestamp = resolveTimestamp(true, ts.getValue());
+    frameData += timestampBytes;
+    frameSize -= timestampBytes;
   } else {
-    const auto tsNow = resolveTimestamp(false, 0);
-    if (ensureTransportStarted()) {
-      transport_->send(buzz::wire::MsgType::MEDIA_AUDIO, tsNow, data, size);
-    }
+    timestamp = resolveTimestamp(false, 0);
+  }
+
+  if (ensureTransportStarted()) {
+    transport_->send(buzz::wire::MsgType::MEDIA_AUDIO, timestamp, frameData, frameSize);
   }
 
   aap_protobuf::service::media::source::message::Ack ack;

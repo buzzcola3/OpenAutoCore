@@ -163,19 +163,24 @@ bool MediaSinkVideoMessageHandlers::handleMediaData(const ::aasdk::messenger::Me
   }
 
   const bool hasTimestamp = size >= sizeof(::aasdk::messenger::Timestamp::ValueType);
+  constexpr auto timestampBytes = sizeof(::aasdk::messenger::Timestamp::ValueType);
+  const std::uint8_t* frameData = data;
+  std::size_t frameSize = size;
+
+  uint64_t timestamp = 0;
   if (hasTimestamp) {
-    ::aasdk::messenger::Timestamp ts(common::DataConstBuffer(data, size));
+    ::aasdk::messenger::Timestamp ts(common::DataConstBuffer(data, timestampBytes));
     //AASDK_LOG(debug) << "[MediaSinkVideoMessageHandlers] Detected timestamped media frame, ts=" << ts.getValue();
-    if (ensureTransportStarted()) {
-      transport_->send(buzz::wire::MsgType::VIDEO, ts.getValue(), data, size);
-      AASDK_LOG(debug) << "[MediaSinkVideoMessageHandlers] Sent video frame with timestamp: ts=" << ts.getValue();
-    }
+    timestamp = resolveTimestamp(true, ts.getValue());
+    frameData += timestampBytes;
+    frameSize -= timestampBytes;
   } else {
     AASDK_LOG(debug) << "[MediaSinkVideoMessageHandlers] Media frame without timestamp.";
-    const auto tsNow = resolveTimestamp(false, 0);
-    if (ensureTransportStarted()) {
-      transport_->send(buzz::wire::MsgType::VIDEO, tsNow, data, size);
-    }
+    timestamp = resolveTimestamp(false, 0);
+  }
+
+  if (ensureTransportStarted()) {
+    transport_->send(buzz::wire::MsgType::VIDEO, timestamp, frameData, frameSize);
   }
 
   aap_protobuf::service::media::source::message::Ack ack;
