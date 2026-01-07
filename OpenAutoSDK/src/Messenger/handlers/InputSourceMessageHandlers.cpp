@@ -1,4 +1,4 @@
-#include <Messenger/InputSourceMessageHandlers.hpp>
+#include <Messenger/handlers/InputSourceMessageHandlers.hpp>
 
 #include <Messenger/Message.hpp>
 #include <Messenger/MessageId.hpp>

@@ -2,8 +2,9 @@
 // delivery for specific channel IDs when required.
 
 #include <Messenger/MessageInStreamInterceptor.hpp>
-#include <Messenger/MediaSinkVideoMessageHandlers.hpp>
-#include <Messenger/InputSourceMessageHandlers.hpp>
+#include <Messenger/handlers/MediaSinkAudioMessageHandlers.hpp>
+#include <Messenger/handlers/MediaSinkVideoMessageHandlers.hpp>
+#include <Messenger/handlers/InputSourceMessageHandlers.hpp>
 #include <Messenger/MessageSender.hpp>
 #include <Messenger/MessageSenderLocator.hpp>
 #include <Messenger/Message.hpp>
@@ -17,6 +18,7 @@ namespace aasdk::messenger::interceptor {
 namespace {
 
 MediaSinkVideoMessageHandlers MEDIA_SINK_VIDEO_HANDLERS;
+MediaSinkAudioMessageHandlers MEDIA_SINK_AUDIO_HANDLERS;
 InputSourceMessageHandlers INPUT_SOURCE_HANDLERS;
 
 }
@@ -25,6 +27,8 @@ bool handleMessage(const ::aasdk::messenger::Message& message) {
   switch (message.getChannelId()) {
     case ::aasdk::messenger::ChannelId::MEDIA_SINK_VIDEO:
       return MEDIA_SINK_VIDEO_HANDLERS.handle(message);
+    case ::aasdk::messenger::ChannelId::MEDIA_SINK_MEDIA_AUDIO:
+      return MEDIA_SINK_AUDIO_HANDLERS.handle(message);
     case ::aasdk::messenger::ChannelId::INPUT_SOURCE:
       return INPUT_SOURCE_HANDLERS.handle(message);
     default:
@@ -35,11 +39,13 @@ bool handleMessage(const ::aasdk::messenger::Message& message) {
 void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender) {
   MessageSenderLocator::set(sender);
   MEDIA_SINK_VIDEO_HANDLERS.setMessageSender(sender);
+  MEDIA_SINK_AUDIO_HANDLERS.setMessageSender(sender);
   INPUT_SOURCE_HANDLERS.setMessageSender(sender);
 }
 
-void setVideoTransport(std::shared_ptr<buzz::autoapp::Transport::Transport> transport) {
-  MEDIA_SINK_VIDEO_HANDLERS.setTransport(std::move(transport));
+void setVideoTransport(const std::shared_ptr<buzz::autoapp::Transport::Transport>& transport) {
+  MEDIA_SINK_VIDEO_HANDLERS.setTransport(transport);
+  MEDIA_SINK_AUDIO_HANDLERS.setTransport(transport);
 }
 
 InputSourceMessageHandlers& getInputSourceHandlers() {

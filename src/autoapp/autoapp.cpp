@@ -29,7 +29,7 @@
 #include <boost/log/utility/setup.hpp>
 #include <f1x/openauto/autoapp/App.hpp>
 #include <Messenger/MessageInStreamInterceptor.hpp>
-#include <Messenger/InputSourceMessageHandlers.hpp>
+#include <Messenger/handlers/InputSourceMessageHandlers.hpp>
 #include <open_auto_transport/wire.hpp>
 #include <aap_protobuf/service/inputsource/message/InputReport.pb.h>
 #include <f1x/openauto/autoapp/Configuration/IConfiguration.hpp>

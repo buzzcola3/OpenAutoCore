@@ -21,7 +21,7 @@ class InputSourceMessageHandlers;
 
 bool handleMessage(const ::aasdk::messenger::Message& message);
 void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender);
-void setVideoTransport(std::shared_ptr<buzz::autoapp::Transport::Transport> transport);
+void setVideoTransport(const std::shared_ptr<buzz::autoapp::Transport::Transport>& transport);
 ::aasdk::messenger::interceptor::InputSourceMessageHandlers& getInputSourceHandlers();
 
 }
