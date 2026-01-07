@@ -16,9 +16,6 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <QApplication>
-#include <QScreen>
-
 #include <Channel/MediaSink/Audio/Channel/MediaAudioChannel.hpp>
 #include <Channel/MediaSink/Audio/Channel/SystemAudioChannel.hpp>
 #include <Channel/MediaSink/Audio/Channel/GuidanceAudioChannel.hpp>
@@ -35,10 +32,8 @@
 
 #include <f1x/openauto/autoapp/Service/Sensor/SensorService.hpp>
 #include <f1x/openauto/autoapp/Service/Bluetooth/BluetoothService.hpp>
-#include <f1x/openauto/autoapp/Service/InputSource/InputSourceService.hpp>
 #include <f1x/openauto/autoapp/Projection/QtAudioOutput.hpp>
 #include <f1x/openauto/autoapp/Projection/QtAudioInput.hpp>
-#include <f1x/openauto/autoapp/Projection/InputDevice.hpp>
 #include <f1x/openauto/autoapp/Projection/LocalBluetoothDevice.hpp>
 #include <f1x/openauto/autoapp/Projection/DummyBluetoothDevice.hpp>
 
@@ -57,7 +52,6 @@ namespace f1x::openauto::autoapp::service {
     this->createMediaSinkServices(serviceList, messenger);
     this->createMediaSourceServices(serviceList, messenger);
     serviceList.emplace_back(this->createSensorService(messenger));
-    serviceList.emplace_back(this->createInputService(messenger));
     if (configuration_->getWirelessProjectionEnabled())
     {
         // TODO: What is WiFi Projection Service?
@@ -93,33 +87,6 @@ namespace f1x::openauto::autoapp::service {
     }
 
     return std::make_shared<bluetooth::BluetoothService>(ioService_, messenger, std::move(bluetoothDevice));
-  }
-
-  IService::Pointer ServiceFactory::createInputService(aasdk::messenger::IMessenger::Pointer messenger) {
-    OPENAUTO_LOG(info) << "[ServiceFactory] createInputService()";
-    QRect videoGeometry;
-    switch (configuration_->getVideoResolution()) {
-      case aap_protobuf::service::media::sink::message::VideoCodecResolutionType::VIDEO_1280x720:
-        OPENAUTO_LOG(info) << "[ServiceFactory] Resolution 1280x720";
-        videoGeometry = QRect(0, 0, 1280, 720);
-        break;
-      case aap_protobuf::service::media::sink::message::VideoCodecResolutionType::VIDEO_1920x1080:
-        OPENAUTO_LOG(info) << "[ServiceFactory] Resolution 1920x1080";
-        videoGeometry = QRect(0, 0, 1920, 1080);
-        break;
-      default:
-        OPENAUTO_LOG(info) << "[ServiceFactory] Resolution 800x480";
-        videoGeometry = QRect(0, 0, 800, 480);
-        break;
-    }
-
-    QScreen *screen = QGuiApplication::primaryScreen();
-    QRect screenGeometry = screen == nullptr ? QRect(0, 0, 1, 1) : screen->geometry();
-    projection::IInputDevice::Pointer inputDevice(
-        std::make_shared<projection::InputDevice>(*QApplication::instance(), configuration_,
-                                                  std::move(screenGeometry), std::move(videoGeometry)));
-
-    return std::make_shared<inputsource::InputSourceService>(ioService_, messenger, std::move(inputDevice));
   }
 
   void ServiceFactory::createMediaSinkServices(ServiceList &serviceList,
