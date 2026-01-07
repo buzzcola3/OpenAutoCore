@@ -1,7 +1,9 @@
-module(name = "openautocore", version = "0.0.0")
+module(
+    name = "openautocore",
+    version = "0.0.0",
+)
 
 bazel_dep(name = "bazel_skylib", version = "1.5.0")
-
 bazel_dep(name = "rules_python", version = "0.39.0")
 
 # rules_foreign_cc 0.10.1 is known-good with this codebase; pin via override to
@@ -9,22 +11,20 @@ bazel_dep(name = "rules_python", version = "0.39.0")
 bazel_dep(name = "rules_foreign_cc", version = "0.10.1")
 
 # OpenAutoTransport shared-memory transport for video/audio/data piping.
-bazel_dep(name = "open_auto_transport", version = "0.0.8")
+bazel_dep(name = "open_auto_transport", version = "0.0.18")
 
 # Cap'n Proto runtime
 bazel_dep(name = "capnp-cpp", version = "1.1.0")
 
 git_override(
-	module_name = "open_auto_transport",
-	remote = "https://github.com/buzzcola3/OpenAutoTransport.git",
-	tag = "v0.0.8",
-	patches = ["third_party/patches/open_auto_transport_no_hermetic.patch"],
-	patch_strip = 1,
+    module_name = "open_auto_transport",
+    remote = "https://github.com/buzzcola3/OpenAutoTransport.git",
+    tag = "v0.0.18",
 )
 
 archive_override(
-	module_name = "rules_foreign_cc",
-	urls = ["https://github.com/bazelbuild/rules_foreign_cc/archive/refs/tags/0.10.1.tar.gz"],
-	strip_prefix = "rules_foreign_cc-0.10.1",
-	sha256 = "476303bd0f1b04cc311fc258f1708a5f6ef82d3091e53fd1977fa20383425a6a",
+    module_name = "rules_foreign_cc",
+    sha256 = "476303bd0f1b04cc311fc258f1708a5f6ef82d3091e53fd1977fa20383425a6a",
+    strip_prefix = "rules_foreign_cc-0.10.1",
+    urls = ["https://github.com/bazelbuild/rules_foreign_cc/archive/refs/tags/0.10.1.tar.gz"],
 )

@@ -235,7 +235,7 @@ int main(int argc, char* argv[])
     aasdk::messenger::interceptor::setVideoTransport(transport);
 
     if (transport) {
-        static aasdk::messenger::interceptor::InputSourceMessageHandlers touchHandlers;
+        auto& touchHandlers = aasdk::messenger::interceptor::getInputSourceHandlers();
         transport->addTypeHandler(
             buzz::wire::MsgType::TOUCH,
             [&touchHandlers](uint64_t timestamp, const void* data, std::size_t size) {

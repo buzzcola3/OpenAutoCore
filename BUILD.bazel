@@ -206,7 +206,6 @@ cc_binary(
     deps = [
         "//OpenAutoSDK:aap_protobuf_cc",
         "//OpenAutoSDK:aasdk",
-        "//third_party/glib:glibconfig",
     ],
     visibility = ["//visibility:public"],
 )

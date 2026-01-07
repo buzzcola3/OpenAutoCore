@@ -17,8 +17,8 @@
 #include <cstring>
 #include <fstream>
 #include <limits>
-#include <sstream>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 namespace {
@@ -47,46 +47,6 @@ bool parsePayload(const std::uint8_t* data, std::size_t size, Proto& message, co
 
 namespace aasdk::messenger::interceptor {
 
-namespace {
-
-std::pair<std::uint32_t, std::uint32_t> resolveTouchscreenResolution() {
-  constexpr const char* kConfigPath = "configuration/ServiceDiscoveryResponse.textproto";
-  std::uint32_t width = 0;
-  std::uint32_t height = 0;
-
-  if (std::ifstream file(kConfigPath); file.good()) {
-    std::string line;
-    bool inTouchscreen = false;
-    while (std::getline(file, line)) {
-      if (!inTouchscreen && line.find("touchscreen") != std::string::npos) {
-        inTouchscreen = true;
-      }
-
-      if (!inTouchscreen) {
-        continue;
-      }
-
-      if (line.find("width:") != std::string::npos) {
-        std::istringstream iss(line.substr(line.find("width:") + 6));
-        iss >> width;
-      }
-
-      if (line.find("height:") != std::string::npos) {
-        std::istringstream iss(line.substr(line.find("height:") + 7));
-        iss >> height;
-      }
-
-      if (width != 0 && height != 0) {
-        break;
-      }
-    }
-  }
-
-  return {width, height};
-}
-
-}
-
 bool InputSourceMessageHandlers::handle(const ::aasdk::messenger::Message& message) const {
   ++messageCount_;
   const auto& rawPayload = message.getPayload();
@@ -112,6 +72,73 @@ bool InputSourceMessageHandlers::handle(const ::aasdk::messenger::Message& messa
   }
 }
 
+void InputSourceMessageHandlers::resolveTouchscreenResolution() const {
+  constexpr const char* kConfigPath = "configuration/ServiceDiscoveryResponse.textproto";
+
+  std::uint32_t width = 0;
+  std::uint32_t height = 0;
+
+  const auto trim = [](std::string value) {
+    const auto first = value.find_first_not_of(" \t");
+    if (first == std::string::npos) {
+      return std::string{};
+    }
+    const auto last = value.find_last_not_of(" \t");
+    return value.substr(first, last - first + 1);
+  };
+
+  if (std::ifstream file(kConfigPath); file.good()) {
+    std::string line;
+    while (std::getline(file, line)) {
+      const auto pos = line.find("codec_resolution");
+      if (pos == std::string::npos) {
+        continue;
+      }
+
+      const auto colonPos = line.find(':', pos);
+      if (colonPos == std::string::npos) {
+        continue;
+      }
+
+      const auto token = trim(line.substr(colonPos + 1));
+
+      static const std::unordered_map<std::string, std::pair<std::uint32_t, std::uint32_t>> kResolutionLookup = {
+        {"VIDEO_800x480", {800, 480}},
+        {"VIDEO_1280x720", {1280, 720}},
+        {"VIDEO_1920x1080", {1920, 1080}},
+        {"VIDEO_2560x1440", {2560, 1440}},
+        {"VIDEO_3840x2160", {3840, 2160}},
+        {"VIDEO_720x1280", {720, 1280}},
+        {"VIDEO_1080x1920", {1080, 1920}},
+        {"VIDEO_1440x2560", {1440, 2560}},
+        {"VIDEO_2160x3840", {2160, 3840}},
+      };
+
+      const auto it = kResolutionLookup.find(token);
+      if (it != kResolutionLookup.end()) {
+        width = it->second.first;
+        height = it->second.second;
+        break;
+      }
+
+      AASDK_LOG(error) << "[InputSourceMessageHandlers] Unknown codec_resolution value '" << token
+                       << "'; using fallback " << touchWidth_ << "x" << touchHeight_ << ".";
+      break;
+    }
+  }
+
+  if (width == 0 || height == 0) {
+    AASDK_LOG(error) << "[InputSourceMessageHandlers] Failed to resolve touchscreen resolution; using fallback "
+                     << touchWidth_ << "x" << touchHeight_ << ".";
+    return;
+  }
+
+  touchWidth_ = width;
+  touchHeight_ = height;
+  AASDK_LOG(debug) << "[InputSourceMessageHandlers] Using codec resolution for touchscreen scaling: "
+                   << touchWidth_ << "x" << touchHeight_ << ".";
+}
+
 bool InputSourceMessageHandlers::handleChannelOpenRequest(const ::aasdk::messenger::Message& message,
                                                           const std::uint8_t* data,
                                                           std::size_t size) const {
@@ -126,17 +153,9 @@ bool InputSourceMessageHandlers::handleChannelOpenRequest(const ::aasdk::messeng
   aap_protobuf::service::control::message::ChannelOpenResponse response;
   response.set_status(aap_protobuf::shared::MessageStatus::STATUS_SUCCESS);
 
-  std::uint32_t kFallbackTouchWidth = touchWidth_;
-  std::uint32_t kFallbackTouchHeight = touchHeight_;
-  const auto [width, height] = resolveTouchscreenResolution();
-  if (width == 0 || height == 0) {
-    AASDK_LOG(error) << "[InputSourceMessageHandlers] Failed to resolve touchscreen resolution; using fallback 1920x1080.";
-    touchWidth_ = kFallbackTouchWidth;
-    touchHeight_ = kFallbackTouchHeight;
-  } else {
-    touchWidth_ = width;
-    touchHeight_ = height;
-  }
+  touchChannelId_ = message.getChannelId();
+  touchEncryptionType_ = message.getEncryptionType();
+  resolveTouchscreenResolution();
 
   if (sender_ != nullptr) {
     sender_->sendProtobuf(message.getChannelId(),
@@ -243,12 +262,15 @@ void InputSourceMessageHandlers::onTouchEvent(std::uint64_t timestamp,
   touchLocation->set_y(py);
   touchLocation->set_pointer_id(pointerId);
 
-  AASDK_LOG(info) << "[InputSourceMessageHandlers] Decoded TOUCH: ts=" << timestamp
-                  << " norm_x=" << normX << " norm_y=" << normY
-                  << " px=" << px << " py=" << py
-                  << " pointer_id=" << pointerId << " action=" << action
-                  << " payload=" << inputReport.ShortDebugString();
-
+  if (sender_ != nullptr && touchChannelId_ != ::aasdk::messenger::ChannelId::NONE) {
+    sender_->sendProtobuf(touchChannelId_,
+                          touchEncryptionType_,
+                          ::aasdk::messenger::MessageType::SPECIFIC,
+                          Input::INPUT_MESSAGE_INPUT_REPORT,
+                          inputReport);
+  } else {
+    AASDK_LOG(error) << "[InputSourceMessageHandlers] Cannot send touch InputReport: sender or channel unavailable.";
+  }
 }
 
 void InputSourceMessageHandlers::setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender) {

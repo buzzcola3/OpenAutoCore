@@ -42,4 +42,8 @@ void setVideoTransport(std::shared_ptr<buzz::autoapp::Transport::Transport> tran
   MEDIA_SINK_VIDEO_HANDLERS.setTransport(std::move(transport));
 }
 
+InputSourceMessageHandlers& getInputSourceHandlers() {
+  return INPUT_SOURCE_HANDLERS;
+}
+
 }
