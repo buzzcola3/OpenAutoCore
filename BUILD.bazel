@@ -33,13 +33,6 @@ filegroup(
 )
 
 genrule(
-    name = "uic_mainwindow",
-    srcs = ["src/autoapp/UI/mainwindow.ui"],
-    outs = ["ui_mainwindow.h"],
-    cmd = "uic $(location src/autoapp/UI/mainwindow.ui) -o $@",
-)
-
-genrule(
     name = "rcc_resources",
     srcs = ["assets/resources.qrc"] + glob(["assets/*"], exclude = ["assets/resources.qrc"]),
     outs = ["qrc_resources.cpp"],
@@ -82,13 +75,6 @@ genrule(
 )
 
 genrule(
-    name = "moc_main_window",
-    srcs = ["include/f1x/openauto/autoapp/UI/MainWindow.hpp"],
-    outs = ["moc_MainWindow.cpp"],
-    cmd = "moc $(location include/f1x/openauto/autoapp/UI/MainWindow.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp -Iinclude/f1x/openauto/Common",
-)
-
-genrule(
     name = "moc_bluetooth_handler",
     srcs = ["include/f1x/openauto/btservice/BluetoothHandler.hpp"],
     outs = ["moc_BluetoothHandler.cpp"],
@@ -120,8 +106,6 @@ cc_binary(
         ":moc_qt_audio_input",
         ":moc_qt_audio_output",
         ":moc_qt_video_output",
-        ":moc_main_window",
-        ":uic_mainwindow",
     ],
     includes = [
         "include",
