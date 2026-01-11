@@ -250,7 +250,31 @@ bool MediaSinkVideoMessageHandlers::handleCodecConfig(const ::aasdk::messenger::
   AASDK_LOG(debug) << "[MediaSinkVideoMessageHandlers] codec configuration blob size=" << size
                    << " bytes on channel " << channelIdToString(message.getChannelId());
 
-  return handleMediaData(message, data, size);;
+  if (sender_ == nullptr) {
+    AASDK_LOG(error) << "[MediaSinkVideoMessageHandlers] MessageSender not configured; cannot send media ACK.";
+    return false;
+  }
+
+  if (sessionId_ < 0) {
+    AASDK_LOG(error) << "[MediaSinkVideoMessageHandlers] Session id not set; cannot send media ACK.";
+    return false;
+  }
+
+  if (ensureTransportStarted()) {
+    transport_->send(buzz::wire::MsgType::VIDEO, 0, data, size);
+  }
+
+  aap_protobuf::service::media::source::message::Ack ack;
+  ack.set_session_id(sessionId_);
+  ack.set_ack(1);
+
+  sender_->sendProtobuf(message.getChannelId(),
+                        message.getEncryptionType(),
+                        ::aasdk::messenger::MessageType::SPECIFIC,
+                        aap_protobuf::service::media::sink::MediaMessageId::MEDIA_MESSAGE_ACK,
+                        ack);
+
+  return true;
 }
 
 void MediaSinkVideoMessageHandlers::setMessageSender(

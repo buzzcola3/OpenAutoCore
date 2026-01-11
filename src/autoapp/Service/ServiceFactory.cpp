@@ -16,23 +16,12 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <Channel/MediaSink/Audio/Channel/MediaAudioChannel.hpp>
-#include <Channel/MediaSink/Audio/Channel/SystemAudioChannel.hpp>
-#include <Channel/MediaSink/Audio/Channel/GuidanceAudioChannel.hpp>
-#include <Channel/MediaSink/Audio/Channel/TelephonyAudioChannel.hpp>
-
 #include <f1x/openauto/autoapp/Service/ServiceFactory.hpp>
-
-#include <f1x/openauto/autoapp/Service/MediaSink/MediaAudioService.hpp>
-#include <f1x/openauto/autoapp/Service/MediaSink/GuidanceAudioService.hpp>
-#include <f1x/openauto/autoapp/Service/MediaSink/SystemAudioService.hpp>
-#include <f1x/openauto/autoapp/Service/MediaSink/TelephonyAudioService.hpp>
 
 #include <f1x/openauto/autoapp/Service/MediaSource/MicrophoneMediaSourceService.hpp>
 
 #include <f1x/openauto/autoapp/Service/Sensor/SensorService.hpp>
 #include <f1x/openauto/autoapp/Service/Bluetooth/BluetoothService.hpp>
-#include <f1x/openauto/autoapp/Projection/QtAudioOutput.hpp>
 #include <f1x/openauto/autoapp/Projection/QtAudioInput.hpp>
 #include <f1x/openauto/autoapp/Projection/LocalBluetoothDevice.hpp>
 #include <f1x/openauto/autoapp/Projection/DummyBluetoothDevice.hpp>
@@ -49,7 +38,6 @@ namespace f1x::openauto::autoapp::service {
     OPENAUTO_LOG(info) << "[ServiceFactory] create()";
     ServiceList serviceList;
 
-    this->createMediaSinkServices(serviceList, messenger);
     this->createMediaSourceServices(serviceList, messenger);
     serviceList.emplace_back(this->createSensorService(messenger));
     if (configuration_->getWirelessProjectionEnabled())
@@ -87,41 +75,6 @@ namespace f1x::openauto::autoapp::service {
     }
 
     return std::make_shared<bluetooth::BluetoothService>(ioService_, messenger, std::move(bluetoothDevice));
-  }
-
-  void ServiceFactory::createMediaSinkServices(ServiceList &serviceList,
-                                               aasdk::messenger::IMessenger::Pointer messenger) {
-    OPENAUTO_LOG(info) << "[ServiceFactory] createMediaSinkServices()";
-    if (configuration_->musicAudioChannelEnabled()) {
-      OPENAUTO_LOG(info) << "[ServiceFactory] Media Audio Channel enabled";
-      auto mediaAudioOutput = projection::IAudioOutput::Pointer(new projection::QtAudioOutput(2, 16, 48000),
-                                            std::bind(&QObject::deleteLater, std::placeholders::_1));
-
-      serviceList.emplace_back(
-          std::make_shared<mediasink::MediaAudioService>(ioService_, messenger, std::move(mediaAudioOutput)));
-    }
-
-    if (configuration_->guidanceAudioChannelEnabled()) {
-      OPENAUTO_LOG(info) << "[ServiceFactory] Guidance Audio Channel enabled";
-      auto guidanceAudioOutput = projection::IAudioOutput::Pointer(new projection::QtAudioOutput(1, 16, 16000),
-                                            std::bind(&QObject::deleteLater, std::placeholders::_1));
-
-      serviceList.emplace_back(
-          std::make_shared<mediasink::GuidanceAudioService>(ioService_, messenger,
-                                                            std::move(guidanceAudioOutput)));
-    }
-
-    /*
-     * No Need to Check for systemAudioChannelEnabled - MUST be enabled by default.
-     */
-
-    OPENAUTO_LOG(info) << "[ServiceFactory] System Audio Channel enabled";
-    auto systemAudioOutput = projection::IAudioOutput::Pointer(new projection::QtAudioOutput(1, 16, 16000),
-                                          std::bind(&QObject::deleteLater, std::placeholders::_1));
-
-    serviceList.emplace_back(
-        std::make_shared<mediasink::SystemAudioService>(ioService_, messenger, std::move(systemAudioOutput)));
-
   }
 
   void ServiceFactory::createMediaSourceServices(f1x::openauto::autoapp::service::ServiceList &serviceList,

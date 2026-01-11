@@ -3,6 +3,9 @@
 
 #include <Messenger/MessageInStreamInterceptor.hpp>
 #include <Messenger/handlers/MediaSinkAudioMessageHandlers.hpp>
+#include <Messenger/handlers/GuidanceAudioMessageHandlers.hpp>
+#include <Messenger/handlers/SystemAudioMessageHandlers.hpp>
+#include <Messenger/handlers/TelephonyAudioMessageHandlers.hpp>
 #include <Messenger/handlers/MediaSinkVideoMessageHandlers.hpp>
 #include <Messenger/handlers/InputSourceMessageHandlers.hpp>
 #include <Messenger/MessageSender.hpp>
@@ -19,6 +22,9 @@ namespace {
 
 MediaSinkVideoMessageHandlers MEDIA_SINK_VIDEO_HANDLERS;
 MediaSinkAudioMessageHandlers MEDIA_SINK_AUDIO_HANDLERS;
+GuidanceAudioMessageHandlers MEDIA_SINK_GUIDANCE_AUDIO_HANDLERS;
+SystemAudioMessageHandlers MEDIA_SINK_SYSTEM_AUDIO_HANDLERS;
+TelephonyAudioMessageHandlers MEDIA_SINK_TELEPHONY_AUDIO_HANDLERS;
 InputSourceMessageHandlers INPUT_SOURCE_HANDLERS;
 
 }
@@ -29,6 +35,12 @@ bool handleMessage(const ::aasdk::messenger::Message& message) {
       return MEDIA_SINK_VIDEO_HANDLERS.handle(message);
     case ::aasdk::messenger::ChannelId::MEDIA_SINK_MEDIA_AUDIO:
       return MEDIA_SINK_AUDIO_HANDLERS.handle(message);
+    case ::aasdk::messenger::ChannelId::MEDIA_SINK_GUIDANCE_AUDIO:
+      return MEDIA_SINK_GUIDANCE_AUDIO_HANDLERS.handle(message);
+    case ::aasdk::messenger::ChannelId::MEDIA_SINK_SYSTEM_AUDIO:
+      return MEDIA_SINK_SYSTEM_AUDIO_HANDLERS.handle(message);
+    case ::aasdk::messenger::ChannelId::MEDIA_SINK_TELEPHONY_AUDIO:
+      return MEDIA_SINK_TELEPHONY_AUDIO_HANDLERS.handle(message);
     case ::aasdk::messenger::ChannelId::INPUT_SOURCE:
       return INPUT_SOURCE_HANDLERS.handle(message);
     default:
@@ -40,12 +52,18 @@ void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender)
   MessageSenderLocator::set(sender);
   MEDIA_SINK_VIDEO_HANDLERS.setMessageSender(sender);
   MEDIA_SINK_AUDIO_HANDLERS.setMessageSender(sender);
+  MEDIA_SINK_GUIDANCE_AUDIO_HANDLERS.setMessageSender(sender);
+  MEDIA_SINK_SYSTEM_AUDIO_HANDLERS.setMessageSender(sender);
+  MEDIA_SINK_TELEPHONY_AUDIO_HANDLERS.setMessageSender(sender);
   INPUT_SOURCE_HANDLERS.setMessageSender(sender);
 }
 
 void setVideoTransport(const std::shared_ptr<buzz::autoapp::Transport::Transport>& transport) {
   MEDIA_SINK_VIDEO_HANDLERS.setTransport(transport);
   MEDIA_SINK_AUDIO_HANDLERS.setTransport(transport);
+  MEDIA_SINK_GUIDANCE_AUDIO_HANDLERS.setTransport(transport);
+  MEDIA_SINK_SYSTEM_AUDIO_HANDLERS.setTransport(transport);
+  MEDIA_SINK_TELEPHONY_AUDIO_HANDLERS.setTransport(transport);
 }
 
 InputSourceMessageHandlers& getInputSourceHandlers() {

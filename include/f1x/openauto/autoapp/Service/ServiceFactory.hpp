@@ -35,8 +35,6 @@ namespace f1x {
 
         private:
           IService::Pointer createBluetoothService(aasdk::messenger::IMessenger::Pointer messenger);
-
-          void createMediaSinkServices(ServiceList &serviceList, aasdk::messenger::IMessenger::Pointer messenger);
           void createMediaSourceServices(ServiceList &serviceList, aasdk::messenger::IMessenger::Pointer messenger);
 
           IService::Pointer createSensorService(aasdk::messenger::IMessenger::Pointer messenger);

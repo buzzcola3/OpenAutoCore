@@ -1,6 +1,7 @@
-#include <Messenger/handlers/MediaSinkAudioMessageHandlers.hpp>
+#include <Messenger/handlers/GuidanceAudioMessageHandlers.hpp>
 
 #include <Messenger/Message.hpp>
+#include <Messenger/ChannelId.hpp>
 #include <Messenger/MessageId.hpp>
 #include <Messenger/MessageSender.hpp>
 #include <Messenger/MessageType.hpp>
@@ -11,7 +12,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <iomanip>
 #include <limits>
 #include <utility>
 
@@ -31,36 +31,18 @@ namespace {
 
 using Control = aap_protobuf::service::control::message::ControlMessageType;
 using Media = aap_protobuf::service::media::sink::MediaMessageId;
+constexpr const char* kLogPrefix = "[GuidanceAudioMessageHandlers]";
 
-template<typename Proto>
-void decodeAndLogPayload(const std::uint8_t* data, std::size_t size, const char* label) {
-  if (size > static_cast<std::size_t>(std::numeric_limits<int>::max())) {
-    AASDK_LOG(error) << "[MediaSinkAudioMessageHandlers] " << label
-                     << " payload too large for ParseFromArray, bytes=" << size;
-    return;
-  }
-
-  Proto message;
-  if (!message.ParseFromArray(data, static_cast<int>(size))) {
-    AASDK_LOG(error) << "[MediaSinkAudioMessageHandlers] Failed to parse " << label
-                     << " payload, bytes=" << size;
-    return;
-  }
-
-  AASDK_LOG(debug) << "[MediaSinkAudioMessageHandlers] " << label << ": "
-                   << message.ShortDebugString();
-}
-
-}
+} // namespace
 
 namespace aasdk::messenger::interceptor {
 
-bool MediaSinkAudioMessageHandlers::handle(const ::aasdk::messenger::Message& message) const {
+bool GuidanceAudioMessageHandlers::handle(const ::aasdk::messenger::Message& message) const {
   ++messageCount_;
   const auto& rawPayload = message.getPayload();
 
   if (rawPayload.size() <= ::aasdk::messenger::MessageId::getSizeOf()) {
-    AASDK_LOG(error) << "[MediaSinkAudioMessageHandlers] media audio payload too small";
+    AASDK_LOG(error) << kLogPrefix << " media guidance payload too small";
     return false;
   }
 
@@ -80,16 +62,21 @@ bool MediaSinkAudioMessageHandlers::handle(const ::aasdk::messenger::Message& me
       aap_protobuf::service::media::shared::message::Start start;
       if (start.ParseFromArray(payloadData, static_cast<int>(payloadSize))) {
         sessionId_ = start.session_id();
-        AASDK_LOG(debug) << "[MediaSinkAudioMessageHandlers] MediaStart: session=" << sessionId_;
+        AASDK_LOG(debug) << kLogPrefix << " MediaStart: session=" << sessionId_;
       } else {
-        AASDK_LOG(error) << "[MediaSinkAudioMessageHandlers] Failed to parse MediaStart payload";
+        AASDK_LOG(error) << kLogPrefix << " Failed to parse MediaStart payload";
       }
       break;
     }
-    case Media::MEDIA_MESSAGE_STOP:
-      decodeAndLogPayload<aap_protobuf::service::media::shared::message::Stop>(
-          payloadData, payloadSize, "MediaStop");
+    case Media::MEDIA_MESSAGE_STOP: {
+      aap_protobuf::service::media::shared::message::Stop stop;
+      if (stop.ParseFromArray(payloadData, static_cast<int>(payloadSize))) {
+        AASDK_LOG(debug) << kLogPrefix << " MediaStop: " << stop.ShortDebugString();
+      } else {
+        AASDK_LOG(error) << kLogPrefix << " Failed to parse MediaStop payload";
+      }
       break;
+    }
     case Media::MEDIA_MESSAGE_CODEC_CONFIG:
       handled = handleCodecConfig(message, payloadData, payloadSize);
       break;
@@ -97,34 +84,33 @@ bool MediaSinkAudioMessageHandlers::handle(const ::aasdk::messenger::Message& me
       handled = handleMediaData(message, payloadData, payloadSize);
       break;
     case Media::MEDIA_MESSAGE_AUDIO_UNDERFLOW_NOTIFICATION:
-      AASDK_LOG(warning) << "[MediaSinkAudioMessageHandlers] Audio underflow notification received.";
+      AASDK_LOG(warning) << kLogPrefix << " Audio underflow notification received.";
       handled = true;
       break;
     default:
-      AASDK_LOG(debug) << "[MediaSinkAudioMessageHandlers] media audio message id="
-                       << messageId.getId() << " not explicitly decoded.";
+      AASDK_LOG(debug) << kLogPrefix << " guidance audio message id=" << messageId.getId()
+                       << " not explicitly decoded.";
       break;
   }
 
   return handled;
 }
 
-bool MediaSinkAudioMessageHandlers::handleChannelOpenRequest(const ::aasdk::messenger::Message& message,
+bool GuidanceAudioMessageHandlers::handleChannelOpenRequest(const ::aasdk::messenger::Message& message,
                                                              const std::uint8_t* data,
                                                              std::size_t size) const {
   aap_protobuf::service::control::message::ChannelOpenRequest request;
   if (!request.ParseFromArray(data, static_cast<int>(size))) {
-    AASDK_LOG(error) << "[MediaSinkAudioMessageHandlers] Failed to parse ChannelOpenRequest payload";
+    AASDK_LOG(error) << kLogPrefix << " Failed to parse ChannelOpenRequest payload";
     return false;
   }
 
-  AASDK_LOG(debug) << "[MediaSinkAudioMessageHandlers] ChannelOpenRequest: "
-                   << request.ShortDebugString();
+  AASDK_LOG(debug) << kLogPrefix << " ChannelOpenRequest: " << request.ShortDebugString();
 
   aap_protobuf::service::control::message::ChannelOpenResponse response;
   response.set_status(aap_protobuf::shared::MessageStatus::STATUS_SUCCESS);
 
-  AASDK_LOG(debug) << "[MediaSinkAudioMessageHandlers] Constructed ChannelOpenResponse: "
+  AASDK_LOG(debug) << kLogPrefix << " Constructed ChannelOpenResponse: "
                    << response.ShortDebugString();
 
   if (sender_ != nullptr) {
@@ -136,20 +122,20 @@ bool MediaSinkAudioMessageHandlers::handleChannelOpenRequest(const ::aasdk::mess
     return true;
   }
 
-  AASDK_LOG(error) << "[MediaSinkAudioMessageHandlers] MessageSender not configured; cannot send response.";
+  AASDK_LOG(error) << kLogPrefix << " MessageSender not configured; cannot send response.";
   return false;
 }
 
-bool MediaSinkAudioMessageHandlers::handleMediaData(const ::aasdk::messenger::Message& message,
+bool GuidanceAudioMessageHandlers::handleMediaData(const ::aasdk::messenger::Message& message,
                                                     const std::uint8_t* data,
                                                     std::size_t size) const {
   if (sender_ == nullptr) {
-    AASDK_LOG(error) << "[MediaSinkAudioMessageHandlers] MessageSender not configured; cannot send media ACK.";
+    AASDK_LOG(error) << kLogPrefix << " MessageSender not configured; cannot send media ACK.";
     return false;
   }
 
   if (sessionId_ < 0) {
-    AASDK_LOG(error) << "[MediaSinkAudioMessageHandlers] Session id not set; cannot send media ACK.";
+    AASDK_LOG(error) << kLogPrefix << " Session id not set; cannot send media ACK.";
     return false;
   }
 
@@ -169,7 +155,7 @@ bool MediaSinkAudioMessageHandlers::handleMediaData(const ::aasdk::messenger::Me
   }
 
   if (ensureTransportStarted()) {
-    transport_->send(buzz::wire::MsgType::MEDIA_AUDIO, timestamp, frameData, frameSize);
+    transport_->send(buzz::wire::MsgType::GUIDANCE_AUDIO, timestamp, frameData, frameSize);
   }
 
   aap_protobuf::service::media::source::message::Ack ack;
@@ -185,16 +171,16 @@ bool MediaSinkAudioMessageHandlers::handleMediaData(const ::aasdk::messenger::Me
   return true;
 }
 
-bool MediaSinkAudioMessageHandlers::handleChannelSetupRequest(const ::aasdk::messenger::Message& message,
+bool GuidanceAudioMessageHandlers::handleChannelSetupRequest(const ::aasdk::messenger::Message& message,
                                                               const std::uint8_t* data,
                                                               std::size_t size) const {
   aap_protobuf::service::media::shared::message::Setup setup;
   if (!setup.ParseFromArray(data, static_cast<int>(size))) {
-    AASDK_LOG(error) << "[MediaSinkAudioMessageHandlers] Failed to parse MediaSetup payload";
+    AASDK_LOG(error) << kLogPrefix << " Failed to parse MediaSetup payload";
     return false;
   }
 
-  AASDK_LOG(info) << "[MediaSinkAudioMessageHandlers] MediaSetup: channel="
+  AASDK_LOG(info) << kLogPrefix << " MediaSetup: channel="
                   << channelIdToString(message.getChannelId())
                   << ", codec=" << aap_protobuf::service::media::shared::message::MediaCodecType_Name(setup.type());
 
@@ -211,33 +197,32 @@ bool MediaSinkAudioMessageHandlers::handleChannelSetupRequest(const ::aasdk::mes
         aap_protobuf::service::media::sink::MediaMessageId::MEDIA_MESSAGE_CONFIG,
         response);
 
-    AASDK_LOG(debug) << "[MediaSinkAudioMessageHandlers] MediaSetup response: "
-                     << response.ShortDebugString();
+    AASDK_LOG(debug) << kLogPrefix << " MediaSetup response: " << response.ShortDebugString();
     return true;
   }
 
-  AASDK_LOG(error) << "[MediaSinkAudioMessageHandlers] MessageSender not configured; cannot send setup response.";
+  AASDK_LOG(error) << kLogPrefix << " MessageSender not configured; cannot send setup response.";
   return false;
 }
 
-bool MediaSinkAudioMessageHandlers::handleCodecConfig(const ::aasdk::messenger::Message& message,
+bool GuidanceAudioMessageHandlers::handleCodecConfig(const ::aasdk::messenger::Message& message,
                                                       const std::uint8_t* data,
                                                       std::size_t size) const {
-  AASDK_LOG(debug) << "[MediaSinkAudioMessageHandlers] codec configuration blob size=" << size
+  AASDK_LOG(debug) << kLogPrefix << " codec configuration blob size=" << size
                    << " bytes on channel " << channelIdToString(message.getChannelId());
 
   if (sender_ == nullptr) {
-    AASDK_LOG(error) << "[MediaSinkAudioMessageHandlers] MessageSender not configured; cannot send media ACK.";
+    AASDK_LOG(error) << kLogPrefix << " MessageSender not configured; cannot send media ACK.";
     return false;
   }
 
   if (sessionId_ < 0) {
-    AASDK_LOG(error) << "[MediaSinkAudioMessageHandlers] Session id not set; cannot send media ACK.";
+    AASDK_LOG(error) << kLogPrefix << " Session id not set; cannot send media ACK.";
     return false;
   }
 
   if (ensureTransportStarted()) {
-    transport_->send(buzz::wire::MsgType::MEDIA_AUDIO, 0, data, size);
+    transport_->send(buzz::wire::MsgType::GUIDANCE_AUDIO, 0, data, size);
   }
 
   aap_protobuf::service::media::source::message::Ack ack;
@@ -253,17 +238,17 @@ bool MediaSinkAudioMessageHandlers::handleCodecConfig(const ::aasdk::messenger::
   return true;
 }
 
-void MediaSinkAudioMessageHandlers::setMessageSender(
+void GuidanceAudioMessageHandlers::setMessageSender(
     std::shared_ptr<::aasdk::messenger::MessageSender> sender) {
   sender_ = std::move(sender);
 }
 
-void MediaSinkAudioMessageHandlers::setTransport(
+void GuidanceAudioMessageHandlers::setTransport(
     std::shared_ptr<buzz::autoapp::Transport::Transport> transport) {
   transport_ = std::move(transport);
 }
 
-bool MediaSinkAudioMessageHandlers::ensureTransportStarted() const {
+bool GuidanceAudioMessageHandlers::ensureTransportStarted() const {
   if (transport_ && transport_->isRunning()) {
     return true;
   }
@@ -273,14 +258,14 @@ bool MediaSinkAudioMessageHandlers::ensureTransportStarted() const {
   }
 
   if (!transport_->startAsA(std::chrono::microseconds{1000})) {
-    AASDK_LOG(error) << "[MediaSinkAudioMessageHandlers] Failed to start OpenAutoTransport (side A).";
+    AASDK_LOG(error) << kLogPrefix << " Failed to start OpenAutoTransport (side A).";
     return false;
   }
 
   return transport_->isRunning();
 }
 
-uint64_t MediaSinkAudioMessageHandlers::resolveTimestamp(bool hasTimestamp, uint64_t parsedTs) const {
+uint64_t GuidanceAudioMessageHandlers::resolveTimestamp(bool hasTimestamp, uint64_t parsedTs) const {
   if (hasTimestamp) {
     return parsedTs;
   }
