@@ -1,11 +1,6 @@
 # Add any directories, files, or patterns you don't want to be tracked by version control
 lib/
-bin/
-build/
-/bazel-bin/
-/bazel-out/
-/bazel-*/
+bazel-bin/
+bazel-out/
+bazel-*/
 openauto.ini
-CMakeLists.txt.user
-/cmake-build-*/
-.idea/

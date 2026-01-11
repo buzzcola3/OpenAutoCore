@@ -33,13 +33,6 @@ filegroup(
 )
 
 genrule(
-    name = "rcc_resources",
-    srcs = ["assets/resources.qrc"] + glob(["assets/*"], exclude = ["assets/resources.qrc"]),
-    outs = ["qrc_resources.cpp"],
-    cmd = "rcc $(location assets/resources.qrc) -o $@",
-)
-
-genrule(
     name = "moc_input_device",
     srcs = ["include/f1x/openauto/autoapp/Projection/InputDevice.hpp"],
     outs = ["moc_InputDevice.cpp"],
@@ -86,7 +79,6 @@ cc_binary(
     ], exclude = [
         "bazel-*/**",
     ]) + [
-        ":rcc_resources",
         ":moc_input_device",
         ":moc_local_bluetooth_device",
         ":moc_qt_audio_input",
