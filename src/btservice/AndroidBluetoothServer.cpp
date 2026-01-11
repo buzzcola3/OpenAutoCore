@@ -78,7 +78,12 @@ namespace f1x::openauto::btservice {
 
       aap_protobuf::aaw::WifiVersionRequest versionRequest;
       aap_protobuf::aaw::WifiStartRequest startRequest;
-      startRequest.set_ip_address(getIP4_("wlan0"));
+
+      const auto hostIp = getIP4_("wlan0");
+      if (hostIp.empty()) {
+        OPENAUTO_LOG(warning) << "[AndroidBluetoothServer] No IPv4 found on wlan0, using first non-loopback interface.";
+      }
+      startRequest.set_ip_address(hostIp);
       startRequest.set_port(5000);
 
       sendMessage(versionRequest, aap_protobuf::aaw::MessageId::WIFI_VERSION_REQUEST);
@@ -164,10 +169,34 @@ namespace f1x::openauto::btservice {
 
     aap_protobuf::aaw::WifiInfoResponse response;
 
-    response.set_ssid(configuration_->getParamFromFile("/etc/hostapd/hostapd.conf", "ssid").toStdString());
-    response.set_password(
-        configuration_->getParamFromFile("/etc/hostapd/hostapd.conf", "wpa_passphrase").toStdString());
-    response.set_bssid(QNetworkInterface::interfaceFromName("wlan0").hardwareAddress().toStdString());
+    // Prefer system hostapd config; fall back to repo-local wifi_credentials.ini if missing.
+    auto ssid = configuration_->getParamFromFile("/etc/hostapd/hostapd.conf", "ssid");
+    auto pass = configuration_->getParamFromFile("/etc/hostapd/hostapd.conf", "wpa_passphrase");
+
+    if (ssid.isEmpty()) {
+      ssid = configuration_->getParamFromFile("wifi_credentials.ini", "ssid");
+    }
+    if (pass.isEmpty()) {
+      pass = configuration_->getParamFromFile("wifi_credentials.ini", "wpa_passphrase");
+    }
+
+    // Hardcoded fallback to get you running quickly; change these to your AP values.
+    if (ssid.isEmpty()) {
+      ssid = QStringLiteral("OpenAutoAP");
+    }
+    if (pass.isEmpty()) {
+      pass = QStringLiteral("OpenAutoPass123");
+    }
+
+    response.set_ssid(ssid.toStdString());
+    response.set_password(pass.toStdString());
+    // Provide a BSSID to satisfy required proto field; prefer wlan0 MAC, fall back to a null MAC.
+    auto bssid = QNetworkInterface::interfaceFromName("wlp4s0").hardwareAddress().toStdString();
+    if (bssid.empty()) {
+      bssid = "00:00:00:00:00:00";
+    }
+    OPENAUTO_LOG(info) << "[AndroidBluetoothServer::handleWifiInfoRequest] Using BSSID: " << bssid;
+    response.set_bssid(bssid);
     // TODO: AAP uses different values than WiFiProjection....
     response.set_security_mode(
         aap_protobuf::service::wifiprojection::message::WifiSecurityMode::WPA2_ENTERPRISE);
@@ -234,10 +263,37 @@ namespace f1x::openauto::btservice {
   }
 
   const ::std::string AndroidBluetoothServer::getIP4_(const QString intf) {
-    for (const QNetworkAddressEntry &address: QNetworkInterface::interfaceFromName(intf).addressEntries()) {
-      if (address.ip().protocol() == QAbstractSocket::IPv4Protocol)
-        return address.ip().toString().toStdString();
+    auto getFirstIPv4 = [](const QNetworkInterface& iface) -> std::string {
+      for (const auto& address : iface.addressEntries()) {
+        if (address.ip().protocol() == QAbstractSocket::IPv4Protocol) {
+          return address.ip().toString().toStdString();
+        }
+      }
+      return "";
+    };
+
+    if (!intf.isEmpty()) {
+      const auto preferred = QNetworkInterface::interfaceFromName(intf);
+      const auto ip = getFirstIPv4(preferred);
+      if (!ip.empty()) {
+        return ip;
+      }
     }
+
+    for (const auto& iface : QNetworkInterface::allInterfaces()) {
+      const auto flags = iface.flags();
+      const bool isUp = flags.testFlag(QNetworkInterface::IsUp);
+      const bool isLoopback = flags.testFlag(QNetworkInterface::IsLoopBack);
+      if (!isUp || isLoopback) {
+        continue;
+      }
+
+      const auto ip = getFirstIPv4(iface);
+      if (!ip.empty()) {
+        return ip;
+      }
+    }
+
     return "";
   }
 
