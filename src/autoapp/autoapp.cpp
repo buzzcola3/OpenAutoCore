@@ -30,6 +30,7 @@
 #include <f1x/openauto/autoapp/App.hpp>
 #include <Messenger/MessageInStreamInterceptor.hpp>
 #include <Messenger/handlers/InputSourceMessageHandlers.hpp>
+#include <Messenger/handlers/SensorMessageHandlers.hpp>
 #include <open_auto_transport/wire.hpp>
 #include <aap_protobuf/service/inputsource/message/InputReport.pb.h>
 #include <f1x/openauto/autoapp/Configuration/IConfiguration.hpp>
@@ -133,6 +134,13 @@ int main(int argc, char* argv[])
             buzz::wire::MsgType::TOUCH,
             [&touchHandlers](uint64_t timestamp, const void* data, std::size_t size) {
                 touchHandlers.onTouchEvent(timestamp, data, size);
+            });
+
+        auto& sensorHandlers = aasdk::messenger::interceptor::getSensorHandlers();
+        transport->addTypeHandler(
+            buzz::wire::MsgType::SENSOR,
+            [&sensorHandlers](uint64_t timestamp, const void* data, std::size_t size) {
+                sensorHandlers.onSensorEvent(timestamp, data, size);
             });
     }
 

@@ -20,7 +20,6 @@
 
 #include <f1x/openauto/autoapp/Service/MediaSource/MicrophoneMediaSourceService.hpp>
 
-#include <f1x/openauto/autoapp/Service/Sensor/SensorService.hpp>
 #include <f1x/openauto/autoapp/Service/Bluetooth/BluetoothService.hpp>
 #include <f1x/openauto/autoapp/Projection/QtAudioInput.hpp>
 #include <f1x/openauto/autoapp/Projection/LocalBluetoothDevice.hpp>
@@ -39,7 +38,6 @@ namespace f1x::openauto::autoapp::service {
     ServiceList serviceList;
 
     this->createMediaSourceServices(serviceList, messenger);
-    serviceList.emplace_back(this->createSensorService(messenger));
     if (configuration_->getWirelessProjectionEnabled())
     {
         // TODO: What is WiFi Projection Service?
@@ -84,11 +82,6 @@ namespace f1x::openauto::autoapp::service {
                                                 std::bind(&QObject::deleteLater, std::placeholders::_1));
     serviceList.emplace_back(std::make_shared<mediasource::MicrophoneMediaSourceService>(ioService_, messenger,
                                                                                          std::move(audioInput)));
-  }
-
-  IService::Pointer ServiceFactory::createSensorService(aasdk::messenger::IMessenger::Pointer messenger) {
-    OPENAUTO_LOG(info) << "[ServiceFactory] createSensorService()";
-    return std::make_shared<sensor::SensorService>(ioService_, messenger);
   }
 
 }

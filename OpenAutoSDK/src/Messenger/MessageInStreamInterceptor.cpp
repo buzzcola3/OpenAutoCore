@@ -8,6 +8,7 @@
 #include <Messenger/handlers/TelephonyAudioMessageHandlers.hpp>
 #include <Messenger/handlers/MediaSinkVideoMessageHandlers.hpp>
 #include <Messenger/handlers/InputSourceMessageHandlers.hpp>
+#include <Messenger/handlers/SensorMessageHandlers.hpp>
 #include <Messenger/MessageSender.hpp>
 #include <Messenger/MessageSenderLocator.hpp>
 #include <Messenger/Message.hpp>
@@ -26,6 +27,7 @@ GuidanceAudioMessageHandlers MEDIA_SINK_GUIDANCE_AUDIO_HANDLERS;
 SystemAudioMessageHandlers MEDIA_SINK_SYSTEM_AUDIO_HANDLERS;
 TelephonyAudioMessageHandlers MEDIA_SINK_TELEPHONY_AUDIO_HANDLERS;
 InputSourceMessageHandlers INPUT_SOURCE_HANDLERS;
+SensorMessageHandlers SENSOR_HANDLERS;
 
 }
 
@@ -43,6 +45,8 @@ bool handleMessage(const ::aasdk::messenger::Message& message) {
       return MEDIA_SINK_TELEPHONY_AUDIO_HANDLERS.handle(message);
     case ::aasdk::messenger::ChannelId::INPUT_SOURCE:
       return INPUT_SOURCE_HANDLERS.handle(message);
+    case ::aasdk::messenger::ChannelId::SENSOR:
+      return SENSOR_HANDLERS.handle(message);
     default:
       return false;
   }
@@ -56,6 +60,7 @@ void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender)
   MEDIA_SINK_SYSTEM_AUDIO_HANDLERS.setMessageSender(sender);
   MEDIA_SINK_TELEPHONY_AUDIO_HANDLERS.setMessageSender(sender);
   INPUT_SOURCE_HANDLERS.setMessageSender(sender);
+  SENSOR_HANDLERS.setMessageSender(sender);
 }
 
 void setVideoTransport(const std::shared_ptr<buzz::autoapp::Transport::Transport>& transport) {
@@ -68,6 +73,10 @@ void setVideoTransport(const std::shared_ptr<buzz::autoapp::Transport::Transport
 
 InputSourceMessageHandlers& getInputSourceHandlers() {
   return INPUT_SOURCE_HANDLERS;
+}
+
+SensorMessageHandlers& getSensorHandlers() {
+  return SENSOR_HANDLERS;
 }
 
 }
