@@ -24,6 +24,7 @@ cc_library(
     deps = [
         ":aap_protobuf_cc",
         "@open_auto_transport//:open_auto_transport",
+        "@nlohmann_json//:json",
     ],
     includes = [
         "include/aasdk",

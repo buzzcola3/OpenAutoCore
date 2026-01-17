@@ -17,9 +17,9 @@
 #include <aap_protobuf/service/sensorsource/message/SensorType.pb.h>
 #include <aap_protobuf/shared/MessageStatus.pb.h>
 #include <cmath>
-#include <gps.h>
 #include <fstream>
 #include <limits>
+#include <string_view>
 
 namespace {
 
@@ -133,8 +133,6 @@ bool SensorMessageHandlers::handleSensorStartRequest(const ::aasdk::messenger::M
       sendDrivingStatusIndication(message);
     } else if (request.type() == aap_protobuf::service::sensorsource::message::SensorType::SENSOR_NIGHT_MODE) {
       sendNightModeIndication(message);
-    } else if (request.type() == aap_protobuf::service::sensorsource::message::SensorType::SENSOR_LOCATION) {
-      sendLocationIndication(message);
     }
     return true;
   }
@@ -164,24 +162,25 @@ void SensorMessageHandlers::onSensorEvent(std::uint64_t timestamp,
     return;
   }
 
-  if (sender_ == nullptr || sensorChannelId_ == ::aasdk::messenger::ChannelId::NONE) {
-    AASDK_LOG(error) << kLogPrefix << " Cannot send SensorBatch: sender or channel unavailable.";
+  const auto json = nlohmann::json::parse(
+      std::string_view(static_cast<const char*>(data), size), nullptr, false);
+  if (json.is_discarded()) {
+    AASDK_LOG(error) << kLogPrefix << " Failed to parse SENSOR json ts=" << timestamp
+                     << " bytes=" << size;
     return;
   }
 
-  aap_protobuf::service::sensorsource::message::SensorBatch batch;
-  if (!parsePayload(static_cast<const std::uint8_t*>(data), size, batch, "SensorBatch")) {
+  if (!json.contains("location")) {
+    AASDK_LOG(debug) << kLogPrefix << " SENSOR json missing location ts=" << timestamp;
     return;
   }
 
-  sender_->sendProtobuf(sensorChannelId_,
-                        sensorEncryptionType_,
-                        ::aasdk::messenger::MessageType::SPECIFIC,
-                        Sensor::SENSOR_MESSAGE_BATCH,
-                        batch);
+  if (!json["location"].is_object()) {
+    AASDK_LOG(error) << kLogPrefix << " SENSOR json location is not an object";
+    return;
+  }
 
-  AASDK_LOG(debug) << kLogPrefix << " forwarded transport SensorBatch ts=" << timestamp
-                   << " bytes=" << size;
+  sendLocationIndication(json["location"]);
 }
 
 bool SensorMessageHandlers::sendDrivingStatusIndication(const ::aasdk::messenger::Message& message) const {
@@ -224,81 +223,46 @@ bool SensorMessageHandlers::sendNightModeIndication(const ::aasdk::messenger::Me
   return true;
 }
 
-bool SensorMessageHandlers::sendLocationIndication(const ::aasdk::messenger::Message& message) const {
-  if (sender_ == nullptr) {
-    AASDK_LOG(error) << kLogPrefix << " MessageSender not configured; cannot send location indication.";
+bool SensorMessageHandlers::sendLocationIndication(const nlohmann::json& location) const {
+  if (sender_ == nullptr || sensorChannelId_ == ::aasdk::messenger::ChannelId::NONE) {
+    AASDK_LOG(error) << kLogPrefix << " Cannot send location indication; sender or channel unavailable.";
     return false;
   }
 
-  struct gps_data_t gpsData {};
-  if (gps_open("127.0.0.1", "2947", &gpsData) != 0) {
-    AASDK_LOG(warning) << kLogPrefix << " gps_open failed; cannot send location.";
-    return false;
-  }
-
-  const auto shutdownGps = [&gpsData]() {
-    gps_stream(&gpsData, WATCH_DISABLE, nullptr);
-    gps_close(&gpsData);
-  };
-
-  gps_stream(&gpsData, WATCH_ENABLE | WATCH_JSON, nullptr);
-
-  bool gpsReadOk = false;
-#if GPSD_API_MAJOR_VERSION >= 7
-  if (gps_read(&gpsData, nullptr, 0) != -1) {
-    gpsReadOk = true;
-  }
-#else
-  if (gps_read(&gpsData) != -1) {
-    gpsReadOk = true;
-  }
-#endif
-
-  if (!gpsReadOk) {
-    AASDK_LOG(warning) << kLogPrefix << " gps_read failed; cannot send location.";
-    shutdownGps();
-    return false;
-  }
-
-  if ((gpsData.fix.mode != MODE_2D && gpsData.fix.mode != MODE_3D) ||
-      !(gpsData.set & TIME_SET) ||
-      !(gpsData.set & LATLON_SET)) {
-    AASDK_LOG(debug) << kLogPrefix << " GPS fix not ready; skipping location indication.";
-    shutdownGps();
+  if (!location.contains("latitude") || !location.contains("longitude") ||
+      !location["latitude"].is_number() || !location["longitude"].is_number()) {
+    AASDK_LOG(error) << kLogPrefix << " Location json missing latitude/longitude.";
     return false;
   }
 
   aap_protobuf::service::sensorsource::message::SensorBatch indication;
   auto* locInd = indication.add_location_data();
 
-#if GPSD_API_MAJOR_VERSION >= 7
-  locInd->set_timestamp(gpsData.fix.time.tv_sec);
-#else
-  locInd->set_timestamp(gpsData.fix.time);
-#endif
-  locInd->set_latitude_e7(gpsData.fix.latitude * 1e7);
-  locInd->set_longitude_e7(gpsData.fix.longitude * 1e7);
+  locInd->set_latitude_e7(std::llround(location["latitude"].get<double>() * 1e7));
+  locInd->set_longitude_e7(std::llround(location["longitude"].get<double>() * 1e7));
 
-  const auto accuracy = std::sqrt(std::pow(gpsData.fix.epx, 2) + std::pow(gpsData.fix.epy, 2));
-  locInd->set_accuracy_e3(accuracy * 1e3);
-
-  if (gpsData.set & ALTITUDE_SET) {
-    locInd->set_altitude_e2(gpsData.fix.altitude * 1e2);
+  if (location.contains("accuracy_m") && location["accuracy_m"].is_number()) {
+    locInd->set_accuracy_e3(std::llround(location["accuracy_m"].get<double>() * 1e3));
   }
-  if (gpsData.set & SPEED_SET) {
-    locInd->set_speed_e3(gpsData.fix.speed * 1.94384 * 1e3);
+  if (location.contains("altitude_m") && location["altitude_m"].is_number()) {
+    locInd->set_altitude_e2(std::llround(location["altitude_m"].get<double>() * 1e2));
   }
-  if (gpsData.set & TRACK_SET) {
-    locInd->set_bearing_e6(gpsData.fix.track * 1e6);
+  if (location.contains("speed_mps") && location["speed_mps"].is_number()) {
+    locInd->set_speed_e3(std::llround(location["speed_mps"].get<double>() * 1e3));
+  }
+  if (location.contains("bearing_deg") && location["bearing_deg"].is_number()) {
+    locInd->set_bearing_e6(std::llround(location["bearing_deg"].get<double>() * 1e6));
   }
 
-  sender_->sendProtobuf(message.getChannelId(),
-                        message.getEncryptionType(),
+  sender_->sendProtobuf(sensorChannelId_,
+                        sensorEncryptionType_,
                         ::aasdk::messenger::MessageType::SPECIFIC,
                         Sensor::SENSOR_MESSAGE_BATCH,
                         indication);
 
-  shutdownGps();
+  AASDK_LOG(debug) << kLogPrefix << " sent location indication: "
+                   << locInd->ShortDebugString();
+
   return true;
 }
 

@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <nlohmann/json.hpp>
 #include <Messenger/ChannelId.hpp>
 #include <Messenger/EncryptionType.hpp>
 
@@ -37,7 +38,7 @@ private:
 
   bool sendDrivingStatusIndication(const ::aasdk::messenger::Message& message) const;
   bool sendNightModeIndication(const ::aasdk::messenger::Message& message) const;
-  bool sendLocationIndication(const ::aasdk::messenger::Message& message) const;
+  bool sendLocationIndication(const nlohmann::json& location) const;
 
   mutable std::uint64_t messageCount_{0};
   mutable ::aasdk::messenger::ChannelId sensorChannelId_{::aasdk::messenger::ChannelId::NONE};
