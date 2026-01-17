@@ -36,8 +36,8 @@ private:
                                const std::uint8_t* data,
                                std::size_t size) const;
 
-  bool sendDrivingStatusIndication(const ::aasdk::messenger::Message& message) const;
-  bool sendNightModeIndication(const ::aasdk::messenger::Message& message) const;
+  bool sendDrivingStatusIndication(const nlohmann::json& drivingStatus) const;
+  bool sendNightModeIndication(const nlohmann::json& nightMode) const;
   bool sendLocationIndication(const nlohmann::json& location) const;
 
   mutable std::uint64_t messageCount_{0};

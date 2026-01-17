@@ -129,10 +129,10 @@ bool SensorMessageHandlers::handleSensorStartRequest(const ::aasdk::messenger::M
                           response);
 
     // Fire an initial indication matching the requested sensor type where possible.
-    if (request.type() == aap_protobuf::service::sensorsource::message::SENSOR_DRIVING_STATUS_DATA) {
-      sendDrivingStatusIndication(message);
-    } else if (request.type() == aap_protobuf::service::sensorsource::message::SensorType::SENSOR_NIGHT_MODE) {
-      sendNightModeIndication(message);
+    if (request.type() == aap_protobuf::service::sensorsource::message::SENSOR_DRIVING_STATUS_DATA ||
+        request.type() == aap_protobuf::service::sensorsource::message::SensorType::SENSOR_NIGHT_MODE ||
+        request.type() == aap_protobuf::service::sensorsource::message::SensorType::SENSOR_LOCATION) {
+      AASDK_LOG(debug) << kLogPrefix << " Sensor start request acknowledged; awaiting transport sensor JSON.";
     }
     return true;
   }
@@ -170,53 +170,87 @@ void SensorMessageHandlers::onSensorEvent(std::uint64_t timestamp,
     return;
   }
 
-  if (!json.contains("location")) {
-    AASDK_LOG(debug) << kLogPrefix << " SENSOR json missing location ts=" << timestamp;
-    return;
-  }
+  bool handled = false;
 
-  if (!json["location"].is_object()) {
+  if (json.contains("location") && json["location"].is_object()) {
+    handled = sendLocationIndication(json["location"]);
+  } else if (json.contains("location")) {
     AASDK_LOG(error) << kLogPrefix << " SENSOR json location is not an object";
     return;
   }
 
-  sendLocationIndication(json["location"]);
+  if (json.contains("night_mode") && json["night_mode"].is_object()) {
+    handled = sendNightModeIndication(json["night_mode"]) || handled;
+  } else if (json.contains("night_mode")) {
+    AASDK_LOG(error) << kLogPrefix << " SENSOR json night_mode is not an object";
+    return;
+  }
+
+  if (json.contains("driving_status") && json["driving_status"].is_object()) {
+    handled = sendDrivingStatusIndication(json["driving_status"]) || handled;
+  } else if (json.contains("driving_status")) {
+    AASDK_LOG(error) << kLogPrefix << " SENSOR json driving_status is not an object";
+    return;
+  }
+
+  if (!handled) {
+    AASDK_LOG(debug) << kLogPrefix << " SENSOR json contained no handled keys ts=" << timestamp;
+  }
 }
 
-bool SensorMessageHandlers::sendDrivingStatusIndication(const ::aasdk::messenger::Message& message) const {
-  if (sender_ == nullptr) {
-    AASDK_LOG(error) << kLogPrefix << " MessageSender not configured; cannot send driving status indication.";
+bool SensorMessageHandlers::sendDrivingStatusIndication(const nlohmann::json& drivingStatus) const {
+  if (sender_ == nullptr || sensorChannelId_ == ::aasdk::messenger::ChannelId::NONE) {
+    AASDK_LOG(error) << kLogPrefix << " Cannot send driving status indication; sender or channel unavailable.";
     return false;
   }
 
-  aap_protobuf::service::sensorsource::message::SensorBatch indication;
-  indication.add_driving_status_data()->set_status(
-      aap_protobuf::service::sensorsource::message::DrivingStatus::DRIVE_STATUS_UNRESTRICTED);
+  if (!drivingStatus.contains("status") || !drivingStatus["status"].is_string()) {
+    AASDK_LOG(error) << kLogPrefix << " Driving status json missing status.";
+    return false;
+  }
 
-  sender_->sendProtobuf(message.getChannelId(),
-                        message.getEncryptionType(),
+  const auto status = drivingStatus["status"].get<std::string>();
+  auto mapped = aap_protobuf::service::sensorsource::message::DrivingStatus::DRIVE_STATUS_UNRESTRICTED;
+
+  if (status == "no_video") {
+    mapped = aap_protobuf::service::sensorsource::message::DrivingStatus::DRIVE_STATUS_NO_VIDEO;
+  } else if (status == "no_keyboard_input") {
+    mapped = aap_protobuf::service::sensorsource::message::DrivingStatus::DRIVE_STATUS_NO_KEYBOARD_INPUT;
+  } else if (status == "no_voice_input") {
+    mapped = aap_protobuf::service::sensorsource::message::DrivingStatus::DRIVE_STATUS_NO_VOICE_INPUT;
+  } else if (status == "no_config") {
+    mapped = aap_protobuf::service::sensorsource::message::DrivingStatus::DRIVE_STATUS_NO_CONFIG;
+  } else if (status == "limit_message_len") {
+    mapped = aap_protobuf::service::sensorsource::message::DrivingStatus::DRIVE_STATUS_LIMIT_MESSAGE_LEN;
+  }
+
+  aap_protobuf::service::sensorsource::message::SensorBatch indication;
+  indication.add_driving_status_data()->set_status(mapped);
+
+  sender_->sendProtobuf(sensorChannelId_,
+                        sensorEncryptionType_,
                         ::aasdk::messenger::MessageType::SPECIFIC,
                         Sensor::SENSOR_MESSAGE_BATCH,
                         indication);
   return true;
 }
 
-bool SensorMessageHandlers::sendNightModeIndication(const ::aasdk::messenger::Message& message) const {
-  if (sender_ == nullptr) {
-    AASDK_LOG(error) << kLogPrefix << " MessageSender not configured; cannot send night mode indication.";
+bool SensorMessageHandlers::sendNightModeIndication(const nlohmann::json& nightMode) const {
+  if (sender_ == nullptr || sensorChannelId_ == ::aasdk::messenger::ChannelId::NONE) {
+    AASDK_LOG(error) << kLogPrefix << " Cannot send night mode indication; sender or channel unavailable.";
     return false;
   }
 
-  const bool isNight = []() {
-    std::ifstream ifile("/tmp/night_mode_enabled", std::ios::in);
-    return ifile.good();
-  }();
+  if (!nightMode.contains("enabled") || !nightMode["enabled"].is_boolean()) {
+    AASDK_LOG(error) << kLogPrefix << " Night mode json missing enabled boolean.";
+    return false;
+  }
 
   aap_protobuf::service::sensorsource::message::SensorBatch indication;
-  indication.add_night_mode_data()->set_night_mode(isNight);
+  indication.add_night_mode_data()->set_night_mode(nightMode["enabled"].get<bool>());
 
-  sender_->sendProtobuf(message.getChannelId(),
-                        message.getEncryptionType(),
+  sender_->sendProtobuf(sensorChannelId_,
+                        sensorEncryptionType_,
                         ::aasdk::messenger::MessageType::SPECIFIC,
                         Sensor::SENSOR_MESSAGE_BATCH,
                         indication);
