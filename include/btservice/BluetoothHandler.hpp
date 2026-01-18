@@ -7,7 +7,6 @@
 
 #include <btservice/IBluetoothHandler.hpp>
 #include <btservice/IAndroidBluetoothServer.hpp>
-#include <btservice/IAndroidBluetoothService.hpp>
 #include <Configuration/IConfiguration.hpp>
 #include <QObject>
 
@@ -16,27 +15,13 @@ namespace f1x::openauto::btservice {
   class BluetoothHandler : public QObject, public IBluetoothHandler {
     Q_OBJECT
   public:
-    BluetoothHandler(btservice::IAndroidBluetoothService::Pointer androidBluetoothService,
+    BluetoothHandler(btservice::IAndroidBluetoothServer::Pointer androidBluetoothServer,
                      autoapp::configuration::IConfiguration::Pointer configuration);
 
     void shutdownService() override;
 
-  private slots:
-    void onPairingDisplayPinCode(const QBluetoothAddress &address, QString pin);
-
-    void onPairingDisplayConfirmation(const QBluetoothAddress &address, QString pin);
-
-    void onPairingFinished(const QBluetoothAddress &address, QBluetoothLocalDevice::Pairing pairing);
-
-    void onError(QBluetoothLocalDevice::Error error);
-
-    void onHostModeStateChanged(QBluetoothLocalDevice::HostMode state);
-
-
   private:
-    std::unique_ptr<QBluetoothLocalDevice> localDevice_;
     autoapp::configuration::IConfiguration::Pointer configuration_;
-    btservice::IAndroidBluetoothService::Pointer androidBluetoothService_;
     btservice::IAndroidBluetoothServer::Pointer androidBluetoothServer_;
   };
 }

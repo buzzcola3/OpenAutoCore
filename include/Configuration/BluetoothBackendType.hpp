@@ -18,20 +18,10 @@
 
 #pragma once
 
-#include <memory>
-#include <string>
+namespace f1x::openauto::autoapp::configuration {
 
-namespace f1x::openauto::btservice {
-
-  class IAndroidBluetoothServer {
-  public:
-    typedef std::shared_ptr<IAndroidBluetoothServer> Pointer;
-
-    virtual ~IAndroidBluetoothServer() = default;
-
-    virtual uint16_t start(const std::string& address) = 0;
+  enum class BluetoothBackendType {
+    QT = 0,
+    BLUEZ = 1
   };
-
 }
-
-

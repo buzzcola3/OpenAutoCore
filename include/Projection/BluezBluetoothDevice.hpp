@@ -18,20 +18,30 @@
 
 #pragma once
 
+#include <Projection/IBluetoothDevice.hpp>
 #include <memory>
 #include <string>
+#include <sdbus-c++/sdbus-c++.h>
 
-namespace f1x::openauto::btservice {
+namespace f1x::openauto::autoapp::projection {
 
-  class IAndroidBluetoothServer {
-  public:
-    typedef std::shared_ptr<IAndroidBluetoothServer> Pointer;
+class BluezBluetoothDevice : public IBluetoothDevice
+{
+public:
+    explicit BluezBluetoothDevice(std::string adapterAddress);
 
-    virtual ~IAndroidBluetoothServer() = default;
+    void stop() override;
+    bool isPaired(const std::string& address) const override;
+    std::string getAdapterAddress() const override;
+    bool isAvailable() const override;
 
-    virtual uint16_t start(const std::string& address) = 0;
-  };
+private:
+    std::string resolveAdapterPath() const;
+    bool getDevicePaired(const std::string& deviceAddress) const;
+
+    std::string adapterAddress_;
+    std::unique_ptr<sdbus::IConnection> bus_;
+    std::unique_ptr<sdbus::IProxy> objectManager_;
+};
 
 }
-
-

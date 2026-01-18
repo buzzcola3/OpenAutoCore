@@ -64,10 +64,7 @@ sudo apt-get install -y \
     qttools5-dev \
     qttools5-dev-tools \
     qtmultimedia5-dev \
-    libqt5bluetooth5 \
-    libqt5bluetooth5-bin \
-    qtconnectivity5-dev \
-    qml-module-qtbluetooth \
+    libsdbus-c++-dev \
     libboost-all-dev
 
 

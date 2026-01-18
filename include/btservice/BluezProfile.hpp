@@ -18,20 +18,32 @@
 
 #pragma once
 
+#include <map>
 #include <memory>
 #include <string>
+#include <sdbus-c++/sdbus-c++.h>
 
 namespace f1x::openauto::btservice {
 
-  class IAndroidBluetoothServer {
+  class BluezBluetoothServer;
+
+  class BluezProfile {
   public:
-    typedef std::shared_ptr<IAndroidBluetoothServer> Pointer;
+    BluezProfile(sdbus::IConnection& connection, std::string objectPath, BluezBluetoothServer* server);
+    ~BluezProfile();
 
-    virtual ~IAndroidBluetoothServer() = default;
+    const std::string& objectPath() const;
 
-    virtual uint16_t start(const std::string& address) = 0;
+  private:
+    void release();
+    void newConnection(const sdbus::ObjectPath& device,
+                       const sdbus::UnixFd& fd,
+                       const std::map<std::string, sdbus::Variant>& properties);
+    void requestDisconnection(const sdbus::ObjectPath& device);
+
+    std::string objectPath_;
+    BluezBluetoothServer* server_;
+    std::unique_ptr<sdbus::IObject> object_;
   };
 
 }
-
-

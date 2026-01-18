@@ -6,8 +6,6 @@
 #define OPENAUTO_IBLUETOOTHHANDLER_HPP
 
 #include <memory>
-#include <QBluetoothAddress>
-#include <QBluetoothLocalDevice>
 
 namespace f1x::openauto::btservice {
 

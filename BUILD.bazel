@@ -6,25 +6,10 @@ filegroup(
 
 
 genrule(
-    name = "moc_local_bluetooth_device",
-    srcs = ["include/Projection/LocalBluetoothDevice.hpp"],
-    outs = ["moc_LocalBluetoothDevice.cpp"],
-    cmd = "moc $(location include/Projection/LocalBluetoothDevice.hpp) -o $@ -Iinclude -Iinclude/Common",
-)
-
-
-genrule(
     name = "moc_bluetooth_handler",
     srcs = ["include/btservice/BluetoothHandler.hpp"],
     outs = ["moc_BluetoothHandler.cpp"],
     cmd = "moc $(location include/btservice/BluetoothHandler.hpp) -o $@ -Iinclude -Iinclude/btservice -Iinclude/Common",
-)
-
-genrule(
-    name = "moc_android_bluetooth_server",
-    srcs = ["include/btservice/AndroidBluetoothServer.hpp"],
-    outs = ["moc_AndroidBluetoothServer.cpp"],
-    cmd = "moc $(location include/btservice/AndroidBluetoothServer.hpp) -o $@ -Iinclude -Iinclude/btservice -Iinclude/Common",
 )
 
 cc_binary(
@@ -33,14 +18,17 @@ cc_binary(
         "src/**/*.cpp",
     ], exclude = [
         "bazel-*/**",
+        "src/autoapp/autoapp.cpp",
+        "src/Projection/LocalBluetoothDevice.cpp",
+        "src/btservice/AndroidBluetoothService.cpp",
+        "src/btservice/AndroidBluetoothServer.cpp",
+        "src/btservice/BluezBluetoothService.cpp",
     ]) + glob([
         "include/**/*.hpp",
     ], exclude = [
         "bazel-*/**",
     ]) + [
-        ":moc_local_bluetooth_device",
         ":moc_bluetooth_handler",
-        ":moc_android_bluetooth_server",
         
     ],
     includes = [
@@ -56,18 +44,16 @@ cc_binary(
         "-DBOOST_ALL_DYN_LINK",
         "-DQT_CORE_LIB",
         "-DQT_NETWORK_LIB",
-        "-DQT_BLUETOOTH_LIB",
-        "-DQT_DBUS_LIB",
         "-DQT_MULTIMEDIA_LIB",
         "-DQT_MULTIMEDIAWIDGETS_LIB",
         "-isystem/usr/include/libusb-1.0",
         "-isystem/usr/include/x86_64-linux-gnu/qt5",
         "-isystem/usr/include/x86_64-linux-gnu/qt5/QtCore",
         "-isystem/usr/include/x86_64-linux-gnu/qt5/QtNetwork",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtBluetooth",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtDBus",
+        "-isystem/usr/include/sdbus-c++",
         "-isystem/usr/include/x86_64-linux-gnu/qt5/QtMultimedia",
         "-isystem/usr/include/x86_64-linux-gnu/qt5/QtMultimediaWidgets",
+        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
         "-isystem/usr/include/gstreamer-1.0",
         "-isystem/usr/include/glib-2.0",
         "-isystem/usr/include/x86_64-linux-gnu",
@@ -83,7 +69,8 @@ cc_binary(
         "-lboost_log_setup",
         "-lboost_thread",
         "-lboost_filesystem",
-        "-lQt5Bluetooth",
+        "-lQt5Widgets",
+        "-lsdbus-c++",
         "-lQt5Network",
         "-lQt5Core",
         "-lz",

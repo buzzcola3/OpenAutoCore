@@ -16,22 +16,24 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include <memory>
-#include <string>
+#include <btservice/BluezBluetoothService.hpp>
+#include <Common/Log.hpp>
 
 namespace f1x::openauto::btservice {
 
-  class IAndroidBluetoothServer {
-  public:
-    typedef std::shared_ptr<IAndroidBluetoothServer> Pointer;
+  BluezBluetoothService::BluezBluetoothService() {
+    OPENAUTO_LOG(info) << "[BluezBluetoothService] Initialising";
+  }
 
-    virtual ~IAndroidBluetoothServer() = default;
+  bool BluezBluetoothService::registerService(int16_t portNumber, const QBluetoothAddress& bluetoothAddress) {
+    OPENAUTO_LOG(info) << "[BluezBluetoothService] registerService handled by BlueZ profile (port="
+                       << portNumber << ", address=" << bluetoothAddress.toString().toStdString() << ")";
+    return true;
+  }
 
-    virtual uint16_t start(const std::string& address) = 0;
-  };
+  bool BluezBluetoothService::unregisterService() {
+    OPENAUTO_LOG(info) << "[BluezBluetoothService] unregisterService is a no-op (handled by BlueZ)";
+    return true;
+  }
 
 }
-
-
