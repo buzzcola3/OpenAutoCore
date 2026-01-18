@@ -13,6 +13,7 @@
 #include <Messenger/handlers/GenericNotificationMessageHandlers.hpp>
 #include <Messenger/handlers/NavigationStatusMessageHandlers.hpp>
 #include <Messenger/handlers/RadioMessageHandlers.hpp>
+#include <Messenger/handlers/MediaBrowserMessageHandlers.hpp>
 #include <Messenger/MessageSender.hpp>
 #include <Messenger/MessageSenderLocator.hpp>
 #include <Messenger/Message.hpp>
@@ -36,6 +37,7 @@ PhoneStatusMessageHandlers PHONE_STATUS_HANDLERS;
 GenericNotificationMessageHandlers GENERIC_NOTIFICATION_HANDLERS;
 NavigationStatusMessageHandlers NAVIGATION_STATUS_HANDLERS;
 RadioMessageHandlers RADIO_HANDLERS;
+MediaBrowserMessageHandlers MEDIA_BROWSER_HANDLERS;
 
 }
 
@@ -63,6 +65,8 @@ bool handleMessage(const ::aasdk::messenger::Message& message) {
       return NAVIGATION_STATUS_HANDLERS.handle(message);
     case ::aasdk::messenger::ChannelId::RADIO:
       return RADIO_HANDLERS.handle(message);
+    case ::aasdk::messenger::ChannelId::MEDIA_BROWSER:
+      return MEDIA_BROWSER_HANDLERS.handle(message);
     default:
       return false;
   }
@@ -81,6 +85,7 @@ void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender)
   GENERIC_NOTIFICATION_HANDLERS.setMessageSender(sender);
   NAVIGATION_STATUS_HANDLERS.setMessageSender(sender);
   RADIO_HANDLERS.setMessageSender(sender);
+  MEDIA_BROWSER_HANDLERS.setMessageSender(sender);
 }
 
 void setVideoTransport(const std::shared_ptr<buzz::autoapp::Transport::Transport>& transport) {
@@ -113,6 +118,10 @@ NavigationStatusMessageHandlers& getNavigationStatusHandlers() {
 
 RadioMessageHandlers& getRadioHandlers() {
   return RADIO_HANDLERS;
+}
+
+MediaBrowserMessageHandlers& getMediaBrowserHandlers() {
+  return MEDIA_BROWSER_HANDLERS;
 }
 
 }
