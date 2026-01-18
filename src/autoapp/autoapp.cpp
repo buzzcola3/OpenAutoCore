@@ -31,6 +31,7 @@
 #include <Messenger/MessageInStreamInterceptor.hpp>
 #include <Messenger/handlers/BluetoothMessageHandlers.hpp>
 #include <Messenger/handlers/InputSourceMessageHandlers.hpp>
+#include <Messenger/handlers/MediaSourceMessageHandlers.hpp>
 #include <Messenger/handlers/SensorMessageHandlers.hpp>
 #include <open_auto_transport/wire.hpp>
 #include <aap_protobuf/service/inputsource/message/InputReport.pb.h>
@@ -164,6 +165,13 @@ int main(int argc, char* argv[])
             buzz::wire::MsgType::SENSOR,
             [&sensorHandlers](uint64_t timestamp, const void* data, std::size_t size) {
                 sensorHandlers.onSensorEvent(timestamp, data, size);
+            });
+
+        auto& mediaSourceHandlers = aasdk::messenger::interceptor::getMediaSourceHandlers();
+        transport->addTypeHandler(
+            buzz::wire::MsgType::MICROPHONE_AUDIO,
+            [&mediaSourceHandlers](uint64_t timestamp, const void* data, std::size_t size) {
+                mediaSourceHandlers.onMicrophoneAudio(timestamp, data, size);
             });
     }
 

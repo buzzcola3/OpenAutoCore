@@ -46,12 +46,6 @@ genrule(
     cmd = "moc $(location include/f1x/openauto/autoapp/Projection/LocalBluetoothDevice.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp -Iinclude/f1x/openauto/Common",
 )
 
-genrule(
-    name = "moc_qt_audio_input",
-    srcs = ["include/f1x/openauto/autoapp/Projection/QtAudioInput.hpp"],
-    outs = ["moc_QtAudioInput.cpp"],
-    cmd = "moc $(location include/f1x/openauto/autoapp/Projection/QtAudioInput.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp -Iinclude/f1x/openauto/Common",
-)
 
 genrule(
     name = "moc_bluetooth_handler",
@@ -81,7 +75,7 @@ cc_binary(
     ]) + [
         ":moc_input_device",
         ":moc_local_bluetooth_device",
-        ":moc_qt_audio_input",
+        
     ],
     includes = [
         "include",
