@@ -44,6 +44,9 @@
 #include <f1x/openauto/autoapp/Service/ServiceFactory.hpp>
 #include <f1x/openauto/autoapp/Configuration/Configuration.hpp>
 #include <f1x/openauto/Common/Log.hpp>
+#include <f1x/openauto/btservice/BluetoothHandler.hpp>
+#include <f1x/openauto/btservice/AndroidBluetoothService.hpp>
+#include <QtBluetooth>
 
 namespace autoapp = f1x::openauto::autoapp;
 using ThreadPool = std::vector<std::thread>;
@@ -112,6 +115,18 @@ int main(int argc, char* argv[])
     QApplication qApplication(argc, argv);
 
     auto configuration = std::make_shared<autoapp::configuration::Configuration>();
+
+    std::unique_ptr<f1x::openauto::btservice::BluetoothHandler> bluetoothHandler;
+    if (configuration->getWirelessProjectionEnabled()) {
+        try {
+            auto androidBluetoothService = std::make_shared<f1x::openauto::btservice::AndroidBluetoothService>();
+            bluetoothHandler = std::make_unique<f1x::openauto::btservice::BluetoothHandler>(
+                androidBluetoothService,
+                configuration);
+        } catch (const std::runtime_error& e) {
+            OPENAUTO_LOG(error) << "[AutoApp] Bluetooth service init failed: " << e.what();
+        }
+    }
 
     autoapp::projection::IBluetoothDevice::Pointer bluetoothDevice;
     if (configuration->getBluetoothAdapterAddress().empty()) {

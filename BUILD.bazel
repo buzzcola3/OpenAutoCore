@@ -35,101 +35,15 @@ cc_binary(
         "bazel-*/**",
     ]) + glob([
         "include/f1x/openauto/autoapp/**/*.hpp",
+        "include/f1x/openauto/btservice/**/*.hpp",
         "include/f1x/openauto/Common/**/*.hpp",
     ], exclude = [
         "bazel-*/**",
     ]) + [
         ":moc_local_bluetooth_device",
-        
-    ],
-    includes = [
-        "include",
-        "include/f1x/openauto",
-        "include/f1x/openauto/Common",
-        "include/f1x/openauto/autoapp",
-    ],
-    copts = [
-        "-include", "Common/AsioCompat.hpp",
-        "-Wall",
-        "-pedantic",
-        "-fPIC",
-        "-DBOOST_ALL_DYN_LINK",
-        "-DQT_WIDGETS_LIB",
-        "-DQT_GUI_LIB",
-        "-DQT_CORE_LIB",
-        "-DQT_NETWORK_LIB",
-        "-DQT_BLUETOOTH_LIB",
-        "-DQT_DBUS_LIB",
-        "-DQT_MULTIMEDIA_LIB",
-        "-DQT_MULTIMEDIAWIDGETS_LIB",
-        "-isystem/usr/include/libusb-1.0",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtCore",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtGui",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtNetwork",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtBluetooth",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtDBus",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtMultimedia",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtMultimediaWidgets",
-        "-isystem/usr/include/gstreamer-1.0",
-        "-isystem/usr/include/glib-2.0",
-        "-isystem/usr/include/x86_64-linux-gnu",
-        "-isystem/usr/include/taglib",
-        "-isystem/usr/include/blkid",
-    ],
-    linkopts = [
-        "-lusb-1.0",
-        "-lssl",
-        "-lcrypto",
-        "-lboost_system",
-        "-lboost_log",
-        "-lboost_log_setup",
-        "-lboost_thread",
-        "-lboost_filesystem",
-        "-lQt5MultimediaWidgets",
-        "-lQt5Multimedia",
-        "-lQt5Widgets",
-        "-lQt5Gui",
-        "-lQt5Bluetooth",
-        "-lQt5Network",
-        "-lQt5DBus",
-        "-lQt5Core",
-        "-lgstapp-1.0",
-        "-lgstbase-1.0",
-        "-lgstreamer-1.0",
-        "-lgobject-2.0",
-        "-lglib-2.0",
-        "-ltag",
-        "-lz",
-        "-lblkid",
-        "-lgps",
-        "-pthread",
-    ],
-    deps = [
-        "//OpenAutoSDK:aap_protobuf_cc",
-        "//OpenAutoSDK:aasdk",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-cc_binary(
-    name = "btservice_bazel",
-    srcs = glob([
-        "src/btservice/**/*.cpp",
-    ], exclude = [
-        "bazel-*/**",
-    ]) + glob([
-        "include/f1x/openauto/btservice/**/*.hpp",
-        "include/f1x/openauto/Common/**/*.hpp",
-        "include/f1x/openauto/autoapp/**/*.hpp",
-    ], exclude = [
-        "bazel-*/**",
-    ]) + [
-        "src/autoapp/Configuration/Configuration.cpp",
-        "src/autoapp/Configuration/RecentAddressesList.cpp",
         ":moc_bluetooth_handler",
         ":moc_android_bluetooth_server",
+        
     ],
     includes = [
         "include",
@@ -202,3 +116,4 @@ cc_binary(
     ],
     visibility = ["//visibility:public"],
 )
+
