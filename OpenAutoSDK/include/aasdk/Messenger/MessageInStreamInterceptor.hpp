@@ -19,11 +19,13 @@ namespace aasdk::messenger::interceptor {
 
 class InputSourceMessageHandlers;
 class SensorMessageHandlers;
+class PhoneStatusMessageHandlers;
 
 bool handleMessage(const ::aasdk::messenger::Message& message);
 void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender);
 void setVideoTransport(const std::shared_ptr<buzz::autoapp::Transport::Transport>& transport);
 ::aasdk::messenger::interceptor::InputSourceMessageHandlers& getInputSourceHandlers();
 ::aasdk::messenger::interceptor::SensorMessageHandlers& getSensorHandlers();
+::aasdk::messenger::interceptor::PhoneStatusMessageHandlers& getPhoneStatusHandlers();
 
 }
