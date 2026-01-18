@@ -17,7 +17,7 @@
 */
 
 #include <thread>
-#include <QApplication>
+#include <QCoreApplication>
 #include <chrono>
 #include <fstream>
 #include <USB/USBHub.hpp>
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
     startUSBWorkers(ioService, usbContext, threadPool);
     startIOServiceWorkers(ioService, threadPool);
 
-    QApplication qApplication(argc, argv);
+    QCoreApplication qApplication(argc, argv);
 
     auto configuration = std::make_shared<autoapp::configuration::Configuration>();
 
