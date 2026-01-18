@@ -1,31 +1,3 @@
-load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
-
-filegroup(
-    name = "cmake_srcs",
-    srcs = glob([
-        "**",
-    ], exclude = [
-        "bazel-*/**",
-        "build/**",
-        "bin/**",
-        "lib/**",
-        "OpenAutoSDK/lib/**",
-    ]),
-)
-
-cmake(
-    name = "autoapp_cmake",
-    lib_source = ":cmake_srcs",
-    cache_entries = {
-        "CMAKE_BUILD_TYPE": "Release",
-    },
-    build_args = ["-j"],
-    targets = ["autoapp", "aasdk", "aap_protobuf"],
-    install = True,
-    out_binaries = ["autoapp"],
-    out_shared_libs = ["libaasdk.so", "libaap_protobuf.so"],
-)
-
 filegroup(
     name = "autoapp",
     srcs = ["bin/autoapp"],

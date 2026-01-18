@@ -45,14 +45,12 @@ Copyrights (c) 2018 f1x.studio (Michal Szwaj)
  - [aasdk](https://github.com/f1xpl/aasdk)
  - [Boost libraries](http://www.boost.org/)
  - [Qt libraries](https://www.qt.io/)
- - [CMake](https://cmake.org/)
  - Broadcom ilclient from RaspberryPI 3 firmware
  - OpenMAX IL API
 
 ### Building
 
 sudo apt-get install -y \
-    cmake \
     g++ \
     qtbase5-dev \
     libqt5serialport5-dev \
@@ -79,13 +77,6 @@ seem to work fine.
 
 You will also likely need to install the udev rules from `prebuilts`
 
-You need to point some CMAKE variables at your `aasdk` files.
-```text
--DAASDK_INCLUDE_DIRS=<path_to_aasdk_repo>/include
--DAASDK_LIBRARIES=<path_to_aasdk_repo>/lib/libaasdk.so
- DAASDK_PROTO_INCLUDE_DIRS=<path_to_aasdk_build>
--DAASDK_PROTO_LIBRARIES=<path_to_aasdk_repo>/lib/libaasdk_proto.so
-```
 
 #### Raspberry Pi
 Just run the scripts in the `prebuilts` repository for `aasdk` and `openauto`. It is possible to cross compile if your raspberry pi is too slow to compile the code itself.
