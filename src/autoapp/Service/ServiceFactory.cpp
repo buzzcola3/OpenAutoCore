@@ -20,10 +20,7 @@
 
 #include <f1x/openauto/autoapp/Service/MediaSource/MicrophoneMediaSourceService.hpp>
 
-#include <f1x/openauto/autoapp/Service/Bluetooth/BluetoothService.hpp>
 #include <f1x/openauto/autoapp/Projection/QtAudioInput.hpp>
-#include <f1x/openauto/autoapp/Projection/LocalBluetoothDevice.hpp>
-#include <f1x/openauto/autoapp/Projection/DummyBluetoothDevice.hpp>
 
 namespace f1x::openauto::autoapp::service {
 
@@ -38,15 +35,13 @@ namespace f1x::openauto::autoapp::service {
     ServiceList serviceList;
 
     this->createMediaSourceServices(serviceList, messenger);
-    if (configuration_->getWirelessProjectionEnabled())
-    {
-        // TODO: What is WiFi Projection Service?
-        /*
-         * The btservice seems to handle connecting over bluetooth and allow AA to establish a WiFi connection for Projection
-         * If WifiProjection is a legitimate service, then it seems clear it is not what we think it actually is.
-         */
-        serviceList.emplace_back(this->createBluetoothService(messenger));
-        // serviceList.emplace_back(this->createWifiProjectionService(messenger));
+    if (configuration_->getWirelessProjectionEnabled()) {
+      // TODO: What is WiFi Projection Service?
+      /*
+       * The btservice seems to handle connecting over bluetooth and allow AA to establish a WiFi connection for Projection
+       * If WifiProjection is a legitimate service, then it seems clear it is not what we think it actually is.
+       */
+      // serviceList.emplace_back(this->createWifiProjectionService(messenger));
     }
 
     return serviceList;
@@ -57,22 +52,6 @@ namespace f1x::openauto::autoapp::service {
       transport_ = std::make_shared<buzz::autoapp::Transport::Transport>();
     }
     return transport_;
-  }
-
-  IService::Pointer ServiceFactory::createBluetoothService(aasdk::messenger::IMessenger::Pointer messenger) {
-    OPENAUTO_LOG(info) << "[ServiceFactory] createBluetoothService()";
-    projection::IBluetoothDevice::Pointer bluetoothDevice;
-    if (configuration_->getBluetoothAdapterAddress() == "") {
-      OPENAUTO_LOG(debug) << "[ServiceFactory] Using Dummy Bluetooth";
-      bluetoothDevice = std::make_shared<projection::DummyBluetoothDevice>();
-    } else {
-      OPENAUTO_LOG(info) << "[ServiceFactory] Using Local Bluetooth Adapter";
-      bluetoothDevice = projection::IBluetoothDevice::Pointer(new projection::LocalBluetoothDevice(),
-                                                              std::bind(&QObject::deleteLater,
-                                                                        std::placeholders::_1));
-    }
-
-    return std::make_shared<bluetooth::BluetoothService>(ioService_, messenger, std::move(bluetoothDevice));
   }
 
   void ServiceFactory::createMediaSourceServices(f1x::openauto::autoapp::service::ServiceList &serviceList,

@@ -19,6 +19,7 @@ namespace aasdk::messenger::interceptor {
 
 class InputSourceMessageHandlers;
 class SensorMessageHandlers;
+class BluetoothMessageHandlers;
 class PhoneStatusMessageHandlers;
 class GenericNotificationMessageHandlers;
 class NavigationStatusMessageHandlers;
@@ -32,6 +33,7 @@ void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender)
 void setVideoTransport(const std::shared_ptr<buzz::autoapp::Transport::Transport>& transport);
 ::aasdk::messenger::interceptor::InputSourceMessageHandlers& getInputSourceHandlers();
 ::aasdk::messenger::interceptor::SensorMessageHandlers& getSensorHandlers();
+::aasdk::messenger::interceptor::BluetoothMessageHandlers& getBluetoothHandlers();
 ::aasdk::messenger::interceptor::PhoneStatusMessageHandlers& getPhoneStatusHandlers();
 ::aasdk::messenger::interceptor::GenericNotificationMessageHandlers& getGenericNotificationHandlers();
 ::aasdk::messenger::interceptor::NavigationStatusMessageHandlers& getNavigationStatusHandlers();

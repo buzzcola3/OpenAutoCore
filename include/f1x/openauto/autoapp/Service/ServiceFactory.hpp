@@ -34,7 +34,6 @@ namespace f1x {
           std::shared_ptr<buzz::autoapp::Transport::Transport> getTransport() override;
 
         private:
-          IService::Pointer createBluetoothService(aasdk::messenger::IMessenger::Pointer messenger);
           void createMediaSourceServices(ServiceList &serviceList, aasdk::messenger::IMessenger::Pointer messenger);
           IService::Pointer createWifiProjectionService(aasdk::messenger::IMessenger::Pointer messenger);
 

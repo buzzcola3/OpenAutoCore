@@ -29,12 +29,16 @@
 #include <boost/log/utility/setup.hpp>
 #include <f1x/openauto/autoapp/App.hpp>
 #include <Messenger/MessageInStreamInterceptor.hpp>
+#include <Messenger/handlers/BluetoothMessageHandlers.hpp>
 #include <Messenger/handlers/InputSourceMessageHandlers.hpp>
 #include <Messenger/handlers/SensorMessageHandlers.hpp>
 #include <open_auto_transport/wire.hpp>
 #include <aap_protobuf/service/inputsource/message/InputReport.pb.h>
 #include <f1x/openauto/autoapp/Configuration/IConfiguration.hpp>
 #include <f1x/openauto/autoapp/Configuration/RecentAddressesList.hpp>
+#include <f1x/openauto/autoapp/Projection/IBluetoothDevice.hpp>
+#include <f1x/openauto/autoapp/Projection/LocalBluetoothDevice.hpp>
+#include <f1x/openauto/autoapp/Projection/DummyBluetoothDevice.hpp>
 #include <f1x/openauto/autoapp/Service/AndroidAutoEntityFactory.hpp>
 #include <f1x/openauto/autoapp/Service/ServiceFactory.hpp>
 #include <f1x/openauto/autoapp/Configuration/Configuration.hpp>
@@ -108,6 +112,17 @@ int main(int argc, char* argv[])
 
     auto configuration = std::make_shared<autoapp::configuration::Configuration>();
 
+    autoapp::projection::IBluetoothDevice::Pointer bluetoothDevice;
+    if (configuration->getBluetoothAdapterAddress().empty()) {
+        OPENAUTO_LOG(debug) << "[AutoApp] Using Dummy Bluetooth";
+        bluetoothDevice = std::make_shared<autoapp::projection::DummyBluetoothDevice>();
+    } else {
+        OPENAUTO_LOG(info) << "[AutoApp] Using Local Bluetooth Adapter";
+        bluetoothDevice = autoapp::projection::IBluetoothDevice::Pointer(
+            new autoapp::projection::LocalBluetoothDevice(),
+            std::bind(&QObject::deleteLater, std::placeholders::_1));
+    }
+
     autoapp::configuration::RecentAddressesList recentAddressesList(7);
     recentAddressesList.read();
 
@@ -127,6 +142,14 @@ int main(int argc, char* argv[])
         }
     }
     aasdk::messenger::interceptor::setVideoTransport(transport);
+
+    auto& bluetoothHandlers = aasdk::messenger::interceptor::getBluetoothHandlers();
+    bluetoothHandlers.setIsPairedCallback([bluetoothDevice](const std::string& address) {
+        if (bluetoothDevice == nullptr) {
+            return false;
+        }
+        return bluetoothDevice->isPaired(address);
+    });
 
     if (transport) {
         auto& touchHandlers = aasdk::messenger::interceptor::getInputSourceHandlers();

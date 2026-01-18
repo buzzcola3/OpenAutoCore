@@ -9,6 +9,7 @@
 #include <Messenger/handlers/MediaSinkVideoMessageHandlers.hpp>
 #include <Messenger/handlers/InputSourceMessageHandlers.hpp>
 #include <Messenger/handlers/SensorMessageHandlers.hpp>
+#include <Messenger/handlers/BluetoothMessageHandlers.hpp>
 #include <Messenger/handlers/PhoneStatusMessageHandlers.hpp>
 #include <Messenger/handlers/GenericNotificationMessageHandlers.hpp>
 #include <Messenger/handlers/NavigationStatusMessageHandlers.hpp>
@@ -35,6 +36,7 @@ SystemAudioMessageHandlers MEDIA_SINK_SYSTEM_AUDIO_HANDLERS;
 TelephonyAudioMessageHandlers MEDIA_SINK_TELEPHONY_AUDIO_HANDLERS;
 InputSourceMessageHandlers INPUT_SOURCE_HANDLERS;
 SensorMessageHandlers SENSOR_HANDLERS;
+BluetoothMessageHandlers BLUETOOTH_HANDLERS;
 PhoneStatusMessageHandlers PHONE_STATUS_HANDLERS;
 GenericNotificationMessageHandlers GENERIC_NOTIFICATION_HANDLERS;
 NavigationStatusMessageHandlers NAVIGATION_STATUS_HANDLERS;
@@ -61,6 +63,8 @@ bool handleMessage(const ::aasdk::messenger::Message& message) {
       return INPUT_SOURCE_HANDLERS.handle(message);
     case ::aasdk::messenger::ChannelId::SENSOR:
       return SENSOR_HANDLERS.handle(message);
+    case ::aasdk::messenger::ChannelId::BLUETOOTH:
+      return BLUETOOTH_HANDLERS.handle(message);
     case ::aasdk::messenger::ChannelId::PHONE_STATUS:
       return PHONE_STATUS_HANDLERS.handle(message);
     case ::aasdk::messenger::ChannelId::GENERIC_NOTIFICATION:
@@ -89,6 +93,7 @@ void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender)
   MEDIA_SINK_TELEPHONY_AUDIO_HANDLERS.setMessageSender(sender);
   INPUT_SOURCE_HANDLERS.setMessageSender(sender);
   SENSOR_HANDLERS.setMessageSender(sender);
+  BLUETOOTH_HANDLERS.setMessageSender(sender);
   PHONE_STATUS_HANDLERS.setMessageSender(sender);
   GENERIC_NOTIFICATION_HANDLERS.setMessageSender(sender);
   NAVIGATION_STATUS_HANDLERS.setMessageSender(sender);
@@ -112,6 +117,10 @@ InputSourceMessageHandlers& getInputSourceHandlers() {
 
 SensorMessageHandlers& getSensorHandlers() {
   return SENSOR_HANDLERS;
+}
+
+BluetoothMessageHandlers& getBluetoothHandlers() {
+  return BLUETOOTH_HANDLERS;
 }
 
 PhoneStatusMessageHandlers& getPhoneStatusHandlers() {
