@@ -15,16 +15,16 @@ genrule(
 
 genrule(
     name = "moc_bluetooth_handler",
-    srcs = ["include/f1x/openauto/btservice/BluetoothHandler.hpp"],
+    srcs = ["include/f1x/openauto/autoapp/btservice/BluetoothHandler.hpp"],
     outs = ["moc_BluetoothHandler.cpp"],
-    cmd = "moc $(location include/f1x/openauto/btservice/BluetoothHandler.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/btservice -Iinclude/f1x/openauto/Common -Iinclude/f1x/openauto/autoapp",
+    cmd = "moc $(location include/f1x/openauto/autoapp/btservice/BluetoothHandler.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp/btservice -Iinclude/f1x/openauto/Common -Iinclude/f1x/openauto/autoapp",
 )
 
 genrule(
     name = "moc_android_bluetooth_server",
-    srcs = ["include/f1x/openauto/btservice/AndroidBluetoothServer.hpp"],
+    srcs = ["include/f1x/openauto/autoapp/btservice/AndroidBluetoothServer.hpp"],
     outs = ["moc_AndroidBluetoothServer.cpp"],
-    cmd = "moc $(location include/f1x/openauto/btservice/AndroidBluetoothServer.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/btservice -Iinclude/f1x/openauto/Common -Iinclude/f1x/openauto/autoapp",
+    cmd = "moc $(location include/f1x/openauto/autoapp/btservice/AndroidBluetoothServer.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp/btservice -Iinclude/f1x/openauto/Common -Iinclude/f1x/openauto/autoapp",
 )
 
 cc_binary(
@@ -35,7 +35,6 @@ cc_binary(
         "bazel-*/**",
     ]) + glob([
         "include/f1x/openauto/autoapp/**/*.hpp",
-        "include/f1x/openauto/btservice/**/*.hpp",
         "include/f1x/openauto/Common/**/*.hpp",
     ], exclude = [
         "bazel-*/**",
@@ -50,7 +49,7 @@ cc_binary(
         "include/f1x/openauto",
         "include/f1x/openauto/Common",
         "include/f1x/openauto/autoapp",
-        "include/f1x/openauto/btservice",
+        "include/f1x/openauto/autoapp/btservice",
     ],
     copts = [
         "-include", "Common/AsioCompat.hpp",

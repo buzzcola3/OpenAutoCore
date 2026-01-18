@@ -2,9 +2,9 @@
 // Created by Simon Dean on 26/11/2024.
 //
 
-#include <f1x/openauto/btservice/BluetoothHandler.hpp>
-#include <f1x/openauto/btservice/AndroidBluetoothService.hpp>
-#include <f1x/openauto/btservice/AndroidBluetoothServer.hpp>
+#include <f1x/openauto/autoapp/btservice/BluetoothHandler.hpp>
+#include <f1x/openauto/autoapp/btservice/AndroidBluetoothService.hpp>
+#include <f1x/openauto/autoapp/btservice/AndroidBluetoothServer.hpp>
 #include <f1x/openauto/Common/Log.hpp>
 
 namespace f1x::openauto::btservice {

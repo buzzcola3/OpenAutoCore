@@ -44,8 +44,8 @@
 #include <f1x/openauto/autoapp/Service/ServiceFactory.hpp>
 #include <f1x/openauto/autoapp/Configuration/Configuration.hpp>
 #include <f1x/openauto/Common/Log.hpp>
-#include <f1x/openauto/btservice/BluetoothHandler.hpp>
-#include <f1x/openauto/btservice/AndroidBluetoothService.hpp>
+#include <f1x/openauto/autoapp/btservice/BluetoothHandler.hpp>
+#include <f1x/openauto/autoapp/btservice/AndroidBluetoothService.hpp>
 #include <QtBluetooth>
 
 namespace autoapp = f1x::openauto::autoapp;

@@ -19,7 +19,7 @@
 #pragma once
 
 #include <QBluetoothServiceInfo>
-#include <f1x/openauto/btservice/IAndroidBluetoothService.hpp>
+#include <f1x/openauto/autoapp/btservice/IAndroidBluetoothService.hpp>
 
 namespace f1x::openauto::btservice
 {

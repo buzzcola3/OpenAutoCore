@@ -20,7 +20,7 @@
 #include <boost/algorithm/hex.hpp>
 #include <f1x/openauto/Common/Log.hpp>
 #include <f1x/openauto/autoapp/Configuration/IConfiguration.hpp>
-#include <f1x/openauto/btservice/AndroidBluetoothServer.hpp>
+#include <f1x/openauto/autoapp/btservice/AndroidBluetoothServer.hpp>
 #include <QString>
 #include <QtCore/QDataStream>
 #include <QNetworkInterface>
