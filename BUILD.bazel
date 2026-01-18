@@ -7,35 +7,34 @@ filegroup(
 
 genrule(
     name = "moc_local_bluetooth_device",
-    srcs = ["include/f1x/openauto/autoapp/Projection/LocalBluetoothDevice.hpp"],
+    srcs = ["include/Projection/LocalBluetoothDevice.hpp"],
     outs = ["moc_LocalBluetoothDevice.cpp"],
-    cmd = "moc $(location include/f1x/openauto/autoapp/Projection/LocalBluetoothDevice.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp -Iinclude/f1x/openauto/Common",
+    cmd = "moc $(location include/Projection/LocalBluetoothDevice.hpp) -o $@ -Iinclude -Iinclude/Common",
 )
 
 
 genrule(
     name = "moc_bluetooth_handler",
-    srcs = ["include/f1x/openauto/autoapp/btservice/BluetoothHandler.hpp"],
+    srcs = ["include/btservice/BluetoothHandler.hpp"],
     outs = ["moc_BluetoothHandler.cpp"],
-    cmd = "moc $(location include/f1x/openauto/autoapp/btservice/BluetoothHandler.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp/btservice -Iinclude/f1x/openauto/Common -Iinclude/f1x/openauto/autoapp",
+    cmd = "moc $(location include/btservice/BluetoothHandler.hpp) -o $@ -Iinclude -Iinclude/btservice -Iinclude/Common",
 )
 
 genrule(
     name = "moc_android_bluetooth_server",
-    srcs = ["include/f1x/openauto/autoapp/btservice/AndroidBluetoothServer.hpp"],
+    srcs = ["include/btservice/AndroidBluetoothServer.hpp"],
     outs = ["moc_AndroidBluetoothServer.cpp"],
-    cmd = "moc $(location include/f1x/openauto/autoapp/btservice/AndroidBluetoothServer.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp/btservice -Iinclude/f1x/openauto/Common -Iinclude/f1x/openauto/autoapp",
+    cmd = "moc $(location include/btservice/AndroidBluetoothServer.hpp) -o $@ -Iinclude -Iinclude/btservice -Iinclude/Common",
 )
 
 cc_binary(
     name = "autoapp_bazel",
     srcs = glob([
-        "src/autoapp/**/*.cpp",
+        "src/**/*.cpp",
     ], exclude = [
         "bazel-*/**",
     ]) + glob([
-        "include/f1x/openauto/autoapp/**/*.hpp",
-        "include/f1x/openauto/Common/**/*.hpp",
+        "include/**/*.hpp",
     ], exclude = [
         "bazel-*/**",
     ]) + [
@@ -46,10 +45,8 @@ cc_binary(
     ],
     includes = [
         "include",
-        "include/f1x/openauto",
-        "include/f1x/openauto/Common",
-        "include/f1x/openauto/autoapp",
-        "include/f1x/openauto/autoapp/btservice",
+        "include/Common",
+        "include/btservice",
     ],
     copts = [
         "-include", "Common/AsioCompat.hpp",
