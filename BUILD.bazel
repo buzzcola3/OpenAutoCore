@@ -32,12 +32,6 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
-genrule(
-    name = "moc_input_device",
-    srcs = ["include/f1x/openauto/autoapp/Projection/InputDevice.hpp"],
-    outs = ["moc_InputDevice.cpp"],
-    cmd = "moc $(location include/f1x/openauto/autoapp/Projection/InputDevice.hpp) -o $@ -Iinclude -Iinclude/f1x/openauto -Iinclude/f1x/openauto/autoapp -Iinclude/f1x/openauto/Common",
-)
 
 genrule(
     name = "moc_local_bluetooth_device",
@@ -73,7 +67,6 @@ cc_binary(
     ], exclude = [
         "bazel-*/**",
     ]) + [
-        ":moc_input_device",
         ":moc_local_bluetooth_device",
         
     ],
