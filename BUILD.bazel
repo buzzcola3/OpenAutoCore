@@ -5,13 +5,6 @@ filegroup(
 )
 
 
-genrule(
-    name = "moc_bluetooth_handler",
-    srcs = ["include/btservice/BluetoothHandler.hpp"],
-    outs = ["moc_BluetoothHandler.cpp"],
-    cmd = "moc $(location include/btservice/BluetoothHandler.hpp) -o $@ -Iinclude -Iinclude/btservice -Iinclude/Common",
-)
-
 cc_binary(
     name = "autoapp_bazel",
     srcs = glob([
@@ -19,18 +12,11 @@ cc_binary(
     ], exclude = [
         "bazel-*/**",
         "src/autoapp/autoapp.cpp",
-        "src/Projection/LocalBluetoothDevice.cpp",
-        "src/btservice/AndroidBluetoothService.cpp",
-        "src/btservice/AndroidBluetoothServer.cpp",
-        "src/btservice/BluezBluetoothService.cpp",
     ]) + glob([
         "include/**/*.hpp",
     ], exclude = [
         "bazel-*/**",
-    ]) + [
-        ":moc_bluetooth_handler",
-        
-    ],
+    ]),
     includes = [
         "include",
         "include/Common",
@@ -42,23 +28,10 @@ cc_binary(
         "-pedantic",
         "-fPIC",
         "-DBOOST_ALL_DYN_LINK",
-        "-DQT_CORE_LIB",
-        "-DQT_NETWORK_LIB",
-        "-DQT_MULTIMEDIA_LIB",
-        "-DQT_MULTIMEDIAWIDGETS_LIB",
         "-isystem/usr/include/libusb-1.0",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtCore",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtNetwork",
         "-isystem/usr/include/sdbus-c++",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtMultimedia",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtMultimediaWidgets",
-        "-isystem/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
-        "-isystem/usr/include/gstreamer-1.0",
-        "-isystem/usr/include/glib-2.0",
         "-isystem/usr/include/x86_64-linux-gnu",
-        "-isystem/usr/include/taglib",
-        "-isystem/usr/include/blkid",
+        
     ],
     linkopts = [
         "-lusb-1.0",
@@ -69,10 +42,7 @@ cc_binary(
         "-lboost_log_setup",
         "-lboost_thread",
         "-lboost_filesystem",
-        "-lQt5Widgets",
         "-lsdbus-c++",
-        "-lQt5Network",
-        "-lQt5Core",
         "-lz",
         "-pthread",
     ],

@@ -16,10 +16,13 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <thread>
-#include <QCoreApplication>
+#include <atomic>
 #include <chrono>
+#include <condition_variable>
+#include <csignal>
 #include <fstream>
+#include <mutex>
+#include <thread>
 #include <USB/USBHub.hpp>
 #include <USB/ConnectedAccessoriesEnumerator.hpp>
 #include <USB/AccessoryModeQueryChain.hpp>
@@ -49,6 +52,17 @@
 
 namespace autoapp = f1x::openauto::autoapp;
 using ThreadPool = std::vector<std::thread>;
+
+namespace {
+    std::atomic_bool gRunning{true};
+    std::condition_variable gShutdownCv;
+    std::mutex gShutdownMutex;
+
+    void handleSignal(int) {
+        gRunning.store(false);
+        gShutdownCv.notify_all();
+    }
+}
 
 void startUSBWorkers(boost::asio::io_service& ioService, libusb_context* usbContext, ThreadPool& threadPool)
 {
@@ -98,6 +112,9 @@ int main(int argc, char* argv[])
 {
     configureLogging();
 
+    std::signal(SIGINT, handleSignal);
+    std::signal(SIGTERM, handleSignal);
+
     libusb_context* usbContext;
     if(libusb_init(&usbContext) != 0)
     {
@@ -110,8 +127,6 @@ int main(int argc, char* argv[])
     std::vector<std::thread> threadPool;
     startUSBWorkers(ioService, usbContext, threadPool);
     startIOServiceWorkers(ioService, threadPool);
-
-    QCoreApplication qApplication(argc, argv);
 
     auto configuration = std::make_shared<autoapp::configuration::Configuration>();
 
@@ -196,10 +211,15 @@ int main(int argc, char* argv[])
 
     app->waitForUSBDevice();
 
-    auto result = qApplication.exec();
+    {
+        std::unique_lock<std::mutex> lock(gShutdownMutex);
+        gShutdownCv.wait(lock, [] { return !gRunning.load(); });
+    }
+
+    ioService.stop();
 
     std::for_each(threadPool.begin(), threadPool.end(), std::bind(&std::thread::join, std::placeholders::_1));
 
     libusb_exit(usbContext);
-    return result;
+    return 0;
 }

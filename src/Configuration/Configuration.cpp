@@ -18,7 +18,7 @@
 
 #include <Configuration/Configuration.hpp>
 #include <Common/Log.hpp>
-#include <QString>
+#include <algorithm>
 
 
 
@@ -99,7 +99,10 @@ void Configuration::load()
                                                                                                            aap_protobuf::service::media::sink::message::VideoCodecResolutionType::VIDEO_800x480));
         screenDPI_ = iniConfig.get<size_t>(cVideoScreenDPIKey, 140);
 
-        videoMargins_ = QRect(0, 0, iniConfig.get<int32_t>(cVideoMarginWidth, 0), iniConfig.get<int32_t>(cVideoMarginHeight, 0));
+        videoMargins_ = VideoMargins{
+            iniConfig.get<int32_t>(cVideoMarginWidth, 0),
+            iniConfig.get<int32_t>(cVideoMarginHeight, 0)
+        };
 
         enableTouchscreen_ = iniConfig.get<bool>(cInputEnableTouchscreenKey, true);
         enablePlayerControl_ = iniConfig.get<bool>(cInputEnablePlayerControlKey, false);
@@ -149,7 +152,7 @@ void Configuration::reset()
     videoFPS_ = aap_protobuf::service::media::sink::message::VideoFrameRateType::VIDEO_FPS_30;
     videoResolution_ = aap_protobuf::service::media::sink::message::VideoCodecResolutionType::VIDEO_800x480;
     screenDPI_ = 140;
-    videoMargins_ = QRect(0, 0, 0, 0);
+    videoMargins_ = VideoMargins{};
     enableTouchscreen_ = true;
     enablePlayerControl_ = false;
     buttonCodes_.clear();
@@ -178,8 +181,8 @@ void Configuration::save()
     iniConfig.put<uint32_t>(cVideoFPSKey, static_cast<uint32_t>(videoFPS_));
     iniConfig.put<uint32_t>(cVideoResolutionKey, static_cast<uint32_t>(videoResolution_));
     iniConfig.put<size_t>(cVideoScreenDPIKey, screenDPI_);
-    iniConfig.put<uint32_t>(cVideoMarginWidth, videoMargins_.width());
-    iniConfig.put<uint32_t>(cVideoMarginHeight, videoMargins_.height());
+    iniConfig.put<uint32_t>(cVideoMarginWidth, static_cast<uint32_t>(videoMargins_.width));
+    iniConfig.put<uint32_t>(cVideoMarginHeight, static_cast<uint32_t>(videoMargins_.height));
 
     iniConfig.put<bool>(cInputEnableTouchscreenKey, enableTouchscreen_);
     iniConfig.put<bool>(cInputEnablePlayerControlKey, enablePlayerControl_);
@@ -263,12 +266,12 @@ void Configuration::setScreenDPI(size_t value)
     screenDPI_ = value;
 }
 
-void Configuration::setVideoMargins(QRect value)
+void Configuration::setVideoMargins(const VideoMargins& value)
 {
     videoMargins_ = value;
 }
 
-QRect Configuration::getVideoMargins() const
+Configuration::VideoMargins Configuration::getVideoMargins() const
 {
     return videoMargins_;
 }
@@ -381,13 +384,13 @@ void Configuration::setAudioOutputBackendType(AudioOutputBackendType value)
     audioOutputBackendType_ = value;
 }
 
-QString Configuration::getCSValue(QString searchString) const
+std::string Configuration::getCSValue(const std::string& searchString) const
 {
     using namespace std;
     ifstream inFile;
     ifstream inFile2;
     string line;
-    searchString = searchString.append("=");
+    const std::string searchKey = searchString + "=";
     inFile.open("/boot/crankshaft/crankshaft_env.sh");
     inFile2.open("/opt/crankshaft/crankshaft_default_env.sh");
 
@@ -398,30 +401,30 @@ QString Configuration::getCSValue(QString searchString) const
         {
             getline(inFile,line); // get line from file
             if (line[0] != '#') {
-                pos=line.find(searchString.toStdString()); // search
+                pos=line.find(searchKey); // search
                 if(pos!=std::string::npos) // string::npos is returned if string is not found
                 {
                     int equalPosition = line.find("=");
-                    QString value = line.substr(equalPosition + 1).c_str();
-                    value.replace("\"","");
-                    OPENAUTO_LOG(debug) << "[Configuration] CS param found: " << searchString.toStdString() << " Value:" << value.toStdString();
+                    std::string value = line.substr(static_cast<size_t>(equalPosition + 1));
+                    value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
+                    OPENAUTO_LOG(debug) << "[Configuration] CS param found: " << searchKey << " Value:" << value;
                     return value;
                 }
             }
         }
-        OPENAUTO_LOG(warning) << "[Configuration] unable to find cs param: " << searchString.toStdString();
+        OPENAUTO_LOG(warning) << "[Configuration] unable to find cs param: " << searchKey;
         OPENAUTO_LOG(warning) << "[Configuration] Fallback to /opt/crankshaft/crankshaft_default_env.sh)";
         while(inFile2.good())
         {
             getline(inFile2,line); // get line from file
             if (line[0] != '#') {
-                pos=line.find(searchString.toStdString()); // search
+                pos=line.find(searchKey); // search
                 if(pos!=std::string::npos) // string::npos is returned if string is not found
                 {
                     int equalPosition = line.find("=");
-                    QString value = line.substr(equalPosition + 1).c_str();
-                    value.replace("\"","");
-                    OPENAUTO_LOG(debug) << "[Configuration] CS param found: " << searchString.toStdString() << " Value:" << value.toStdString();
+                    std::string value = line.substr(static_cast<size_t>(equalPosition + 1));
+                    value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
+                    OPENAUTO_LOG(debug) << "[Configuration] CS param found: " << searchKey << " Value:" << value;
                     return value;
                 }
             }
@@ -435,13 +438,13 @@ QString Configuration::getCSValue(QString searchString) const
         {
             getline(inFile2,line); // get line from file
             if (line[0] != '#') {
-                pos=line.find(searchString.toStdString()); // search
+                pos=line.find(searchKey); // search
                 if(pos!=std::string::npos) // string::npos is returned if string is not found
                 {
                     int equalPosition = line.find("=");
-                    QString value = line.substr(equalPosition + 1).c_str();
-                    value.replace("\"","");
-                    OPENAUTO_LOG(debug) << "[Configuration] CS param found: " << searchString.toStdString() << " Value:" << value.toStdString();
+                    std::string value = line.substr(static_cast<size_t>(equalPosition + 1));
+                    value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
+                    OPENAUTO_LOG(debug) << "[Configuration] CS param found: " << searchKey << " Value:" << value;
                     return value;
                 }
             }
@@ -450,16 +453,15 @@ QString Configuration::getCSValue(QString searchString) const
     }
 }
 
-QString Configuration::getParamFromFile(QString fileName, QString searchString) const
+std::string Configuration::getParamFromFile(const std::string& fileName, const std::string& searchString) const
 {
-    OPENAUTO_LOG(debug) << "[Configuration] Request param from file: " << fileName.toStdString() << " param: " << searchString.toStdString();
+    OPENAUTO_LOG(debug) << "[Configuration] Request param from file: " << fileName << " param: " << searchString;
     using namespace std;
     ifstream inFile;
     string line;
-    if (!searchString.contains("dtoverlay")) {
-        searchString = searchString.append("=");
-    }
-    inFile.open(fileName.toStdString());
+    const bool needsEquals = searchString.find("dtoverlay") == std::string::npos;
+    const std::string searchKey = needsEquals ? (searchString + "=") : searchString;
+    inFile.open(fileName);
 
     size_t pos;
 
@@ -468,13 +470,13 @@ QString Configuration::getParamFromFile(QString fileName, QString searchString) 
         {
             getline(inFile,line); // get line from file
             if (line[0] != '#') {
-                pos=line.find(searchString.toStdString()); // search
+                pos=line.find(searchKey); // search
                 if(pos!=std::string::npos) // string::npos is returned if string is not found
                 {
                     int equalPosition = line.find("=");
-                    QString value = line.substr(equalPosition + 1).c_str();
-                    value.replace("\"","");
-                    OPENAUTO_LOG(debug) << "[Configuration] Param from file: " << fileName.toStdString() << " found: " << searchString.toStdString() << " Value:" << value.toStdString();
+                    std::string value = line.substr(static_cast<size_t>(equalPosition + 1));
+                    value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
+                    OPENAUTO_LOG(debug) << "[Configuration] Param from file: " << fileName << " found: " << searchKey << " Value:" << value;
                     return value;
                 }
             }
@@ -485,12 +487,12 @@ QString Configuration::getParamFromFile(QString fileName, QString searchString) 
     }
 }
 
-QString Configuration::readFileContent(QString fileName) const
+std::string Configuration::readFileContent(const std::string& fileName) const
 {
     using namespace std;
     ifstream inFile;
     string line;
-    inFile.open(fileName.toStdString());
+    inFile.open(fileName);
     string result = "";
     if(inFile) {
         while(inFile.good())
@@ -498,7 +500,7 @@ QString Configuration::readFileContent(QString fileName) const
             getline(inFile,line); // get line from file
             result.append(line);
         }
-        return result.c_str();
+        return result;
     } else {
         return "";
     }

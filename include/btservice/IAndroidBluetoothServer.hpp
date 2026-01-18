@@ -1,23 +1,11 @@
-/*
-*  This file is part of openauto project.
-*  Copyright (C) 2018 f1x.studio (Michal Szwaj)
-*
-*  openauto is free software: you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation; either version 3 of the License, or
-*  (at your option) any later version.
+//
+// Created by Simon Dean on 26/11/2024.
+//
 
-*  openauto is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with openauto. If not, see <http://www.gnu.org/licenses/>.
-*/
+#ifndef OPENAUTO_IANDROIDBLUETOOTHSERVER_HPP
+#define OPENAUTO_IANDROIDBLUETOOTHSERVER_HPP
 
-#pragma once
-
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -25,7 +13,7 @@ namespace f1x::openauto::btservice {
 
   class IAndroidBluetoothServer {
   public:
-    typedef std::shared_ptr<IAndroidBluetoothServer> Pointer;
+    using Pointer = std::shared_ptr<IAndroidBluetoothServer>;
 
     virtual ~IAndroidBluetoothServer() = default;
 
@@ -33,5 +21,7 @@ namespace f1x::openauto::btservice {
   };
 
 }
+
+#endif //OPENAUTO_IANDROIDBLUETOOTHSERVER_HPP
 
 

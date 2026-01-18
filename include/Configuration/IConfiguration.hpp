@@ -18,8 +18,8 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
-#include <QRect>
 #include <aap_protobuf/service/media/sink/message/VideoFrameRateType.pb.h>
 #include <aap_protobuf/service/media/sink/message/VideoCodecResolutionType.pb.h>
 #include <aap_protobuf/service/media/sink/message/KeyCode.pb.h>
@@ -41,6 +41,10 @@ class IConfiguration
 public:
     typedef std::shared_ptr<IConfiguration> Pointer;
     typedef std::vector<aap_protobuf::service::media::sink::message::KeyCode> ButtonCodes;
+    struct VideoMargins {
+        int32_t width{0};
+        int32_t height{0};
+    };
 
     virtual ~IConfiguration() = default;
 
@@ -57,9 +61,9 @@ public:
     virtual void showNetworkinfo(bool value) = 0;
     virtual bool showNetworkinfo() const = 0;
 
-    virtual QString getCSValue(QString searchString) const = 0;
-    virtual QString readFileContent(QString fileName) const = 0;
-    virtual QString getParamFromFile(QString fileName, QString searchString) const = 0;
+    virtual std::string getCSValue(const std::string& searchString) const = 0;
+    virtual std::string readFileContent(const std::string& fileName) const = 0;
+    virtual std::string getParamFromFile(const std::string& fileName, const std::string& searchString) const = 0;
 
     virtual aap_protobuf::service::media::sink::message::VideoFrameRateType getVideoFPS() const = 0;
     virtual void setVideoFPS(aap_protobuf::service::media::sink::message::VideoFrameRateType value) = 0;
@@ -67,8 +71,8 @@ public:
     virtual void setVideoResolution(aap_protobuf::service::media::sink::message::VideoCodecResolutionType value) = 0;
     virtual size_t getScreenDPI() const = 0;
     virtual void setScreenDPI(size_t value) = 0;
-    virtual void setVideoMargins(QRect value) = 0;
-    virtual QRect getVideoMargins() const = 0;
+    virtual void setVideoMargins(const VideoMargins& value) = 0;
+    virtual VideoMargins getVideoMargins() const = 0;
 
     virtual bool getTouchscreenEnabled() const = 0;
     virtual void setTouchscreenEnabled(bool value) = 0;

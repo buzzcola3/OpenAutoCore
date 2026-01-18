@@ -30,7 +30,6 @@
 #include <aap_protobuf/aaw/WifiVersionResponse.pb.h>
 #include <aap_protobuf/aaw/WifiStartResponse.pb.h>
 #include <aap_protobuf/aaw/WifiStartRequest.pb.h>
-#include <QString>
 #include <algorithm>
 #include <arpa/inet.h>
 #include <ifaddrs.h>
@@ -308,22 +307,22 @@ namespace f1x::openauto::btservice {
     auto ssid = configuration_->getParamFromFile("/etc/hostapd/hostapd.conf", "ssid");
     auto pass = configuration_->getParamFromFile("/etc/hostapd/hostapd.conf", "wpa_passphrase");
 
-    if (ssid.isEmpty()) {
+    if (ssid.empty()) {
       ssid = configuration_->getParamFromFile("wifi_credentials.ini", "ssid");
     }
-    if (pass.isEmpty()) {
+    if (pass.empty()) {
       pass = configuration_->getParamFromFile("wifi_credentials.ini", "wpa_passphrase");
     }
 
-    if (ssid.isEmpty()) {
-      ssid = QString::fromUtf8("OpenAutoAP");
+    if (ssid.empty()) {
+      ssid = "OpenAutoAP";
     }
-    if (pass.isEmpty()) {
-      pass = QString::fromUtf8("OpenAutoPass123");
+    if (pass.empty()) {
+      pass = "OpenAutoPass123";
     }
 
-    response.set_ssid(ssid.toStdString());
-    response.set_password(pass.toStdString());
+    response.set_ssid(ssid);
+    response.set_password(pass);
 
     auto bssid = getMacAddress("wlp4s0");
     if (bssid.empty()) {

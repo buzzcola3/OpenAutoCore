@@ -53,9 +53,9 @@ public:
     void showNetworkinfo(bool value) override;
     bool showNetworkinfo() const override;
 
-    QString getCSValue(QString searchString) const override;
-    QString readFileContent(QString fileName) const override;
-    QString getParamFromFile(QString fileName, QString searchString) const override;
+    std::string getCSValue(const std::string& searchString) const override;
+    std::string readFileContent(const std::string& fileName) const override;
+    std::string getParamFromFile(const std::string& fileName, const std::string& searchString) const override;
 
     aap_protobuf::service::media::sink::message::VideoFrameRateType getVideoFPS() const override;
     void setVideoFPS(aap_protobuf::service::media::sink::message::VideoFrameRateType value) override;
@@ -63,8 +63,8 @@ public:
     void setVideoResolution(aap_protobuf::service::media::sink::message::VideoCodecResolutionType value) override;
     size_t getScreenDPI() const override;
     void setScreenDPI(size_t value) override;
-    void setVideoMargins(QRect value) override;
-    QRect getVideoMargins() const override;
+    void setVideoMargins(const VideoMargins& value) override;
+    VideoMargins getVideoMargins() const override;
 
     bool getTouchscreenEnabled() const override;
     void setTouchscreenEnabled(bool value) override;
@@ -119,7 +119,7 @@ private:
     aap_protobuf::service::media::sink::message::VideoFrameRateType videoFPS_;
     aap_protobuf::service::media::sink::message::VideoCodecResolutionType videoResolution_;
     size_t screenDPI_;
-    QRect videoMargins_;
+    VideoMargins videoMargins_;
     bool enableTouchscreen_;
     bool enablePlayerControl_;
     ButtonCodes buttonCodes_;

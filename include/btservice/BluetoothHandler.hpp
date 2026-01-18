@@ -8,12 +8,10 @@
 #include <btservice/IBluetoothHandler.hpp>
 #include <btservice/IAndroidBluetoothServer.hpp>
 #include <Configuration/IConfiguration.hpp>
-#include <QObject>
 
 namespace f1x::openauto::btservice {
 
-  class BluetoothHandler : public QObject, public IBluetoothHandler {
-    Q_OBJECT
+  class BluetoothHandler : public IBluetoothHandler {
   public:
     BluetoothHandler(btservice::IAndroidBluetoothServer::Pointer androidBluetoothServer,
                      autoapp::configuration::IConfiguration::Pointer configuration);
