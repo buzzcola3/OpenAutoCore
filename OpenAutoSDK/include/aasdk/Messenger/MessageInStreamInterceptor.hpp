@@ -24,6 +24,7 @@ class GenericNotificationMessageHandlers;
 class NavigationStatusMessageHandlers;
 class RadioMessageHandlers;
 class MediaBrowserMessageHandlers;
+class MediaPlaybackStatusMessageHandlers;
 class VendorExtensionMessageHandlers;
 
 bool handleMessage(const ::aasdk::messenger::Message& message);
@@ -36,6 +37,7 @@ void setVideoTransport(const std::shared_ptr<buzz::autoapp::Transport::Transport
 ::aasdk::messenger::interceptor::NavigationStatusMessageHandlers& getNavigationStatusHandlers();
 ::aasdk::messenger::interceptor::RadioMessageHandlers& getRadioHandlers();
 ::aasdk::messenger::interceptor::MediaBrowserMessageHandlers& getMediaBrowserHandlers();
+::aasdk::messenger::interceptor::MediaPlaybackStatusMessageHandlers& getMediaPlaybackStatusHandlers();
 ::aasdk::messenger::interceptor::VendorExtensionMessageHandlers& getVendorExtensionHandlers();
 
 }

@@ -14,6 +14,7 @@
 #include <Messenger/handlers/NavigationStatusMessageHandlers.hpp>
 #include <Messenger/handlers/RadioMessageHandlers.hpp>
 #include <Messenger/handlers/MediaBrowserMessageHandlers.hpp>
+#include <Messenger/handlers/MediaPlaybackStatusMessageHandlers.hpp>
 #include <Messenger/handlers/VendorExtensionMessageHandlers.hpp>
 #include <Messenger/MessageSender.hpp>
 #include <Messenger/MessageSenderLocator.hpp>
@@ -39,6 +40,7 @@ GenericNotificationMessageHandlers GENERIC_NOTIFICATION_HANDLERS;
 NavigationStatusMessageHandlers NAVIGATION_STATUS_HANDLERS;
 RadioMessageHandlers RADIO_HANDLERS;
 MediaBrowserMessageHandlers MEDIA_BROWSER_HANDLERS;
+MediaPlaybackStatusMessageHandlers MEDIA_PLAYBACK_STATUS_HANDLERS;
 VendorExtensionMessageHandlers VENDOR_EXTENSION_HANDLERS;
 
 }
@@ -69,6 +71,8 @@ bool handleMessage(const ::aasdk::messenger::Message& message) {
       return RADIO_HANDLERS.handle(message);
     case ::aasdk::messenger::ChannelId::MEDIA_BROWSER:
       return MEDIA_BROWSER_HANDLERS.handle(message);
+    case ::aasdk::messenger::ChannelId::MEDIA_PLAYBACK_STATUS:
+      return MEDIA_PLAYBACK_STATUS_HANDLERS.handle(message);
     case ::aasdk::messenger::ChannelId::VENDOR_EXTENSION:
       return VENDOR_EXTENSION_HANDLERS.handle(message);
     default:
@@ -90,6 +94,7 @@ void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender)
   NAVIGATION_STATUS_HANDLERS.setMessageSender(sender);
   RADIO_HANDLERS.setMessageSender(sender);
   MEDIA_BROWSER_HANDLERS.setMessageSender(sender);
+  MEDIA_PLAYBACK_STATUS_HANDLERS.setMessageSender(sender);
   VENDOR_EXTENSION_HANDLERS.setMessageSender(sender);
 }
 
@@ -127,6 +132,10 @@ RadioMessageHandlers& getRadioHandlers() {
 
 MediaBrowserMessageHandlers& getMediaBrowserHandlers() {
   return MEDIA_BROWSER_HANDLERS;
+}
+
+MediaPlaybackStatusMessageHandlers& getMediaPlaybackStatusHandlers() {
+  return MEDIA_PLAYBACK_STATUS_HANDLERS;
 }
 
 VendorExtensionMessageHandlers& getVendorExtensionHandlers() {
