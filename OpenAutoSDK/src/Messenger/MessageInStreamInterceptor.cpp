@@ -10,6 +10,7 @@
 #include <Messenger/handlers/InputSourceMessageHandlers.hpp>
 #include <Messenger/handlers/SensorMessageHandlers.hpp>
 #include <Messenger/handlers/PhoneStatusMessageHandlers.hpp>
+#include <Messenger/handlers/GenericNotificationMessageHandlers.hpp>
 #include <Messenger/MessageSender.hpp>
 #include <Messenger/MessageSenderLocator.hpp>
 #include <Messenger/Message.hpp>
@@ -30,6 +31,7 @@ TelephonyAudioMessageHandlers MEDIA_SINK_TELEPHONY_AUDIO_HANDLERS;
 InputSourceMessageHandlers INPUT_SOURCE_HANDLERS;
 SensorMessageHandlers SENSOR_HANDLERS;
 PhoneStatusMessageHandlers PHONE_STATUS_HANDLERS;
+GenericNotificationMessageHandlers GENERIC_NOTIFICATION_HANDLERS;
 
 }
 
@@ -51,6 +53,8 @@ bool handleMessage(const ::aasdk::messenger::Message& message) {
       return SENSOR_HANDLERS.handle(message);
     case ::aasdk::messenger::ChannelId::PHONE_STATUS:
       return PHONE_STATUS_HANDLERS.handle(message);
+    case ::aasdk::messenger::ChannelId::GENERIC_NOTIFICATION:
+      return GENERIC_NOTIFICATION_HANDLERS.handle(message);
     default:
       return false;
   }
@@ -66,6 +70,7 @@ void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender)
   INPUT_SOURCE_HANDLERS.setMessageSender(sender);
   SENSOR_HANDLERS.setMessageSender(sender);
   PHONE_STATUS_HANDLERS.setMessageSender(sender);
+  GENERIC_NOTIFICATION_HANDLERS.setMessageSender(sender);
 }
 
 void setVideoTransport(const std::shared_ptr<buzz::autoapp::Transport::Transport>& transport) {
@@ -86,6 +91,10 @@ SensorMessageHandlers& getSensorHandlers() {
 
 PhoneStatusMessageHandlers& getPhoneStatusHandlers() {
   return PHONE_STATUS_HANDLERS;
+}
+
+GenericNotificationMessageHandlers& getGenericNotificationHandlers() {
+  return GENERIC_NOTIFICATION_HANDLERS;
 }
 
 }
