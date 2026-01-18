@@ -22,6 +22,7 @@ class SensorMessageHandlers;
 class PhoneStatusMessageHandlers;
 class GenericNotificationMessageHandlers;
 class NavigationStatusMessageHandlers;
+class RadioMessageHandlers;
 
 bool handleMessage(const ::aasdk::messenger::Message& message);
 void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender);
@@ -31,5 +32,6 @@ void setVideoTransport(const std::shared_ptr<buzz::autoapp::Transport::Transport
 ::aasdk::messenger::interceptor::PhoneStatusMessageHandlers& getPhoneStatusHandlers();
 ::aasdk::messenger::interceptor::GenericNotificationMessageHandlers& getGenericNotificationHandlers();
 ::aasdk::messenger::interceptor::NavigationStatusMessageHandlers& getNavigationStatusHandlers();
+::aasdk::messenger::interceptor::RadioMessageHandlers& getRadioHandlers();
 
 }
