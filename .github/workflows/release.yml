@@ -1,0 +1,67 @@
+name: Release Builds
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - name: native
+            config: ""
+          - name: amd64_gnu
+            config: "--config=amd64_gnu"
+          - name: arm64_gnu
+            config: "--config=arm64_gnu"
+          - name: amd64_musl
+            config: "--config=amd64_musl"
+          - name: arm64_musl
+            config: "--config=arm64_musl"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bazelisk
+        uses: bazelbuild/setup-bazelisk@v3
+
+      - name: Build
+        shell: bash
+        run: |
+          set -euo pipefail
+          bazel build ${{ matrix.variant.config }} //:openautocore
+
+      - name: Stage artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          output_path=$(bazel cquery ${{ matrix.variant.config }} --output=starlark --starlark:expr='target.files.to_list()[0].path' //:openautocore)
+          cp "$(bazel info execution_root)/${output_path}" "dist/openautocore-${{ matrix.variant.name }}"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openautocore-${{ matrix.variant.name }}
+          path: dist/openautocore-${{ matrix.variant.name }}
+
+  publish-release:
+    runs-on: ubuntu-latest
+    needs: build-release
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**
