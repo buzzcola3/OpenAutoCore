@@ -22,11 +22,11 @@
 #include <Configuration/IConfiguration.hpp>
 #include <atomic>
 #include <cstdint>
+#include <ell/dbus.h>
 #include <memory>
 #include <string>
 #include <thread>
 #include <vector>
-#include <sdbus-c++/sdbus-c++.h>
 
 namespace google::protobuf {
   class Message;
@@ -47,8 +47,14 @@ namespace f1x::openauto::btservice {
     void onDisconnection(const std::string& devicePath);
 
   private:
+    struct InterfaceInfo {
+      std::string name;
+      std::string ip;
+    };
+
     std::string resolveAdapterPath(const std::string& address) const;
-    bool setAdapterProperty(const std::string& adapterPath, const std::string& name, const sdbus::Variant& value) const;
+    bool setAdapterProperty(const std::string& adapterPath, const std::string& name, bool value) const;
+    bool setAdapterProperty(const std::string& adapterPath, const std::string& name, uint32_t value) const;
     void startReadLoop();
     void stopReadLoop(bool fromReader);
     void readLoop();
@@ -57,14 +63,20 @@ namespace f1x::openauto::btservice {
     void handleWifiConnectionStatus(const uint8_t* payload, std::size_t length);
     void handleWifiStartResponse(const uint8_t* payload, std::size_t length);
     void sendMessage(const google::protobuf::Message &message, uint16_t type);
-    std::string getIP4_(const std::string& intf) const;
+    InterfaceInfo getWifiInterfaceInfo() const;
     std::string getMacAddress(const std::string& intf) const;
     void DecodeProtoMessage(const std::string& proto_data);
 
+    struct EllDbusDeleter {
+      void operator()(l_dbus* bus) const {
+        if (bus != nullptr) {
+          l_dbus_destroy(bus);
+        }
+      }
+    };
+
     autoapp::configuration::IConfiguration::Pointer configuration_;
-    std::unique_ptr<sdbus::IConnection> bus_;
-    std::unique_ptr<sdbus::IProxy> objectManager_;
-    std::unique_ptr<sdbus::IProxy> profileManager_;
+    std::unique_ptr<l_dbus, EllDbusDeleter> bus_;
     std::string adapterPath_;
     std::string profilePath_;
     std::unique_ptr<BluezProfile> profile_;
@@ -73,6 +85,7 @@ namespace f1x::openauto::btservice {
     std::thread readerThread_;
     std::vector<uint8_t> buffer_;
     uint16_t channel_{12};
+    std::string wifiInterface_;
   };
 
 }

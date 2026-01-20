@@ -19,9 +19,9 @@
 #pragma once
 
 #include <Projection/IBluetoothDevice.hpp>
+#include <ell/dbus.h>
 #include <memory>
 #include <string>
-#include <sdbus-c++/sdbus-c++.h>
 
 namespace f1x::openauto::autoapp::projection {
 
@@ -39,9 +39,16 @@ private:
     std::string resolveAdapterPath() const;
     bool getDevicePaired(const std::string& deviceAddress) const;
 
+    struct EllDbusDeleter {
+        void operator()(l_dbus* bus) const {
+            if (bus != nullptr) {
+                l_dbus_destroy(bus);
+            }
+        }
+    };
+
     std::string adapterAddress_;
-    std::unique_ptr<sdbus::IConnection> bus_;
-    std::unique_ptr<sdbus::IProxy> objectManager_;
+    std::unique_ptr<l_dbus, EllDbusDeleter> bus_;
 };
 
 }

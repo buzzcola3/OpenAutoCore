@@ -29,7 +29,6 @@ cc_binary(
         "-fPIC",
         "-DBOOST_ALL_DYN_LINK",
         "-isystem/usr/include/libusb-1.0",
-        "-isystem/usr/include/sdbus-c++",
         "-isystem/usr/include/x86_64-linux-gnu",
         
     ],
@@ -42,13 +41,13 @@ cc_binary(
         "-lboost_log_setup",
         "-lboost_thread",
         "-lboost_filesystem",
-        "-lsdbus-c++",
         "-lz",
         "-pthread",
     ],
     deps = [
         "//OpenAutoSDK:aap_protobuf_cc",
         "//OpenAutoSDK:aasdk",
+        "@libell_src//:ell",
     ],
     visibility = ["//visibility:public"],
 )

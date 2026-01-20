@@ -19,7 +19,7 @@
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
-#include <csignal>
+#include <boost/asio/signal_set.hpp>
 #include <fstream>
 #include <mutex>
 #include <thread>
@@ -58,7 +58,7 @@ namespace {
     std::condition_variable gShutdownCv;
     std::mutex gShutdownMutex;
 
-    void handleSignal(int) {
+    void handleShutdown() {
         gRunning.store(false);
         gShutdownCv.notify_all();
     }
@@ -111,9 +111,6 @@ void configureLogging() {
 int main(int argc, char* argv[])
 {
     configureLogging();
-
-    std::signal(SIGINT, handleSignal);
-    std::signal(SIGTERM, handleSignal);
 
     libusb_context* usbContext;
     if(libusb_init(&usbContext) != 0)
@@ -208,6 +205,16 @@ int main(int argc, char* argv[])
     auto usbHub(std::make_shared<aasdk::usb::USBHub>(usbWrapper, ioService, queryChainFactory));
     auto connectedAccessoriesEnumerator(std::make_shared<aasdk::usb::ConnectedAccessoriesEnumerator>(usbWrapper, ioService, queryChainFactory));
     auto app = std::make_shared<autoapp::App>(ioService, usbWrapper, tcpWrapper, androidAutoEntityFactory, std::move(usbHub), std::move(connectedAccessoriesEnumerator));
+
+    boost::asio::signal_set signals(ioService, SIGINT, SIGTERM);
+    signals.async_wait([app, &ioService](const boost::system::error_code& error, int) {
+        if (error) {
+            return;
+        }
+        app->stop();
+        ioService.stop();
+        handleShutdown();
+    });
 
     app->waitForUSBDevice();
 

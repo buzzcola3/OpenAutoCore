@@ -21,7 +21,7 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <sdbus-c++/sdbus-c++.h>
+#include <ell/dbus.h>
 
 namespace f1x::openauto::btservice {
 
@@ -29,21 +29,24 @@ namespace f1x::openauto::btservice {
 
   class BluezProfile {
   public:
-    BluezProfile(sdbus::IConnection& connection, std::string objectPath, BluezBluetoothServer* server);
+    BluezProfile(l_dbus* bus, std::string objectPath, BluezBluetoothServer* server);
     ~BluezProfile();
 
     const std::string& objectPath() const;
 
   private:
+    static void setupInterface(struct l_dbus_interface* interface);
+    static l_dbus_message* releaseCallback(struct l_dbus* dbus, struct l_dbus_message* message, void* userData);
+    static l_dbus_message* newConnectionCallback(struct l_dbus* dbus, struct l_dbus_message* message, void* userData);
+    static l_dbus_message* requestDisconnectionCallback(struct l_dbus* dbus, struct l_dbus_message* message, void* userData);
+
     void release();
-    void newConnection(const sdbus::ObjectPath& device,
-                       const sdbus::UnixFd& fd,
-                       const std::map<std::string, sdbus::Variant>& properties);
-    void requestDisconnection(const sdbus::ObjectPath& device);
+    void newConnection(const std::string& devicePath, int fd);
+    void requestDisconnection(const std::string& devicePath);
 
     std::string objectPath_;
     BluezBluetoothServer* server_;
-    std::unique_ptr<sdbus::IObject> object_;
+    l_dbus* bus_{nullptr};
   };
 
 }

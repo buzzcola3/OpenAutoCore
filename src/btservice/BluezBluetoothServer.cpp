@@ -18,7 +18,11 @@
 
 #include <btservice/BluezBluetoothServer.hpp>
 #include <btservice/BluezProfile.hpp>
+#include <Common/EllDbusUtils.hpp>
+#include <Common/EllMainLoop.hpp>
 #include <Common/Log.hpp>
+#include <chrono>
+#include <cstring>
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/unknown_field_set.h>
@@ -46,11 +50,16 @@ using namespace google::protobuf::io;
 
 namespace f1x::openauto::btservice {
 
-  using VariantMap = std::map<std::string, sdbus::Variant>;
-  using InterfaceMap = std::map<std::string, VariantMap>;
-  using ManagedObjects = std::map<sdbus::ObjectPath, InterfaceMap>;
+  using namespace std::chrono_literals;
 
   namespace {
+    constexpr auto kDbusTimeout = 5s;
+    constexpr const char* kBluezService = "org.bluez";
+    constexpr const char* kAdapterInterface = "org.bluez.Adapter1";
+    constexpr const char* kObjectManagerInterface = "org.freedesktop.DBus.ObjectManager";
+    constexpr const char* kPropertiesInterface = "org.freedesktop.DBus.Properties";
+
+
     uint16_t readUint16(const std::vector<uint8_t>& buffer, std::size_t offset) {
       return static_cast<uint16_t>((buffer[offset] << 8) | buffer[offset + 1]);
     }
@@ -67,20 +76,54 @@ namespace f1x::openauto::btservice {
       });
       return out;
     }
+
+    bool getPropertyString(struct l_dbus_message_iter props, const char* key, std::string& out) {
+      const char* name = nullptr;
+      struct l_dbus_message_iter variant;
+
+      while (l_dbus_message_iter_next_entry(&props, &name, &variant)) {
+        if (name == nullptr || std::strcmp(name, key) != 0) {
+          continue;
+        }
+
+        const char* value = nullptr;
+        if (!l_dbus_message_iter_get_variant(&variant, "s", &value) || value == nullptr) {
+          return false;
+        }
+
+        out = value;
+        return true;
+      }
+
+      return false;
+    }
+
+    bool isWirelessInterfaceName(const std::string& name) {
+      if (name.empty()) {
+        return false;
+      }
+
+      const std::string wirelessPath = "/sys/class/net/" + name + "/wireless";
+      return ::access(wirelessPath.c_str(), F_OK) == 0;
+    }
   }
 
   BluezBluetoothServer::BluezBluetoothServer(autoapp::configuration::IConfiguration::Pointer configuration)
       : configuration_(std::move(configuration)),
-        bus_(sdbus::createSystemBusConnection()),
         profilePath_("/f1x/openauto/bluez_profile") {
     OPENAUTO_LOG(info) << "[BluezBluetoothServer] Initialising";
+
+    common::EllMainLoop::instance().ensureRunning();
+    bus_.reset(l_dbus_new_default(L_DBUS_SYSTEM_BUS));
+    if (bus_) {
+      common::ellDbusWaitReady(bus_.get(), kDbusTimeout);
+    } else {
+      OPENAUTO_LOG(error) << "[BluezBluetoothServer] Failed to create system bus.";
+    }
   }
 
   BluezBluetoothServer::~BluezBluetoothServer() {
     stopReadLoop(false);
-    if (bus_) {
-      bus_->leaveEventLoop();
-    }
   }
 
   uint16_t BluezBluetoothServer::start(const std::string& address) {
@@ -91,8 +134,12 @@ namespace f1x::openauto::btservice {
       return 0;
     }
 
-    objectManager_ = sdbus::createProxy(*bus_, "org.bluez", "/");
-    profileManager_ = sdbus::createProxy(*bus_, "org.bluez", "/org/bluez");
+    const bool bluezAvailable = common::ellDbusNameHasOwner(bus_.get(), kBluezService, kDbusTimeout);
+    OPENAUTO_LOG(info) << "[BluezBluetoothServer] org.bluez on DBus: " << (bluezAvailable ? "yes" : "no");
+    if (!bluezAvailable) {
+      OPENAUTO_LOG(error) << "[BluezBluetoothServer] org.bluez not available on DBus.";
+      return 0;
+    }
 
     adapterPath_ = resolveAdapterPath(address);
     if (adapterPath_.empty()) {
@@ -100,30 +147,95 @@ namespace f1x::openauto::btservice {
       return 0;
     }
 
-    setAdapterProperty(adapterPath_, "Powered", sdbus::Variant(true));
-    setAdapterProperty(adapterPath_, "Discoverable", sdbus::Variant(true));
-    setAdapterProperty(adapterPath_, "Pairable", sdbus::Variant(true));
-    setAdapterProperty(adapterPath_, "DiscoverableTimeout", sdbus::Variant(uint32_t{0}));
-    setAdapterProperty(adapterPath_, "PairableTimeout", sdbus::Variant(uint32_t{0}));
+    setAdapterProperty(adapterPath_, "Powered", true);
+    setAdapterProperty(adapterPath_, "Discoverable", true);
+    setAdapterProperty(adapterPath_, "Pairable", true);
+    setAdapterProperty(adapterPath_, "DiscoverableTimeout", uint32_t{0});
+    setAdapterProperty(adapterPath_, "PairableTimeout", uint32_t{0});
 
-    profile_ = std::make_unique<BluezProfile>(*bus_, profilePath_, this);
+    profile_ = std::make_unique<BluezProfile>(bus_.get(), profilePath_, this);
 
     const std::string serviceUuid = "4de17a00-52cb-11e6-bdf4-0800200c9a66";
 
-    std::map<std::string, sdbus::Variant> options;
-    options["Name"] = sdbus::Variant("OpenAuto Bluetooth Service");
-    options["Role"] = sdbus::Variant("server");
-    options["Channel"] = sdbus::Variant(channel_);
-    options["Service"] = sdbus::Variant(serviceUuid);
-    options["RequireAuthentication"] = sdbus::Variant(false);
-    options["RequireAuthorization"] = sdbus::Variant(false);
-    options["AutoConnect"] = sdbus::Variant(true);
+    auto* registerMsg = l_dbus_message_new_method_call(bus_.get(), kBluezService, "/org/bluez",
+                                                       "org.bluez.ProfileManager1", "RegisterProfile");
+    auto* builder = l_dbus_message_builder_new(registerMsg);
+    l_dbus_message_builder_append_basic(builder, 'o', profilePath_.c_str());
+    l_dbus_message_builder_append_basic(builder, 's', serviceUuid.c_str());
 
-    profileManager_->callMethod("RegisterProfile")
-        .onInterface("org.bluez.ProfileManager1")
-        .withArguments(sdbus::ObjectPath(profilePath_), serviceUuid, options);
+    l_dbus_message_builder_enter_array(builder, "{sv}");
 
-    bus_->enterEventLoopAsync();
+    l_dbus_message_builder_enter_dict(builder, "sv");
+    l_dbus_message_builder_append_basic(builder, 's', "Name");
+    l_dbus_message_builder_enter_variant(builder, "s");
+    l_dbus_message_builder_append_basic(builder, 's', "OpenAuto Bluetooth Service");
+    l_dbus_message_builder_leave_variant(builder);
+    l_dbus_message_builder_leave_dict(builder);
+
+    l_dbus_message_builder_enter_dict(builder, "sv");
+    l_dbus_message_builder_append_basic(builder, 's', "Role");
+    l_dbus_message_builder_enter_variant(builder, "s");
+    l_dbus_message_builder_append_basic(builder, 's', "server");
+    l_dbus_message_builder_leave_variant(builder);
+    l_dbus_message_builder_leave_dict(builder);
+
+    l_dbus_message_builder_enter_dict(builder, "sv");
+    l_dbus_message_builder_append_basic(builder, 's', "Channel");
+    l_dbus_message_builder_enter_variant(builder, "q");
+    l_dbus_message_builder_append_basic(builder, 'q', &channel_);
+    l_dbus_message_builder_leave_variant(builder);
+    l_dbus_message_builder_leave_dict(builder);
+
+    l_dbus_message_builder_enter_dict(builder, "sv");
+    l_dbus_message_builder_append_basic(builder, 's', "Service");
+    l_dbus_message_builder_enter_variant(builder, "s");
+    l_dbus_message_builder_append_basic(builder, 's', serviceUuid.c_str());
+    l_dbus_message_builder_leave_variant(builder);
+    l_dbus_message_builder_leave_dict(builder);
+
+    const bool requireAuth = false;
+    l_dbus_message_builder_enter_dict(builder, "sv");
+    l_dbus_message_builder_append_basic(builder, 's', "RequireAuthentication");
+    l_dbus_message_builder_enter_variant(builder, "b");
+    l_dbus_message_builder_append_basic(builder, 'b', &requireAuth);
+    l_dbus_message_builder_leave_variant(builder);
+    l_dbus_message_builder_leave_dict(builder);
+
+    const bool requireAuthorization = false;
+    l_dbus_message_builder_enter_dict(builder, "sv");
+    l_dbus_message_builder_append_basic(builder, 's', "RequireAuthorization");
+    l_dbus_message_builder_enter_variant(builder, "b");
+    l_dbus_message_builder_append_basic(builder, 'b', &requireAuthorization);
+    l_dbus_message_builder_leave_variant(builder);
+    l_dbus_message_builder_leave_dict(builder);
+
+    const bool autoConnect = true;
+    l_dbus_message_builder_enter_dict(builder, "sv");
+    l_dbus_message_builder_append_basic(builder, 's', "AutoConnect");
+    l_dbus_message_builder_enter_variant(builder, "b");
+    l_dbus_message_builder_append_basic(builder, 'b', &autoConnect);
+    l_dbus_message_builder_leave_variant(builder);
+    l_dbus_message_builder_leave_dict(builder);
+
+    l_dbus_message_builder_leave_array(builder);
+    l_dbus_message_builder_finalize(builder);
+    l_dbus_message_builder_destroy(builder);
+
+    auto* reply = common::ellDbusSendWithReplySync(bus_.get(), registerMsg, kDbusTimeout);
+    if (reply == nullptr || l_dbus_message_is_error(reply)) {
+      if (reply != nullptr) {
+        const char* errName = nullptr;
+        const char* errText = nullptr;
+        l_dbus_message_get_error(reply, &errName, &errText);
+        OPENAUTO_LOG(error) << "[BluezBluetoothServer] RegisterProfile failed: "
+                            << (errName != nullptr ? errName : "unknown") << " "
+                            << (errText != nullptr ? errText : "");
+        l_dbus_message_unref(reply);
+      }
+      return 0;
+    }
+
+    l_dbus_message_unref(reply);
 
     OPENAUTO_LOG(info) << "[BluezBluetoothServer] Profile registered on channel " << channel_;
     return channel_;
@@ -139,15 +251,24 @@ namespace f1x::openauto::btservice {
     aap_protobuf::aaw::WifiVersionRequest versionRequest;
     aap_protobuf::aaw::WifiStartRequest startRequest;
 
-    const auto hostIp = getIP4_("wlan0");
-    if (hostIp.empty()) {
-      OPENAUTO_LOG(warning) << "[BluezBluetoothServer] No IPv4 found on wlan0, using first non-loopback interface.";
+    sendMessage(versionRequest, aap_protobuf::aaw::MessageId::WIFI_VERSION_REQUEST);
+
+    const auto wifiInfo = getWifiInterfaceInfo();
+    if (wifiInfo.ip.empty()) {
+      OPENAUTO_LOG(error) << "[BluezBluetoothServer] No IPv4 found on any non-loopback interface.";
+      return;
     }
-    startRequest.set_ip_address(hostIp);
+
+    wifiInterface_ = wifiInfo.name;
+    OPENAUTO_LOG(info) << "[BluezBluetoothServer] Using WiFi interface " << wifiInterface_
+                       << " with IP " << wifiInfo.ip;
+
+    startRequest.set_ip_address(wifiInfo.ip);
     startRequest.set_port(5000);
 
-    sendMessage(versionRequest, aap_protobuf::aaw::MessageId::WIFI_VERSION_REQUEST);
     sendMessage(startRequest, aap_protobuf::aaw::MessageId::WIFI_START_REQUEST);
+    OPENAUTO_LOG(info) << "[BluezBluetoothServer] Sent WIFI_START_REQUEST ip=" << wifiInfo.ip
+                       << " port=5000";
   }
 
   void BluezBluetoothServer::onDisconnection(const std::string& devicePath) {
@@ -156,56 +277,143 @@ namespace f1x::openauto::btservice {
   }
 
   std::string BluezBluetoothServer::resolveAdapterPath(const std::string& address) const {
-    if (!objectManager_) {
+    if (!bus_) {
       return "/org/bluez/hci0";
     }
 
-    ManagedObjects managed;
-    objectManager_->callMethod("GetManagedObjects")
-        .onInterface("org.freedesktop.DBus.ObjectManager")
-        .storeResultsTo(managed);
-
-    for (const auto& entry : managed) {
-      const auto& path = entry.first;
-      const auto& interfaces = entry.second;
-      auto adapterIt = interfaces.find("org.bluez.Adapter1");
-      if (adapterIt == interfaces.end()) {
-        continue;
+    auto* msg = l_dbus_message_new_method_call(bus_.get(), kBluezService, "/",
+                           kObjectManagerInterface, "GetManagedObjects");
+    l_dbus_message_set_arguments(msg, "");
+    auto* reply = common::ellDbusSendWithReplySync(bus_.get(), msg, kDbusTimeout);
+    if (reply == nullptr || l_dbus_message_is_error(reply)) {
+      if (reply != nullptr) {
+        const char* errName = nullptr;
+        const char* errText = nullptr;
+        l_dbus_message_get_error(reply, &errName, &errText);
+        OPENAUTO_LOG(warning) << "[BluezBluetoothServer] GetManagedObjects failed: "
+                              << (errName != nullptr ? errName : "unknown") << " "
+                              << (errText != nullptr ? errText : "");
+        l_dbus_message_unref(reply);
       }
+      return "/org/bluez/hci0";
+    }
 
-      if (address.empty()) {
-        return path;
-      }
+    struct l_dbus_message_iter objects;
+    if (!l_dbus_message_get_arguments(reply, "a{oa{sa{sv}}}", &objects)) {
+      l_dbus_message_unref(reply);
+      return "/org/bluez/hci0";
+    }
 
-      const auto& props = adapterIt->second;
-      auto addrIt = props.find("Address");
-      if (addrIt == props.end()) {
-        continue;
-      }
+    const char* path = nullptr;
+    struct l_dbus_message_iter object;
+    while (l_dbus_message_iter_next_entry(&objects, &path, &object)) {
+      const char* interface = nullptr;
+      struct l_dbus_message_iter properties;
 
-      const auto adapterAddr = addrIt->second.get<std::string>();
-      if (toLower(adapterAddr) == toLower(address)) {
-        return path;
+      while (l_dbus_message_iter_next_entry(&object, &interface, &properties)) {
+        if (interface == nullptr || std::strcmp(interface, kAdapterInterface) != 0) {
+          continue;
+        }
+
+        if (address.empty() && path != nullptr) {
+          l_dbus_message_unref(reply);
+          return path;
+        }
+
+        std::string adapterAddr;
+        if (!getPropertyString(properties, "Address", adapterAddr)) {
+          continue;
+        }
+
+        if (toLower(adapterAddr) == toLower(address)) {
+          l_dbus_message_unref(reply);
+          return path != nullptr ? path : "/org/bluez/hci0";
+        }
       }
     }
 
+    l_dbus_message_unref(reply);
     return "/org/bluez/hci0";
   }
 
   bool BluezBluetoothServer::setAdapterProperty(const std::string& adapterPath,
                                                 const std::string& name,
-                                                const sdbus::Variant& value) const {
-    try {
-      auto adapterProxy = sdbus::createProxy(*bus_, "org.bluez", adapterPath);
-      adapterProxy->callMethod("Set")
-          .onInterface("org.freedesktop.DBus.Properties")
-          .withArguments("org.bluez.Adapter1", name, value);
-      return true;
-    } catch (const sdbus::Error& e) {
-      OPENAUTO_LOG(warning) << "[BluezBluetoothServer] Failed setting " << name
-                            << ": " << e.getMessage();
+                                                bool value) const {
+    if (!bus_) {
       return false;
     }
+
+    auto* msg = l_dbus_message_new_method_call(bus_.get(), kBluezService,
+                                               adapterPath.c_str(), kPropertiesInterface,
+                                               "Set");
+    auto* builder = l_dbus_message_builder_new(msg);
+    l_dbus_message_builder_append_basic(builder, 's', kAdapterInterface);
+    l_dbus_message_builder_append_basic(builder, 's', name.c_str());
+    l_dbus_message_builder_enter_variant(builder, "b");
+    l_dbus_message_builder_append_basic(builder, 'b', &value);
+    l_dbus_message_builder_leave_variant(builder);
+    l_dbus_message_builder_finalize(builder);
+    l_dbus_message_builder_destroy(builder);
+
+    auto* reply = common::ellDbusSendWithReplySync(bus_.get(), msg, kDbusTimeout);
+    if (reply == nullptr) {
+      OPENAUTO_LOG(warning) << "[BluezBluetoothServer] Failed setting " << name;
+      return false;
+    }
+
+    if (l_dbus_message_is_error(reply)) {
+      const char* errName = nullptr;
+      const char* errText = nullptr;
+      l_dbus_message_get_error(reply, &errName, &errText);
+      OPENAUTO_LOG(warning) << "[BluezBluetoothServer] Failed setting " << name
+                            << ": " << (errName != nullptr ? errName : "unknown")
+                            << " " << (errText != nullptr ? errText : "");
+      l_dbus_message_unref(reply);
+      return false;
+    }
+
+    l_dbus_message_unref(reply);
+    return true;
+  }
+
+  bool BluezBluetoothServer::setAdapterProperty(const std::string& adapterPath,
+                                                const std::string& name,
+                                                uint32_t value) const {
+    if (!bus_) {
+      return false;
+    }
+
+    auto* msg = l_dbus_message_new_method_call(bus_.get(), kBluezService,
+                                               adapterPath.c_str(), kPropertiesInterface,
+                                               "Set");
+    auto* builder = l_dbus_message_builder_new(msg);
+    l_dbus_message_builder_append_basic(builder, 's', kAdapterInterface);
+    l_dbus_message_builder_append_basic(builder, 's', name.c_str());
+    l_dbus_message_builder_enter_variant(builder, "u");
+    l_dbus_message_builder_append_basic(builder, 'u', &value);
+    l_dbus_message_builder_leave_variant(builder);
+    l_dbus_message_builder_finalize(builder);
+    l_dbus_message_builder_destroy(builder);
+
+    auto* reply = common::ellDbusSendWithReplySync(bus_.get(), msg, kDbusTimeout);
+    if (reply == nullptr) {
+      OPENAUTO_LOG(warning) << "[BluezBluetoothServer] Failed setting " << name;
+      return false;
+    }
+
+    if (l_dbus_message_is_error(reply)) {
+      const char* errName = nullptr;
+      const char* errText = nullptr;
+      l_dbus_message_get_error(reply, &errName, &errText);
+      OPENAUTO_LOG(warning) << "[BluezBluetoothServer] Failed setting " << name
+                            << ": " << (errName != nullptr ? errName : "unknown")
+                            << " " << (errText != nullptr ? errText : "");
+      l_dbus_message_unref(reply);
+      return false;
+    }
+
+    l_dbus_message_unref(reply);
+    return true;
   }
 
   void BluezBluetoothServer::startReadLoop() {
@@ -324,16 +532,23 @@ namespace f1x::openauto::btservice {
     response.set_ssid(ssid);
     response.set_password(pass);
 
-    auto bssid = getMacAddress("wlp4s0");
+    std::string interfaceName = wifiInterface_;
+    if (interfaceName.empty()) {
+      interfaceName = getWifiInterfaceInfo().name;
+    }
+
+    auto bssid = getMacAddress(interfaceName);
     if (bssid.empty()) {
       bssid = "00:00:00:00:00:00";
     }
     response.set_bssid(bssid);
     response.set_security_mode(
-        aap_protobuf::service::wifiprojection::message::WifiSecurityMode::WPA2_ENTERPRISE);
+        aap_protobuf::service::wifiprojection::message::WifiSecurityMode::WPA2_PERSONAL);
     response.set_access_point_type(aap_protobuf::service::wifiprojection::message::AccessPointType::STATIC);
 
     sendMessage(response, 3);
+    OPENAUTO_LOG(info) << "[BluezBluetoothServer] Sent WIFI_INFO_RESPONSE ssid=" << ssid
+               << " bssid=" << response.bssid() << " iface=" << interfaceName;
   }
 
   void BluezBluetoothServer::handleWifiVersionResponse(const uint8_t* payload, std::size_t length) {
@@ -380,13 +595,13 @@ namespace f1x::openauto::btservice {
     }
   }
 
-  std::string BluezBluetoothServer::getIP4_(const std::string& intf) const {
+  BluezBluetoothServer::InterfaceInfo BluezBluetoothServer::getWifiInterfaceInfo() const {
     struct ifaddrs* ifaddr = nullptr;
     if (getifaddrs(&ifaddr) == -1) {
-      return "";
+      return {};
     }
 
-    std::string fallback;
+    InterfaceInfo fallback;
     for (auto ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
       if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_INET) {
         continue;
@@ -402,17 +617,24 @@ namespace f1x::openauto::btservice {
         continue;
       }
 
-      if (!intf.empty() && intf == ifa->ifa_name) {
+      const std::string name = ifa->ifa_name;
+      InterfaceInfo current{name, host};
+
+      if (isWirelessInterfaceName(name)) {
         freeifaddrs(ifaddr);
-        return host;
+        return current;
       }
 
-      if (fallback.empty()) {
-        fallback = host;
+      if (fallback.name.empty()) {
+        fallback = current;
       }
     }
 
     freeifaddrs(ifaddr);
+    if (!fallback.name.empty()) {
+      OPENAUTO_LOG(info) << "[BluezBluetoothServer] Falling back to interface " << fallback.name
+                         << " with IP " << fallback.ip;
+    }
     return fallback;
   }
 

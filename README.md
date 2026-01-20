@@ -64,7 +64,10 @@ sudo apt-get install -y \
     qttools5-dev \
     qttools5-dev-tools \
     qtmultimedia5-dev \
-    libsdbus-c++-dev \
+    autoconf \
+    automake \
+    libtool \
+    pkg-config \
     libboost-all-dev
 
 
