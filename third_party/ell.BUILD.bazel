@@ -8,33 +8,33 @@ filegroup(
 config_setting(
     name = "arm64_gnu",
     constraint_values = [
-        "@platforms//cpu:arm64",
-        "@zig_sdk//libc:gnu.2.31",
+        "@platforms//cpu:aarch64",
     ],
+    values = {"define": "libc=gnu"},
 )
 
 config_setting(
     name = "amd64_gnu",
     constraint_values = [
         "@platforms//cpu:x86_64",
-        "@zig_sdk//libc:gnu.2.31",
     ],
+    values = {"define": "libc=gnu"},
 )
 
 config_setting(
     name = "arm64_musl",
     constraint_values = [
-        "@platforms//cpu:arm64",
-        "@zig_sdk//libc:musl",
+        "@platforms//cpu:aarch64",
     ],
+    values = {"define": "libc=musl"},
 )
 
 config_setting(
     name = "amd64_musl",
     constraint_values = [
         "@platforms//cpu:x86_64",
-        "@zig_sdk//libc:musl",
     ],
+    values = {"define": "libc=musl"},
 )
 
 configure_make(
