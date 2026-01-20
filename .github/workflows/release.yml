@@ -15,8 +15,6 @@ jobs:
       fail-fast: false
       matrix:
         variant:
-          - name: native
-            config: ""
           - name: amd64_gnu
             config: "--config=amd64_gnu"
           - name: arm64_gnu
