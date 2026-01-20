@@ -1,12 +1,13 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
 filegroup(
     name = "autoapp",
     srcs = ["bin/autoapp"],
     visibility = ["//visibility:public"],
 )
 
-
 cc_binary(
-    name = "autoapp_bazel",
+    name = "openautocore",
     srcs = glob([
         "src/**/*.cpp",
     ], exclude = [

@@ -22,14 +22,14 @@
       ]
     },
     {
-      "label": "bazel-build-autoapp",
+      "label": "bazel-build-openautocore",
       "type": "shell",
       "command": "bazel",
       "args": [
         "build",
         "-c",
         "dbg",
-        "//:autoapp_bazel"
+        "//:openautocore"
       ],
       "options": {
         "cwd": "${workspaceFolder}"

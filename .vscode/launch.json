@@ -2,10 +2,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug autoapp",
+      "name": "Debug openautocore",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/bazel-bin/autoapp_bazel",
+      "program": "${workspaceFolder}/bazel-bin/openautocore",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
@@ -18,7 +18,7 @@
           "ignoreFailures": true
         }
       ],
-      "preLaunchTask": "bazel-build-autoapp",
+      "preLaunchTask": "bazel-build-openautocore",
       "externalConsole": false
     }
   ]
