@@ -4,7 +4,7 @@
 #include <mutex>
 #include <unordered_map>
 #include <google/protobuf/message.h>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio.hpp>
 #include <cstdint>
 
 #include <Messenger/ChannelId.hpp>

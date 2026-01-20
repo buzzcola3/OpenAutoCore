@@ -5,6 +5,38 @@ filegroup(
     srcs = glob(["**"]),
 )
 
+config_setting(
+    name = "arm64_gnu",
+    constraint_values = [
+        "@platforms//cpu:arm64",
+        "@zig_sdk//libc:gnu.2.31",
+    ],
+)
+
+config_setting(
+    name = "amd64_gnu",
+    constraint_values = [
+        "@platforms//cpu:x86_64",
+        "@zig_sdk//libc:gnu.2.31",
+    ],
+)
+
+config_setting(
+    name = "arm64_musl",
+    constraint_values = [
+        "@platforms//cpu:arm64",
+        "@zig_sdk//libc:musl",
+    ],
+)
+
+config_setting(
+    name = "amd64_musl",
+    constraint_values = [
+        "@platforms//cpu:x86_64",
+        "@zig_sdk//libc:musl",
+    ],
+)
+
 configure_make(
     name = "ell",
     lib_source = ":all",
@@ -17,7 +49,13 @@ configure_make(
         "--disable-tests",
         "--disable-tools",
         "--disable-examples",
-    ],
+    ] + select({
+        ":arm64_gnu": ["--host=aarch64-linux-gnu"],
+        ":amd64_gnu": ["--host=x86_64-linux-gnu"],
+        ":arm64_musl": ["--host=aarch64-linux-musl"],
+        ":amd64_musl": ["--host=x86_64-linux-musl"],
+        "//conditions:default": [],
+    }),
     out_static_libs = ["libell.a"],
     visibility = ["//visibility:public"],
 )

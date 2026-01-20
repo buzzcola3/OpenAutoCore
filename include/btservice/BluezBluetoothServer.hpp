@@ -27,6 +27,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <aap_protobuf/aaw/MessageId.pb.h>
 
 namespace google::protobuf {
   class Message;
@@ -53,19 +54,21 @@ namespace f1x::openauto::btservice {
     };
 
     std::string resolveAdapterPath(const std::string& address) const;
-    bool setAdapterProperty(const std::string& adapterPath, const std::string& name, bool value) const;
-    bool setAdapterProperty(const std::string& adapterPath, const std::string& name, uint32_t value) const;
+    bool setAdapterProperty(const std::string& adapterPath, const std::string& name,
+                            char signature, const void* value) const;
     void startReadLoop();
     void stopReadLoop(bool fromReader);
     void readLoop();
+    void sendWifiVersionRequest();
+    void sendWifiStartRequest(const InterfaceInfo& wifiInfo);
     void handleWifiInfoRequest();
     void handleWifiVersionResponse(const uint8_t* payload, std::size_t length);
     void handleWifiConnectionStatus(const uint8_t* payload, std::size_t length);
     void handleWifiStartResponse(const uint8_t* payload, std::size_t length);
-    void sendMessage(const google::protobuf::Message &message, uint16_t type);
+    void sendMessage(const google::protobuf::Message &message, aap_protobuf::aaw::MessageId type,
+             const char* label = nullptr);
     InterfaceInfo getWifiInterfaceInfo() const;
     std::string getMacAddress(const std::string& intf) const;
-    void DecodeProtoMessage(const std::string& proto_data);
 
     struct EllDbusDeleter {
       void operator()(l_dbus* bus) const {

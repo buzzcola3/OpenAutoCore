@@ -23,9 +23,6 @@
 #include <Common/Log.hpp>
 #include <chrono>
 #include <cstring>
-#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/unknown_field_set.h>
 #include <aap_protobuf/aaw/MessageId.pb.h>
 #include <aap_protobuf/aaw/Status.pb.h>
 #include <aap_protobuf/aaw/WifiConnectionStatus.pb.h>
@@ -40,13 +37,7 @@
 #include <net/if.h>
 #include <unistd.h>
 #include <errno.h>
-#include <iomanip>
-#include <sstream>
-#include <iostream>
 #include <fstream>
-
-using namespace google::protobuf;
-using namespace google::protobuf::io;
 
 namespace f1x::openauto::btservice {
 
@@ -58,6 +49,7 @@ namespace f1x::openauto::btservice {
     constexpr const char* kAdapterInterface = "org.bluez.Adapter1";
     constexpr const char* kObjectManagerInterface = "org.freedesktop.DBus.ObjectManager";
     constexpr const char* kPropertiesInterface = "org.freedesktop.DBus.Properties";
+    constexpr uint16_t kWifiPort = 5000;
 
 
     uint16_t readUint16(const std::vector<uint8_t>& buffer, std::size_t offset) {
@@ -147,11 +139,17 @@ namespace f1x::openauto::btservice {
       return 0;
     }
 
-    setAdapterProperty(adapterPath_, "Powered", true);
-    setAdapterProperty(adapterPath_, "Discoverable", true);
-    setAdapterProperty(adapterPath_, "Pairable", true);
-    setAdapterProperty(adapterPath_, "DiscoverableTimeout", uint32_t{0});
-    setAdapterProperty(adapterPath_, "PairableTimeout", uint32_t{0});
+    const bool powered = true;
+    const bool discoverable = true;
+    const bool pairable = true;
+    const uint32_t discoverableTimeout = 0;
+    const uint32_t pairableTimeout = 0;
+
+    setAdapterProperty(adapterPath_, "Powered", 'b', &powered);
+    setAdapterProperty(adapterPath_, "Discoverable", 'b', &discoverable);
+    setAdapterProperty(adapterPath_, "Pairable", 'b', &pairable);
+    setAdapterProperty(adapterPath_, "DiscoverableTimeout", 'u', &discoverableTimeout);
+    setAdapterProperty(adapterPath_, "PairableTimeout", 'u', &pairableTimeout);
 
     profile_ = std::make_unique<BluezProfile>(bus_.get(), profilePath_, this);
 
@@ -248,10 +246,7 @@ namespace f1x::openauto::btservice {
     socketFd_ = fd;
     startReadLoop();
 
-    aap_protobuf::aaw::WifiVersionRequest versionRequest;
-    aap_protobuf::aaw::WifiStartRequest startRequest;
-
-    sendMessage(versionRequest, aap_protobuf::aaw::MessageId::WIFI_VERSION_REQUEST);
+    sendWifiVersionRequest();
 
     const auto wifiInfo = getWifiInterfaceInfo();
     if (wifiInfo.ip.empty()) {
@@ -262,13 +257,22 @@ namespace f1x::openauto::btservice {
     wifiInterface_ = wifiInfo.name;
     OPENAUTO_LOG(info) << "[BluezBluetoothServer] Using WiFi interface " << wifiInterface_
                        << " with IP " << wifiInfo.ip;
+    sendWifiStartRequest(wifiInfo);
+  }
 
+  void BluezBluetoothServer::sendWifiVersionRequest() {
+    aap_protobuf::aaw::WifiVersionRequest versionRequest;
+    sendMessage(versionRequest, aap_protobuf::aaw::MessageId::WIFI_VERSION_REQUEST, "WIFI_VERSION_REQUEST");
+  }
+
+  void BluezBluetoothServer::sendWifiStartRequest(const InterfaceInfo& wifiInfo) {
+    aap_protobuf::aaw::WifiStartRequest startRequest;
     startRequest.set_ip_address(wifiInfo.ip);
-    startRequest.set_port(5000);
+    startRequest.set_port(kWifiPort);
 
-    sendMessage(startRequest, aap_protobuf::aaw::MessageId::WIFI_START_REQUEST);
+    sendMessage(startRequest, aap_protobuf::aaw::MessageId::WIFI_START_REQUEST, "WIFI_START_REQUEST");
     OPENAUTO_LOG(info) << "[BluezBluetoothServer] Sent WIFI_START_REQUEST ip=" << wifiInfo.ip
-                       << " port=5000";
+                       << " port=" << kWifiPort;
   }
 
   void BluezBluetoothServer::onDisconnection(const std::string& devicePath) {
@@ -338,7 +342,8 @@ namespace f1x::openauto::btservice {
 
   bool BluezBluetoothServer::setAdapterProperty(const std::string& adapterPath,
                                                 const std::string& name,
-                                                bool value) const {
+                                                char signature,
+                                                const void* value) const {
     if (!bus_) {
       return false;
     }
@@ -349,48 +354,9 @@ namespace f1x::openauto::btservice {
     auto* builder = l_dbus_message_builder_new(msg);
     l_dbus_message_builder_append_basic(builder, 's', kAdapterInterface);
     l_dbus_message_builder_append_basic(builder, 's', name.c_str());
-    l_dbus_message_builder_enter_variant(builder, "b");
-    l_dbus_message_builder_append_basic(builder, 'b', &value);
-    l_dbus_message_builder_leave_variant(builder);
-    l_dbus_message_builder_finalize(builder);
-    l_dbus_message_builder_destroy(builder);
-
-    auto* reply = common::ellDbusSendWithReplySync(bus_.get(), msg, kDbusTimeout);
-    if (reply == nullptr) {
-      OPENAUTO_LOG(warning) << "[BluezBluetoothServer] Failed setting " << name;
-      return false;
-    }
-
-    if (l_dbus_message_is_error(reply)) {
-      const char* errName = nullptr;
-      const char* errText = nullptr;
-      l_dbus_message_get_error(reply, &errName, &errText);
-      OPENAUTO_LOG(warning) << "[BluezBluetoothServer] Failed setting " << name
-                            << ": " << (errName != nullptr ? errName : "unknown")
-                            << " " << (errText != nullptr ? errText : "");
-      l_dbus_message_unref(reply);
-      return false;
-    }
-
-    l_dbus_message_unref(reply);
-    return true;
-  }
-
-  bool BluezBluetoothServer::setAdapterProperty(const std::string& adapterPath,
-                                                const std::string& name,
-                                                uint32_t value) const {
-    if (!bus_) {
-      return false;
-    }
-
-    auto* msg = l_dbus_message_new_method_call(bus_.get(), kBluezService,
-                                               adapterPath.c_str(), kPropertiesInterface,
-                                               "Set");
-    auto* builder = l_dbus_message_builder_new(msg);
-    l_dbus_message_builder_append_basic(builder, 's', kAdapterInterface);
-    l_dbus_message_builder_append_basic(builder, 's', name.c_str());
-    l_dbus_message_builder_enter_variant(builder, "u");
-    l_dbus_message_builder_append_basic(builder, 'u', &value);
+    const char signatureString[2] = {signature, '\0'};
+    l_dbus_message_builder_enter_variant(builder, signatureString);
+    l_dbus_message_builder_append_basic(builder, signature, value);
     l_dbus_message_builder_leave_variant(builder);
     l_dbus_message_builder_finalize(builder);
     l_dbus_message_builder_destroy(builder);
@@ -485,17 +451,8 @@ namespace f1x::openauto::btservice {
           case aap_protobuf::aaw::MessageId::WIFI_INFO_RESPONSE:
           case aap_protobuf::aaw::MessageId::WIFI_VERSION_REQUEST:
           default: {
-            const auto dataLen = length >= 2 ? length - 2 : 0;
-            std::string protoData(reinterpret_cast<const char*>(payload), dataLen);
-            DecodeProtoMessage(protoData);
-
-            std::stringstream ss;
-            ss << std::hex << std::setfill('0');
-            for (auto val : buffer_) {
-              ss << std::setw(2) << static_cast<unsigned>(val);
-            }
-            OPENAUTO_LOG(debug) << "[BluezBluetoothServer::readLoop] Unknown message: " << messageId;
-            OPENAUTO_LOG(debug) << "[BluezBluetoothServer::readLoop] Data " << ss.str();
+            OPENAUTO_LOG(debug) << "[BluezBluetoothServer::readLoop] Unknown message: " << messageId
+                                << " length=" << length;
             break;
           }
         }
@@ -546,7 +503,7 @@ namespace f1x::openauto::btservice {
         aap_protobuf::service::wifiprojection::message::WifiSecurityMode::WPA2_PERSONAL);
     response.set_access_point_type(aap_protobuf::service::wifiprojection::message::AccessPointType::STATIC);
 
-    sendMessage(response, 3);
+    sendMessage(response, aap_protobuf::aaw::MessageId::WIFI_INFO_RESPONSE, "WIFI_INFO_RESPONSE");
     OPENAUTO_LOG(info) << "[BluezBluetoothServer] Sent WIFI_INFO_RESPONSE ssid=" << ssid
                << " bssid=" << response.bssid() << " iface=" << interfaceName;
   }
@@ -576,7 +533,9 @@ namespace f1x::openauto::btservice {
                        << Status_Name(status.status());
   }
 
-  void BluezBluetoothServer::sendMessage(const google::protobuf::Message &message, uint16_t type) {
+  void BluezBluetoothServer::sendMessage(const google::protobuf::Message &message,
+                                         aap_protobuf::aaw::MessageId type,
+                                         const char* label) {
     if (socketFd_ < 0) {
       return;
     }
@@ -584,12 +543,17 @@ namespace f1x::openauto::btservice {
     const auto byteSize = static_cast<uint16_t>(message.ByteSizeLong());
     std::vector<uint8_t> out(byteSize + 4, 0);
     writeUint16(out, 0, byteSize);
-    writeUint16(out, 2, type);
+    writeUint16(out, 2, static_cast<uint16_t>(type));
     message.SerializeToArray(reinterpret_cast<void*>(out.data() + 4), byteSize);
 
     auto written = ::write(socketFd_, out.data(), out.size());
     if (written > -1) {
-      OPENAUTO_LOG(debug) << "[BluezBluetoothServer::sendMessage] Bytes written: " << written;
+      if (label != nullptr) {
+        OPENAUTO_LOG(info) << "[BluezBluetoothServer::sendMessage] Sent " << label
+                           << " bytes=" << written;
+      } else {
+        OPENAUTO_LOG(debug) << "[BluezBluetoothServer::sendMessage] Bytes written: " << written;
+      }
     } else {
       OPENAUTO_LOG(debug) << "[BluezBluetoothServer::sendMessage] Could not write data";
     }
@@ -601,6 +565,8 @@ namespace f1x::openauto::btservice {
       return {};
     }
 
+    const std::string preferredInterface =
+        configuration_ != nullptr ? configuration_->getBluetoothWifiInterface() : "";
     InterfaceInfo fallback;
     for (auto ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
       if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_INET) {
@@ -620,6 +586,11 @@ namespace f1x::openauto::btservice {
       const std::string name = ifa->ifa_name;
       InterfaceInfo current{name, host};
 
+      if (!preferredInterface.empty() && name == preferredInterface) {
+        freeifaddrs(ifaddr);
+        return current;
+      }
+
       if (isWirelessInterfaceName(name)) {
         freeifaddrs(ifaddr);
         return current;
@@ -631,6 +602,11 @@ namespace f1x::openauto::btservice {
     }
 
     freeifaddrs(ifaddr);
+    if (!preferredInterface.empty()) {
+      OPENAUTO_LOG(warning) << "[BluezBluetoothServer] Preferred WiFi interface "
+                            << preferredInterface << " not found or has no IPv4.";
+    }
+
     if (!fallback.name.empty()) {
       OPENAUTO_LOG(info) << "[BluezBluetoothServer] Falling back to interface " << fallback.name
                          << " with IP " << fallback.ip;
@@ -651,43 +627,6 @@ namespace f1x::openauto::btservice {
     std::string mac;
     std::getline(file, mac);
     return mac;
-  }
-
-  void BluezBluetoothServer::DecodeProtoMessage(const std::string& proto_data) {
-    UnknownFieldSet set;
-
-    ArrayInputStream raw_input(proto_data.data(), proto_data.size());
-    CodedInputStream input(&raw_input);
-
-    if (!set.MergeFromCodedStream(&input)) {
-      std::cerr << "Failed to decode the message." << std::endl;
-      return;
-    }
-
-    for (int i = 0; i < set.field_count(); ++i) {
-      const UnknownField& field = set.field(i);
-      switch (field.type()) {
-        case UnknownField::TYPE_VARINT:
-          std::cout << "Field number " << field.number() << " is a varint: " << field.varint() << std::endl;
-          break;
-        case UnknownField::TYPE_FIXED32:
-          std::cout << "Field number " << field.number() << " is a fixed32: " << field.fixed32() << std::endl;
-          break;
-        case UnknownField::TYPE_FIXED64:
-          std::cout << "Field number " << field.number() << " is a fixed64: " << field.fixed64() << std::endl;
-          break;
-        case UnknownField::TYPE_LENGTH_DELIMITED:
-          std::cout << "Field number " << field.number() << " is length-delimited: ";
-          for (char ch : field.length_delimited()) {
-            std::cout << std::hex << (int)(unsigned char)ch;
-          }
-          std::cout << std::dec << std::endl;
-          break;
-        case UnknownField::TYPE_GROUP:
-          std::cout << "Field number " << field.number() << " is a group." << std::endl;
-          break;
-      }
-    }
   }
 
 }

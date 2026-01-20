@@ -85,6 +85,8 @@ public:
     virtual void setBluetoothAdapterType(BluetoothAdapterType value) = 0;
     virtual std::string getBluetoothAdapterAddress() const = 0;
     virtual void setBluetoothAdapterAddress(const std::string& value) = 0;
+    virtual std::string getBluetoothWifiInterface() const = 0;
+    virtual void setBluetoothWifiInterface(const std::string& value) = 0;
     virtual bool getWirelessProjectionEnabled() const = 0;
     virtual void setWirelessProjectionEnabled(bool value) = 0;
 

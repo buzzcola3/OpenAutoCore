@@ -6,16 +6,37 @@ module(
 bazel_dep(name = "bazel_skylib", version = "1.5.0")
 bazel_dep(name = "rules_python", version = "0.39.0")
 bazel_dep(name = "nlohmann_json", version = "3.11.3")
+bazel_dep(name = "libusb", version = "1.0.28")
+bazel_dep(name = "openssl", version = "3.5.4.bcr.0")
+bazel_dep(name = "boost.asio", version = "1.87.0.bcr.1")
+bazel_dep(name = "boost.system", version = "1.87.0")
+bazel_dep(name = "boost.thread", version = "1.87.0")
+bazel_dep(name = "boost.filesystem", version = "1.87.0")
+bazel_dep(name = "boost.log", version = "1.87.0")
+bazel_dep(name = "boost.circular_buffer", version = "1.87.0")
 
 # rules_foreign_cc 0.10.1 is known-good with this codebase; pin via override to
 # ensure consistent checksum under Bzlmod.
 bazel_dep(name = "rules_foreign_cc", version = "0.10.1")
+
+# Hermetic C++ toolchain (dev-only for this repo; not required by consumers).
+bazel_dep(name = "hermetic_cc_toolchain", version = "4.0.0", dev_dependency = True)
 
 # OpenAutoTransport shared-memory transport for video/audio/data piping.
 bazel_dep(name = "open_auto_transport", version = "0.0.25")
 
 # Cap'n Proto runtime
 bazel_dep(name = "capnp-cpp", version = "1.1.0")
+
+# Platforms repo for cross-compilation targets.
+bazel_dep(name = "platforms", version = "0.0.11")
+
+toolchains = use_extension(
+    "@hermetic_cc_toolchain//toolchain:ext.bzl",
+    "toolchains",
+    dev_dependency = True,
+)
+use_repo(toolchains, "zig_sdk")
 
 git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 

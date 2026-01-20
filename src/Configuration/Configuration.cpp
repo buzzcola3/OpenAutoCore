@@ -51,6 +51,7 @@ const std::string Configuration::cAudioOutputBackendType = "Audio.OutputBackendT
 
 const std::string Configuration::cBluetoothAdapterTypeKey = "Bluetooth.AdapterType";
 const std::string Configuration::cBluetoothAdapterAddressKey = "Bluetooth.AdapterAddress";
+const std::string Configuration::cBluetoothWifiInterfaceKey = "Bluetooth.WifiInterface";
 const std::string Configuration::cBluetoothWirelessProjectionEnabledKey = "Bluetooth.WirelessProjectionEnabled";
 
 const std::string Configuration::cInputEnableTouchscreenKey = "Input.EnableTouchscreen";
@@ -114,6 +115,7 @@ void Configuration::load()
         wirelessProjectionEnabled_ = iniConfig.get<bool>(cBluetoothWirelessProjectionEnabledKey, true);
 
         bluetoothAdapterAddress_ = iniConfig.get<std::string>(cBluetoothAdapterAddressKey, "");
+        bluetoothWifiInterface_ = iniConfig.get<std::string>(cBluetoothWifiInterfaceKey, "");
 
         _audioChannelEnabledMedia = iniConfig.get<bool>(cAudioChannelMediaEnabled, true);
         _audioChannelEnabledGuidance = iniConfig.get<bool>(cAudioChannelGuidanceEnabled, true);
@@ -158,6 +160,7 @@ void Configuration::reset()
     buttonCodes_.clear();
     bluetoothAdapterType_ = BluetoothAdapterType::NONE;
     bluetoothAdapterAddress_ = "";
+    bluetoothWifiInterface_.clear();
 
    _audioChannelEnabledMedia = true;
    _audioChannelEnabledGuidance = true;
@@ -190,6 +193,7 @@ void Configuration::save()
 
     iniConfig.put<uint32_t>(cBluetoothAdapterTypeKey, static_cast<uint32_t>(bluetoothAdapterType_));
     iniConfig.put<std::string>(cBluetoothAdapterAddressKey, bluetoothAdapterAddress_);
+    iniConfig.put<std::string>(cBluetoothWifiInterfaceKey, bluetoothWifiInterface_);
     iniConfig.put<bool>(cBluetoothWirelessProjectionEnabledKey, wirelessProjectionEnabled_);
 
     iniConfig.put<bool>(cAudioChannelMediaEnabled, _audioChannelEnabledMedia);
@@ -324,6 +328,16 @@ std::string Configuration::getBluetoothAdapterAddress() const
 void Configuration::setBluetoothAdapterAddress(const std::string& value)
 {
     bluetoothAdapterAddress_ = value;
+}
+
+std::string Configuration::getBluetoothWifiInterface() const
+{
+    return bluetoothWifiInterface_;
+}
+
+void Configuration::setBluetoothWifiInterface(const std::string& value)
+{
+    bluetoothWifiInterface_ = value;
 }
 
 bool Configuration::getWirelessProjectionEnabled() const {

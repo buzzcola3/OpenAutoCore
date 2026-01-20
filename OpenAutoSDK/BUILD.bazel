@@ -21,31 +21,27 @@ cc_library(
     hdrs = glob([
         "include/aasdk/**/*.hpp",
     ]),
-    deps = [
-        ":aap_protobuf_cc",
-        "@open_auto_transport//:open_auto_transport",
-        "@nlohmann_json//:json",
-    ],
     includes = [
         "include/aasdk",
-    ],
-    defines = [
-        "BOOST_ALL_DYN_LINK",
     ],
     copts = [
         "-include", "Common/AsioCompat.hpp",
         "-Wall",
         "-pedantic",
         "-fPIC",
-        "-isystem/usr/include/libusb-1.0",
     ],
-    linkopts = [
-        "-lusb-1.0",
-        "-lssl",
-        "-lcrypto",
-        "-lboost_system",
-        "-lboost_log",
-        "-lboost_log_setup",
-        "-pthread",
+    deps = [
+        ":aap_protobuf_cc",
+        "@open_auto_transport//:open_auto_transport",
+        "@nlohmann_json//:json",
+        "@boost.asio//:boost.asio",
+        "@boost.circular_buffer//:boost.circular_buffer",
+        "@boost.filesystem//:boost.filesystem",
+        "@boost.log//:boost.log",
+        "@boost.system//:boost.system",
+        "@boost.thread//:boost.thread",
+        "@libusb//:libusb",
+        "@openssl//:ssl",
+        "@openssl//:crypto",
     ],
 )

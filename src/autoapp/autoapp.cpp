@@ -62,6 +62,18 @@ namespace {
         gRunning.store(false);
         gShutdownCv.notify_all();
     }
+
+    autoapp::projection::IBluetoothDevice::Pointer createBluetoothDevice(
+        const autoapp::configuration::IConfiguration::Pointer& configuration) {
+        if (configuration == nullptr || configuration->getBluetoothAdapterAddress().empty()) {
+            OPENAUTO_LOG(debug) << "[AutoApp] Using Dummy Bluetooth";
+            return std::make_shared<autoapp::projection::DummyBluetoothDevice>();
+        }
+
+        OPENAUTO_LOG(info) << "[AutoApp] Using Local Bluetooth Adapter";
+        return std::make_shared<autoapp::projection::BluezBluetoothDevice>(
+            configuration->getBluetoothAdapterAddress());
+    }
 }
 
 void startUSBWorkers(boost::asio::io_service& ioService, libusb_context* usbContext, ThreadPool& threadPool)
@@ -139,15 +151,8 @@ int main(int argc, char* argv[])
         }
     }
 
-    autoapp::projection::IBluetoothDevice::Pointer bluetoothDevice;
-    if (configuration->getBluetoothAdapterAddress().empty()) {
-        OPENAUTO_LOG(debug) << "[AutoApp] Using Dummy Bluetooth";
-        bluetoothDevice = std::make_shared<autoapp::projection::DummyBluetoothDevice>();
-    } else {
-        OPENAUTO_LOG(info) << "[AutoApp] Using Local Bluetooth Adapter";
-        bluetoothDevice = std::make_shared<autoapp::projection::BluezBluetoothDevice>(
-            configuration->getBluetoothAdapterAddress());
-    }
+    autoapp::projection::IBluetoothDevice::Pointer bluetoothDevice =
+        createBluetoothDevice(configuration);
 
     autoapp::configuration::RecentAddressesList recentAddressesList(7);
     recentAddressesList.read();
