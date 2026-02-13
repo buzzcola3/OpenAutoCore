@@ -40,15 +40,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p dist
+          staging="openautocore-${{ matrix.variant.name }}"
+          mkdir -p "${staging}"
           output_path=$(bazel cquery ${{ matrix.variant.config }} --output=starlark --starlark:expr='target.files.to_list()[0].path' //:openautocore)
-          cp "$(bazel info execution_root)/${output_path}" "dist/openautocore-${{ matrix.variant.name }}"
+          cp "$(bazel info execution_root)/${output_path}" "${staging}/openautocore"
+          cp -r configuration/ "${staging}/configuration"
+          tar -czf "${staging}.tar.gz" "${staging}"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: openautocore-${{ matrix.variant.name }}
-          path: dist/openautocore-${{ matrix.variant.name }}
+          path: openautocore-${{ matrix.variant.name }}.tar.gz
 
   publish-release:
     runs-on: ubuntu-latest
