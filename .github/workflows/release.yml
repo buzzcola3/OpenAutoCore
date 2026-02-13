@@ -30,6 +30,16 @@ jobs:
       - name: Setup Bazelisk
         uses: bazelbuild/setup-bazelisk@v3
 
+      - name: Mount Bazel cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/bazelisk
+            ~/.cache/bazel
+          key: bazel-${{ matrix.variant.name }}-${{ hashFiles('MODULE.bazel', 'WORKSPACE.bazel', 'BUILD.bazel', 'OpenAutoSDK/BUILD.bazel', 'third_party/BUILD.bazel') }}
+          restore-keys: |
+            bazel-${{ matrix.variant.name }}-
+
       - name: Build
         shell: bash
         run: |
