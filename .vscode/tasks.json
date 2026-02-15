@@ -38,6 +38,16 @@
         "kind": "build",
         "isDefault": false
       }
+    },
+    {
+      "label": "deploy-to-debuglantern",
+      "type": "shell",
+      "command": "${workspaceFolder}/.vscode/deploy-debug.sh",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "problemMatcher": []
     }
   ]
 }

@@ -3,4 +3,4 @@ lib/
 bazel-bin/
 bazel-out/
 bazel-*/
-openauto.ini
+openauto.ini.vscode/connect.gdb
