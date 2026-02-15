@@ -30,12 +30,11 @@ echo "  binary: $binary"
 staging=$(mktemp -d)
 trap 'rm -rf "$staging"' EXIT
 
-mkdir -p "$staging/$BUNDLE_NAME"
-cp "$binary"          "$staging/$BUNDLE_NAME/$BUNDLE_NAME"
-cp -r configuration/  "$staging/$BUNDLE_NAME/configuration"
+cp "$binary"          "$staging/$BUNDLE_NAME"
+cp -r configuration/  "$staging/configuration"
 
-bundle_tar="$staging/$BUNDLE_NAME.tar.gz"
-tar -czf "$bundle_tar" -C "$staging" "$BUNDLE_NAME"
+bundle_tar="$staging/bundle.tar.gz"
+tar -czf "$bundle_tar" -C "$staging" "$BUNDLE_NAME" configuration
 echo "▸ Bundle ready ($(du -h "$bundle_tar" | cut -f1))"
 
 # ── 3. Clean up previous sessions for this binary ───────────────────────────
@@ -53,7 +52,7 @@ done
 # ── 4. Upload ────────────────────────────────────────────────────────────────
 echo "▸ Uploading bundle to $TARGET:$PORT …"
 upload_resp=$($CTL upload "$bundle_tar" \
-  --exec-path "$BUNDLE_NAME/$BUNDLE_NAME" \
+  --exec-path "$BUNDLE_NAME" \
   --target "$TARGET" --port "$PORT" 2>&1)
 echo "  $upload_resp"
 
