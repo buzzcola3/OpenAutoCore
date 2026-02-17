@@ -6,7 +6,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-TARGET="${DL_TARGET:-192.168.1.28}"
+TARGET="${DL_TARGET:-OrangePiZero3.local}"
 PORT="${DL_PORT:-4444}"
 CTL="${DL_CTL:-$HOME/.local/bin/debuglanternctl}"
 

@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with aasdk. If not, see <http://www.gnu.org/licenses/>.
 
+#include <cstring>
 #include <boost/endian/conversion.hpp>
 #include <Messenger/Timestamp.hpp>
 
@@ -27,7 +28,8 @@ namespace aasdk::messenger {
   }
 
   Timestamp::Timestamp(const common::DataConstBuffer &buffer) {
-    const ValueType &timestampBig = reinterpret_cast<const ValueType &>(buffer.cdata[0]);
+    ValueType timestampBig;
+    std::memcpy(&timestampBig, buffer.cdata, sizeof(timestampBig));
     stamp_ = boost::endian::big_to_native(timestampBig);
   }
 
