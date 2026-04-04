@@ -21,6 +21,7 @@
 #include <boost/asio.hpp>
 #include <Transport/ITransport.hpp>
 #include <Configuration/IConfiguration.hpp>
+#include <Configuration/ServiceConfig.hpp>
 #include <Service/IAndroidAutoEntityFactory.hpp>
 #include <Service/IServiceFactory.hpp>
 
@@ -38,6 +39,7 @@ class AndroidAutoEntityFactory: public IAndroidAutoEntityFactory
 public:
     AndroidAutoEntityFactory(boost::asio::io_service& ioService,
                              configuration::IConfiguration::Pointer configuration,
+                             configuration::ServiceConfig& serviceConfig,
                              IServiceFactory& serviceFactory);
 
     IAndroidAutoEntity::Pointer create(aasdk::usb::IAOAPDevice::Pointer aoapDevice) override;
@@ -48,6 +50,7 @@ private:
 
     boost::asio::io_service& ioService_;
     configuration::IConfiguration::Pointer configuration_;
+    configuration::ServiceConfig& serviceConfig_;
     IServiceFactory& serviceFactory_;
 };
 

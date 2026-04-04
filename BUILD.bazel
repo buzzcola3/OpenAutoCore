@@ -1,4 +1,9 @@
-load("@rules_cc//cc:defs.bzl", "cc_binary")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
+exports_files([
+    "configuration/ServiceDiscoveryResponse.default.json",
+    "configuration/ServiceDiscoveryResponse.textproto",
+])
 
 filegroup(
     name = "autoapp",
@@ -6,14 +11,16 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
-cc_binary(
-    name = "openautocore",
+cc_library(
+    name = "openautocore_lib",
     srcs = glob([
         "src/**/*.cpp",
     ], exclude = [
         "bazel-*/**",
         "src/autoapp/autoapp.cpp",
-    ]) + glob([
+        "src/autoapp.cpp",
+    ]),
+    hdrs = glob([
         "include/**/*.hpp",
     ], exclude = [
         "bazel-*/**",
@@ -39,8 +46,31 @@ cc_binary(
         "@boost.system//:boost.system",
         "@boost.thread//:boost.thread",
         "@libusb//:libusb",
+        "@nlohmann_json//:json",
         "@openssl//:ssl",
         "@openssl//:crypto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_binary(
+    name = "openautocore",
+    srcs = [
+        "src/autoapp.cpp",
+    ],
+    includes = [
+        "include",
+        "include/Common",
+        "include/btservice",
+    ],
+    copts = [
+        "-include", "Common/AsioCompat.hpp",
+        "-Wall",
+        "-pedantic",
+        "-fPIC",
+    ],
+    deps = [
+        ":openautocore_lib",
     ],
     visibility = ["//visibility:public"],
 )

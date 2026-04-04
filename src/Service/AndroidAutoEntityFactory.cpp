@@ -37,8 +37,9 @@ namespace f1x {
 
         AndroidAutoEntityFactory::AndroidAutoEntityFactory(boost::asio::io_service &ioService,
                                                            configuration::IConfiguration::Pointer configuration,
+                                                           configuration::ServiceConfig &serviceConfig,
                                                            IServiceFactory &serviceFactory)
-            : ioService_(ioService), configuration_(std::move(configuration)), serviceFactory_(serviceFactory) {
+            : ioService_(ioService), configuration_(std::move(configuration)), serviceConfig_(serviceConfig), serviceFactory_(serviceFactory) {
 
         }
 
@@ -69,8 +70,8 @@ namespace f1x {
           auto serviceList = serviceFactory_.create(messenger);
           auto pinger(std::make_shared<Pinger>(ioService_, 5000));
           return std::make_shared<AndroidAutoEntity>(ioService_, std::move(cryptor), std::move(transport),
-                                                     std::move(messenger), configuration_, std::move(serviceList),
-                                                     std::move(pinger));
+                                                     std::move(messenger), configuration_, serviceConfig_,
+                                                     std::move(serviceList), std::move(pinger));
         }
 
       }

@@ -36,9 +36,11 @@
 #include <Messenger/handlers/InputSourceMessageHandlers.hpp>
 #include <Messenger/handlers/MediaSourceMessageHandlers.hpp>
 #include <Messenger/handlers/SensorMessageHandlers.hpp>
+#include <nlohmann/json.hpp>
 #include <open_auto_transport/wire.hpp>
 #include <aap_protobuf/service/inputsource/message/InputReport.pb.h>
 #include <Configuration/IConfiguration.hpp>
+#include <Configuration/ServiceConfig.hpp>
 #include <Configuration/RecentAddressesList.hpp>
 #include <Projection/IBluetoothDevice.hpp>
 #include <Projection/BluezBluetoothDevice.hpp>
@@ -164,6 +166,11 @@ int main(int argc, char* argv[])
     aasdk::usb::AccessoryModeQueryChainFactory queryChainFactory(usbWrapper, ioService, queryFactory);
     autoapp::service::ServiceFactory serviceFactory(ioService, configuration);
 
+    autoapp::configuration::ServiceConfig serviceConfig(
+        "configuration/ServiceDiscoveryResponse.default.json",
+        "configuration/UserServiceDiscoveryResponse.json");
+    serviceConfig.load();
+
     auto transport = serviceFactory.getTransport();
     if (transport && !transport->isRunning()) {
         if (!transport->startAsA(std::chrono::microseconds{1000}, false)) {
@@ -203,9 +210,37 @@ int main(int argc, char* argv[])
             [&mediaSourceHandlers](uint64_t timestamp, const void* data, std::size_t size) {
                 mediaSourceHandlers.onMicrophoneAudio(timestamp, data, size);
             });
+
+        transport->addTypeHandler(
+            buzz::wire::MsgType::CONFIGURATION,
+            [&serviceConfig, transport](uint64_t, const void* data, std::size_t size) {
+                auto req = nlohmann::json::parse(
+                    static_cast<const char*>(data),
+                    static_cast<const char*>(data) + size,
+                    nullptr, false);
+                if (req.is_discarded()) return;
+
+                auto action = req.value("action", "");
+                if (action == "get") {
+                    auto cfg = serviceConfig.getJson();
+                    transport->send(buzz::wire::MsgType::CONFIGURATION, 0,
+                                    cfg.data(), cfg.size());
+                } else if (action == "set") {
+                    if (req.contains("config")) {
+                        auto err = serviceConfig.setJson(req["config"].dump());
+                        if (err.empty()) {
+                            serviceConfig.save();
+                        }
+                    }
+                } else if (action == "reset") {
+                    serviceConfig.reset();
+                    serviceConfig.save();
+                }
+            });
     }
 
-    autoapp::service::AndroidAutoEntityFactory androidAutoEntityFactory(ioService, configuration, serviceFactory);
+    autoapp::service::AndroidAutoEntityFactory androidAutoEntityFactory(ioService, configuration,
+                                                                        serviceConfig, serviceFactory);
 
     auto usbHub(std::make_shared<aasdk::usb::USBHub>(usbWrapper, ioService, queryChainFactory));
     auto connectedAccessoriesEnumerator(std::make_shared<aasdk::usb::ConnectedAccessoriesEnumerator>(usbWrapper, ioService, queryChainFactory));

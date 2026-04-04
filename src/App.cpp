@@ -239,15 +239,15 @@ namespace f1x::openauto::autoapp {
   void App::onUSBHubError(const aasdk::error::Error &error) {
     OPENAUTO_LOG(error) << "[App] onUSBHubError(): " << error.what();
 
-//    if(error != aasdk::error::ErrorCode::OPERATION_ABORTED &&
-//       error != aasdk::error::ErrorCode::OPERATION_IN_PROGRESS)
-//    {
-//        try {
-//            this->waitForDevice();
-//        } catch (...) {
-//            OPENAUTO_LOG(error) << "[App] onUSBHubError: exception caused by this->waitForDevice();";
-//        }
-//    }
+    if(error != aasdk::error::ErrorCode::OPERATION_ABORTED &&
+       error != aasdk::error::ErrorCode::OPERATION_IN_PROGRESS)
+    {
+        try {
+            this->waitForDevice();
+        } catch (...) {
+            OPENAUTO_LOG(error) << "[App] onUSBHubError: exception caused by this->waitForDevice();";
+        }
+    }
   }
 
 }

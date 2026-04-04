@@ -48,6 +48,22 @@
       },
       "group": "build",
       "problemMatcher": []
+    },
+    {
+      "label": "run-openautocore",
+      "type": "shell",
+      "command": "./bazel-bin/openautocore",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "bazel-build-openautocore",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "isBackground": true,
+      "problemMatcher": []
     }
   ]
 }

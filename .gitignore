@@ -4,3 +4,4 @@ bazel-bin/
 bazel-out/
 bazel-*/
 openauto.ini.vscode/connect.gdb
+configuration/UserServiceDiscoveryResponse.json

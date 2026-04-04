@@ -6,9 +6,22 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-TARGET="${DL_TARGET:-OrangePiZero3.local}"
+TARGET_HOST="${DL_TARGET:-orangepizero3.local}"
 PORT="${DL_PORT:-4444}"
 CTL="${DL_CTL:-$HOME/.local/bin/debuglanternctl}"
+
+# debuglanternctl is statically linked and cannot use NSS/mDNS to resolve
+# .local hostnames.  Pre-resolve to an IP so it can connect.
+if [[ "$TARGET_HOST" == *.local ]]; then
+  TARGET=$(getent hosts "$TARGET_HOST" | awk '{print $1; exit}')
+  if [[ -z "$TARGET" ]]; then
+    echo "✗ Could not resolve $TARGET_HOST via mDNS" >&2
+    exit 1
+  fi
+  echo "▸ Resolved $TARGET_HOST → $TARGET"
+else
+  TARGET="$TARGET_HOST"
+fi
 
 BAZEL_CONFIG="${BAZEL_CONFIG:---config=arm64_gnu}"
 BUNDLE_NAME="openautocore"

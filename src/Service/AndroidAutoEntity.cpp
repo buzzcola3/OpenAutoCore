@@ -18,7 +18,6 @@
 
 #include <Channel/Control/ControlServiceChannel.hpp>
 #include <Service/AndroidAutoEntity.hpp>
-#include <Configuration/ProtoConfig.hpp>
 #include <Common/Log.hpp>
 
 namespace f1x {
@@ -31,12 +30,14 @@ namespace f1x {
                                              aasdk::transport::ITransport::Pointer transport,
                                              aasdk::messenger::IMessenger::Pointer messenger,
                                              configuration::IConfiguration::Pointer configuration,
+                                             configuration::ServiceConfig& serviceConfig,
                                              ServiceList serviceList,
                                              IPinger::Pointer pinger)
             : strand_(ioService), cryptor_(std::move(cryptor)), transport_(std::move(transport)),
               messenger_(std::move(messenger)), controlServiceChannel_(
                 std::make_shared<aasdk::channel::control::ControlServiceChannel>(strand_, messenger_)),
-              configuration_(std::move(configuration)), serviceList_(std::move(serviceList)),
+              configuration_(std::move(configuration)), serviceConfig_(serviceConfig),
+              serviceList_(std::move(serviceList)),
               pinger_(std::move(pinger)), eventHandler_(nullptr) {
         }
 
@@ -174,11 +175,8 @@ namespace f1x {
         OPENAUTO_LOG(debug) << "[AndroidAutoEntity] Type: " << request.label_text()
                             << ", Model: " << request.device_name();
 
-        aap_protobuf::service::control::message::ServiceDiscoveryResponse serviceDiscoveryResponse;
-
-        f1x::openauto::autoapp::config::loadTextProto("configuration/ServiceDiscoveryResponse.textproto",
-                        serviceDiscoveryResponse,
-                        "ServiceDiscoveryResponse");
+        aap_protobuf::service::control::message::ServiceDiscoveryResponse serviceDiscoveryResponse =
+            serviceConfig_.toProto();
 
         auto promise = aasdk::channel::SendPromise::defer(strand_);
         promise->then([]() {},

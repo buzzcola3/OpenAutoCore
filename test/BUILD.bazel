@@ -1,0 +1,20 @@
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
+cc_test(
+    name = "service_config_test",
+    srcs = ["ServiceConfigTest.cpp"],
+    data = [
+        "//:configuration/ServiceDiscoveryResponse.default.json",
+        "//:configuration/ServiceDiscoveryResponse.textproto",
+    ],
+    copts = [
+        "-include", "Common/AsioCompat.hpp",
+        "-Wall",
+        "-pedantic",
+        "-fPIC",
+    ],
+    deps = [
+        "//:openautocore_lib",
+        "@googletest//:gtest_main",
+    ],
+)
