@@ -1,4 +1,4 @@
-// Copyright (C) 2024 CubeOne (Simon Dean - simon.dean@cubeone.co.uk)
+// Copyright (C) 2025 Samuel Betak (buzzcola3 - buzzcola3@github.com)
 //
 // This file is part of OpenAutoCore.
 //

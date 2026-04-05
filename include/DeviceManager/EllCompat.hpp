@@ -1,9 +1,19 @@
-// Copyright (C) 2024 CubeOne (Simon Dean - simon.dean@cubeone.co.uk)
+// Copyright (C) 2025 Samuel Betak (buzzcola3 - buzzcola3@github.com)
 //
-// Thin C++ forward declarations for the ELL functions used by DeviceManager.
-// Avoids including <ell/ell.h> which contains C-only constructs
-// (DEFINE_CLEANUP_FUNC void* casts, [static N] array parameters) that
-// don't compile under -pedantic C++.
+// This file is part of OpenAutoCore.
+//
+// OpenAutoCore is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// OpenAutoCore is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with OpenAutoCore. If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 

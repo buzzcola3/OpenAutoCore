@@ -1,11 +1,19 @@
-// Copyright (C) 2024 CubeOne (Simon Dean - simon.dean@cubeone.co.uk)
+// Copyright (C) 2025 Samuel Betak (buzzcola3 - buzzcola3@github.com)
 //
-// FrameRouter — single-module replacement for the Transport/Messenger stack.
+// This file is part of OpenAutoCore.
 //
-// Receives raw bytes from DeviceConnection, parses AA wire frames, reassembles
-// multi-frame messages, decrypts, and dispatches to Lite channel handlers.
-// Provides a synchronous send path for handlers to frame, encrypt, and
-// transmit outbound messages.
+// OpenAutoCore is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// OpenAutoCore is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with OpenAutoCore. If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
