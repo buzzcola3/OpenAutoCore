@@ -18,3 +18,63 @@ cc_test(
         "@googletest//:gtest_main",
     ],
 )
+
+cc_test(
+    name = "usb_device_test",
+    srcs = ["USBDeviceTest.cpp"],
+    copts = [
+        "-include", "Common/AsioCompat.hpp",
+        "-Wall",
+        "-pedantic",
+        "-fPIC",
+    ],
+    deps = [
+        "//OpenAutoSDK:aasdk",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "frame_io_test",
+    srcs = ["FrameIOTest.cpp"],
+    copts = [
+        "-include", "Common/AsioCompat.hpp",
+        "-Wall",
+        "-pedantic",
+        "-fPIC",
+    ],
+    deps = [
+        "//OpenAutoSDK:aasdk",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "channel_router_test",
+    srcs = ["ChannelRouterTest.cpp"],
+    copts = [
+        "-include", "Common/AsioCompat.hpp",
+        "-Wall",
+        "-pedantic",
+        "-fPIC",
+    ],
+    deps = [
+        "//OpenAutoSDK:aasdk",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "session_test",
+    srcs = ["SessionTest.cpp"],
+    copts = [
+        "-include", "Common/AsioCompat.hpp",
+        "-Wall",
+        "-pedantic",
+        "-fPIC",
+    ],
+    deps = [
+        "//OpenAutoSDK:aasdk",
+        "@googletest//:gtest_main",
+    ],
+)

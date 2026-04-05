@@ -26,11 +26,9 @@ namespace f1x::openauto::autoapp {
 
   App::App(boost::asio::io_service &ioService, aasdk::usb::USBWrapper &usbWrapper, aasdk::tcp::ITCPWrapper &tcpWrapper,
            service::IAndroidAutoEntityFactory &androidAutoEntityFactory,
-           aasdk::usb::IUSBHub::Pointer usbHub,
-           aasdk::usb::IConnectedAccessoriesEnumerator::Pointer connectedAccessoriesEnumerator)
+           aasdk::usb::IUSBHub::Pointer usbHub)
       : ioService_(ioService), usbWrapper_(usbWrapper), tcpWrapper_(tcpWrapper), strand_(ioService_),
         androidAutoEntityFactory_(androidAutoEntityFactory), usbHub_(std::move(usbHub)),
-        connectedAccessoriesEnumerator_(std::move(connectedAccessoriesEnumerator)),
         acceptor_(ioService, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 5000)), isStopped_(false) {
 
   }
@@ -43,13 +41,6 @@ namespace f1x::openauto::autoapp {
       catch (...) {
         OPENAUTO_LOG(error) << "[App] waitForUSBDevice() -exception caused by this->waitForDevice();";
       }
-      try {
-        this->enumerateDevices();
-      }
-      catch (...) {
-        OPENAUTO_LOG(error) << "[App] waitForUSBDevice() exception caused by this->enumerateDevices()";
-      }
-
     });
   }
 
@@ -93,11 +84,6 @@ namespace f1x::openauto::autoapp {
     strand_.dispatch([this, self = this->shared_from_this()]() {
       isStopped_ = true;
       try {
-        connectedAccessoriesEnumerator_->cancel();
-      } catch (...) {
-        OPENAUTO_LOG(error) << "[App] stop: exception caused by connectedAccessoriesEnumerator_->cancel()";
-      }
-      try {
         usbHub_->cancel();
       } catch (...) {
         OPENAUTO_LOG(error) << "[App] stop: exception caused by usbHub_->cancel();";
@@ -131,7 +117,6 @@ namespace f1x::openauto::autoapp {
       // ignore autostart if exit to csng was used
       if (!disableAutostartEntity) {
         OPENAUTO_LOG(info) << "[App] Start Android Auto allowed - let's go.";
-        connectedAccessoriesEnumerator_->cancel();
 
         auto aoapDevice(aasdk::usb::AOAPDevice::create(usbWrapper_, ioService_, deviceHandle));
         androidAutoEntity_ = androidAutoEntityFactory_.create(std::move(aoapDevice));
@@ -148,18 +133,6 @@ namespace f1x::openauto::autoapp {
     }
   }
 
-  void App::enumerateDevices() {
-    auto promise = aasdk::usb::IConnectedAccessoriesEnumerator::Promise::defer(strand_);
-    promise->then([this, self = this->shared_from_this()](auto result) {
-                    OPENAUTO_LOG(info) << "[App] Devices enumeration result: " << result;
-                  },
-                  [this, self = this->shared_from_this()](auto e) {
-                    OPENAUTO_LOG(error) << "[App] Devices enumeration failed: " << e.what();
-                  });
-
-    connectedAccessoriesEnumerator_->enumerate(std::move(promise));
-  }
-
   void App::waitForDevice() {
     OPENAUTO_LOG(info) << "[App] Waiting for device...";
 
@@ -168,6 +141,28 @@ namespace f1x::openauto::autoapp {
                   std::bind(&App::onUSBHubError, this->shared_from_this(), std::placeholders::_1));
     usbHub_->start(std::move(promise));
     startServerSocket();
+    scheduleAOAPRescan();
+  }
+
+  void App::scheduleAOAPRescan() {
+    uint32_t gen = ++rescanGeneration_;
+    auto timer = std::make_shared<boost::asio::deadline_timer>(ioService_);
+    timer->expires_from_now(boost::posix_time::milliseconds(5000));
+    timer->async_wait([this, self = this->shared_from_this(), timer, gen](const boost::system::error_code &ec) {
+      strand_.dispatch([this, self, ec, gen]() {
+        if (ec || isStopped_ || androidAutoEntity_ != nullptr || gen != rescanGeneration_) return;
+
+        OPENAUTO_LOG(info) << "[App] Re-scanning for AOAP device";
+        usbHub_->cancel();
+        auto promise = aasdk::usb::IUSBHub::Promise::defer(strand_);
+        promise->then(
+            std::bind(&App::aoapDeviceHandler, self, std::placeholders::_1),
+            std::bind(&App::onUSBHubError, self, std::placeholders::_1));
+        usbHub_->start(std::move(promise));
+
+        this->scheduleAOAPRescan();
+      });
+    });
   }
 
   void App::startServerSocket() {

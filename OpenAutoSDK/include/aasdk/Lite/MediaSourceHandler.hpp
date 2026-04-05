@@ -1,0 +1,51 @@
+#pragma once
+
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <Messenger/ChannelId.hpp>
+#include <Messenger/EncryptionType.hpp>
+#include <Messenger/MessageType.hpp>
+
+namespace google::protobuf { class MessageLite; }
+
+namespace aasdk::lite {
+
+struct InMessage;
+using SendFn = std::function<void(messenger::ChannelId,
+                                  messenger::EncryptionType,
+                                  messenger::MessageType,
+                                  const uint8_t*, size_t)>;
+
+class MediaSourceHandler {
+public:
+    explicit MediaSourceHandler(SendFn sender);
+    void operator()(const InMessage& msg);
+
+    void onMicrophoneAudio(uint64_t timestamp, const void* data, size_t size);
+
+private:
+    void handleChannelOpenRequest(const InMessage& msg,
+                                  const uint8_t* data, size_t size);
+    void handleMediaChannelSetupRequest(const InMessage& msg,
+                                        const uint8_t* data, size_t size);
+    void handleMicrophoneRequest(const InMessage& msg,
+                                 const uint8_t* data, size_t size);
+    void handleMediaChannelAck(const uint8_t* data, size_t size);
+
+    void sendProto(messenger::ChannelId ch,
+                   messenger::EncryptionType enc,
+                   messenger::MessageType mt,
+                   uint16_t messageId,
+                   const google::protobuf::MessageLite& proto);
+
+    SendFn send_;
+    bool channelOpen_{false};
+    bool microphoneEnabled_{false};
+    int32_t sessionId_{0};
+    messenger::ChannelId mediaSourceChannelId_{messenger::ChannelId::NONE};
+    messenger::EncryptionType mediaSourceEncryptionType_{messenger::EncryptionType::PLAIN};
+    uint64_t messageCount_{0};
+};
+
+} // namespace aasdk::lite

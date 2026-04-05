@@ -24,7 +24,6 @@
 #include <mutex>
 #include <thread>
 #include <USB/USBHub.hpp>
-#include <USB/ConnectedAccessoriesEnumerator.hpp>
 #include <USB/AccessoryModeQueryChain.hpp>
 #include <USB/AccessoryModeQueryChainFactory.hpp>
 #include <USB/AccessoryModeQueryFactory.hpp>
@@ -32,10 +31,10 @@
 #include <boost/log/utility/setup.hpp>
 #include <App.hpp>
 #include <Messenger/MessageInStreamInterceptor.hpp>
-#include <Messenger/handlers/BluetoothMessageHandlers.hpp>
-#include <Messenger/handlers/InputSourceMessageHandlers.hpp>
-#include <Messenger/handlers/MediaSourceMessageHandlers.hpp>
-#include <Messenger/handlers/SensorMessageHandlers.hpp>
+#include <Lite/BluetoothHandler.hpp>
+#include <Lite/MediaSourceHandler.hpp>
+#include <Lite/InputSourceHandler.hpp>
+#include <Lite/SensorHandler.hpp>
 #include <nlohmann/json.hpp>
 #include <open_auto_transport/wire.hpp>
 #include <aap_protobuf/service/inputsource/message/InputReport.pb.h>
@@ -181,8 +180,8 @@ int main(int argc, char* argv[])
     }
     aasdk::messenger::interceptor::setVideoTransport(transport);
 
-    auto& bluetoothHandlers = aasdk::messenger::interceptor::getBluetoothHandlers();
-    bluetoothHandlers.setIsPairedCallback([bluetoothDevice](const std::string& address) {
+    auto& btLiteHandler = aasdk::messenger::interceptor::getBluetoothHandler();
+    btLiteHandler.setIsPairedCallback([bluetoothDevice](const std::string& address) {
         if (bluetoothDevice == nullptr) {
             return false;
         }
@@ -190,25 +189,25 @@ int main(int argc, char* argv[])
     });
 
     if (transport) {
-        auto& touchHandlers = aasdk::messenger::interceptor::getInputSourceHandlers();
+        auto& touchHandler = aasdk::messenger::interceptor::getInputSourceHandler();
         transport->addTypeHandler(
             buzz::wire::MsgType::TOUCH,
-            [&touchHandlers](uint64_t timestamp, const void* data, std::size_t size) {
-                touchHandlers.onTouchEvent(timestamp, data, size);
+            [&touchHandler](uint64_t timestamp, const void* data, std::size_t size) {
+                touchHandler.onTouchEvent(timestamp, data, size);
             });
 
-        auto& sensorHandlers = aasdk::messenger::interceptor::getSensorHandlers();
+        auto& sensorHandler = aasdk::messenger::interceptor::getSensorHandler();
         transport->addTypeHandler(
             buzz::wire::MsgType::SENSOR,
-            [&sensorHandlers](uint64_t timestamp, const void* data, std::size_t size) {
-                sensorHandlers.onSensorEvent(timestamp, data, size);
+            [&sensorHandler](uint64_t timestamp, const void* data, std::size_t size) {
+                sensorHandler.onSensorEvent(timestamp, data, size);
             });
 
-        auto& mediaSourceHandlers = aasdk::messenger::interceptor::getMediaSourceHandlers();
+        auto& mediaSourceHandler = aasdk::messenger::interceptor::getMediaSourceHandler();
         transport->addTypeHandler(
             buzz::wire::MsgType::MICROPHONE_AUDIO,
-            [&mediaSourceHandlers](uint64_t timestamp, const void* data, std::size_t size) {
-                mediaSourceHandlers.onMicrophoneAudio(timestamp, data, size);
+            [&mediaSourceHandler](uint64_t timestamp, const void* data, std::size_t size) {
+                mediaSourceHandler.onMicrophoneAudio(timestamp, data, size);
             });
 
         transport->addTypeHandler(
@@ -243,8 +242,7 @@ int main(int argc, char* argv[])
                                                                         serviceConfig, serviceFactory);
 
     auto usbHub(std::make_shared<aasdk::usb::USBHub>(usbWrapper, ioService, queryChainFactory));
-    auto connectedAccessoriesEnumerator(std::make_shared<aasdk::usb::ConnectedAccessoriesEnumerator>(usbWrapper, ioService, queryChainFactory));
-    auto app = std::make_shared<autoapp::App>(ioService, usbWrapper, tcpWrapper, androidAutoEntityFactory, std::move(usbHub), std::move(connectedAccessoriesEnumerator));
+    auto app = std::make_shared<autoapp::App>(ioService, usbWrapper, tcpWrapper, androidAutoEntityFactory, std::move(usbHub));
 
     boost::asio::signal_set signals(ioService, SIGINT, SIGTERM);
     signals.async_wait([app, &ioService](const boost::system::error_code& error, int) {

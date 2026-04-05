@@ -15,33 +15,28 @@ namespace aasdk::messenger {
 	class MessageSender;
 }
 
-namespace aasdk::messenger::interceptor {
+namespace aasdk::lite {
+class BluetoothHandler;
+class MediaSourceHandler;
+class InputSourceHandler;
+class SensorHandler;
+class PhoneStatusHandler;
+class GenericNotificationHandler;
+class NavigationStatusHandler;
+class RadioHandler;
+class MediaBrowserHandler;
+class MediaPlaybackStatusHandler;
+class VendorExtensionHandler;
+}
 
-class InputSourceMessageHandlers;
-class SensorMessageHandlers;
-class BluetoothMessageHandlers;
-class MediaSourceMessageHandlers;
-class PhoneStatusMessageHandlers;
-class GenericNotificationMessageHandlers;
-class NavigationStatusMessageHandlers;
-class RadioMessageHandlers;
-class MediaBrowserMessageHandlers;
-class MediaPlaybackStatusMessageHandlers;
-class VendorExtensionMessageHandlers;
+namespace aasdk::messenger::interceptor {
 
 bool handleMessage(const ::aasdk::messenger::Message& message);
 void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender);
 void setVideoTransport(const std::shared_ptr<buzz::autoapp::Transport::Transport>& transport);
-::aasdk::messenger::interceptor::InputSourceMessageHandlers& getInputSourceHandlers();
-::aasdk::messenger::interceptor::SensorMessageHandlers& getSensorHandlers();
-::aasdk::messenger::interceptor::BluetoothMessageHandlers& getBluetoothHandlers();
-::aasdk::messenger::interceptor::MediaSourceMessageHandlers& getMediaSourceHandlers();
-::aasdk::messenger::interceptor::PhoneStatusMessageHandlers& getPhoneStatusHandlers();
-::aasdk::messenger::interceptor::GenericNotificationMessageHandlers& getGenericNotificationHandlers();
-::aasdk::messenger::interceptor::NavigationStatusMessageHandlers& getNavigationStatusHandlers();
-::aasdk::messenger::interceptor::RadioMessageHandlers& getRadioHandlers();
-::aasdk::messenger::interceptor::MediaBrowserMessageHandlers& getMediaBrowserHandlers();
-::aasdk::messenger::interceptor::MediaPlaybackStatusMessageHandlers& getMediaPlaybackStatusHandlers();
-::aasdk::messenger::interceptor::VendorExtensionMessageHandlers& getVendorExtensionHandlers();
+::aasdk::lite::InputSourceHandler& getInputSourceHandler();
+::aasdk::lite::SensorHandler& getSensorHandler();
+::aasdk::lite::BluetoothHandler& getBluetoothHandler();
+::aasdk::lite::MediaSourceHandler& getMediaSourceHandler();
 
 }

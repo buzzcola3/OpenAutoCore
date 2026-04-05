@@ -1,0 +1,56 @@
+#pragma once
+
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <Messenger/ChannelId.hpp>
+#include <Messenger/EncryptionType.hpp>
+#include <Messenger/MessageType.hpp>
+
+namespace google::protobuf { class MessageLite; }
+#include <nlohmann/json_fwd.hpp>
+
+namespace aasdk::lite {
+
+struct InMessage;
+using SendFn = std::function<void(messenger::ChannelId,
+                                  messenger::EncryptionType,
+                                  messenger::MessageType,
+                                  const uint8_t*, size_t)>;
+
+/// Lite-stack handler for SENSOR channel.
+class SensorHandler {
+public:
+    explicit SensorHandler(SendFn sender);
+
+    /// ChannelRouter-compatible inbound callback.
+    void operator()(const InMessage& msg);
+
+    /// Called from transport when a sensor JSON event arrives (HU → Phone).
+    void onSensorEvent(uint64_t timestamp, const void* data, size_t size);
+
+private:
+    void handleChannelOpenRequest(const InMessage& msg,
+                                  const uint8_t* data, size_t size);
+    void handleSensorStartRequest(const InMessage& msg,
+                                  const uint8_t* data, size_t size);
+    void handleSensorStopRequest(const InMessage& msg,
+                                 const uint8_t* data, size_t size);
+
+    void sendLocationIndication(const nlohmann::json& location);
+    void sendNightModeIndication(const nlohmann::json& nightMode);
+    void sendDrivingStatusIndication(const nlohmann::json& drivingStatus);
+
+    void sendProto(messenger::ChannelId ch,
+                   messenger::EncryptionType enc,
+                   messenger::MessageType mt,
+                   uint16_t messageId,
+                   const google::protobuf::MessageLite& proto);
+
+    SendFn send_;
+    messenger::ChannelId sensorChannelId_{messenger::ChannelId::NONE};
+    messenger::EncryptionType sensorEncryptionType_{messenger::EncryptionType::PLAIN};
+    uint64_t messageCount_{0};
+};
+
+} // namespace aasdk::lite
