@@ -23,10 +23,6 @@
 #include <fstream>
 #include <mutex>
 #include <thread>
-#include <USB/USBHub.hpp>
-#include <USB/AccessoryModeQueryChain.hpp>
-#include <USB/AccessoryModeQueryChainFactory.hpp>
-#include <USB/AccessoryModeQueryFactory.hpp>
 #include <TCP/TCPWrapper.hpp>
 #include <boost/log/utility/setup.hpp>
 #include <App.hpp>
@@ -48,8 +44,9 @@
 #include <Service/ServiceFactory.hpp>
 #include <Configuration/Configuration.hpp>
 #include <Common/Log.hpp>
-#include <btservice/BluetoothHandler.hpp>
-#include <btservice/BluezBluetoothServer.hpp>
+#include <Common/EllMainLoop.hpp>
+#include <DeviceManager/DeviceManager.hpp>
+#include <DeviceManager/DmLog.hpp>
 
 namespace autoapp = f1x::openauto::autoapp;
 using ThreadPool = std::vector<std::thread>;
@@ -125,10 +122,39 @@ int main(int argc, char* argv[])
 {
     configureLogging();
 
-    libusb_context* usbContext;
-    if(libusb_init(&usbContext) != 0)
-    {
-        OPENAUTO_LOG(error) << "[AutoApp] libusb_init failed.";
+    // Bridge DeviceManager logs into the OpenAuto logging system
+    dm_set_log_callback([](DmLogLevel level, const std::string& msg) {
+        switch (level) {
+            case DmLogLevel::info:    OPENAUTO_LOG(info) << "[DeviceManager] " << msg; break;
+            case DmLogLevel::warning: OPENAUTO_LOG(warning) << "[DeviceManager] " << msg; break;
+            case DmLogLevel::error:   OPENAUTO_LOG(error) << "[DeviceManager] " << msg; break;
+        }
+    });
+
+    // Ensure ELL main loop is running (needed by DeviceManager for D-Bus + fd watches)
+    f1x::openauto::common::EllMainLoop::instance().ensureRunning();
+
+    auto configuration = std::make_shared<autoapp::configuration::Configuration>();
+
+    // DeviceManager — unified USB/WiFi/BT device discovery (ELL-native)
+    // Created early because it owns the libusb context used by all USB objects.
+    DeviceManagerConfig dmConfig;
+    dmConfig.bluetoothEnabled = configuration->getWirelessProjectionEnabled();
+    dmConfig.bluetoothAdapterAddress = configuration->getBluetoothAdapterAddress();
+    dmConfig.wifiInterface = configuration->getBluetoothWifiInterface();
+
+    auto ssid = configuration->getParamFromFile("/etc/hostapd/hostapd.conf", "ssid");
+    if (ssid.empty()) ssid = configuration->getParamFromFile("wifi_credentials.ini", "ssid");
+    if (!ssid.empty()) dmConfig.wifiSSID = ssid;
+
+    auto pass = configuration->getParamFromFile("/etc/hostapd/hostapd.conf", "wpa_passphrase");
+    if (pass.empty()) pass = configuration->getParamFromFile("wifi_credentials.ini", "wpa_passphrase");
+    if (!pass.empty()) dmConfig.wifiPassword = pass;
+
+    DeviceManager deviceManager(dmConfig);
+    libusb_context* usbContext = deviceManager.usbContext();
+    if (!usbContext) {
+        OPENAUTO_LOG(error) << "[AutoApp] DeviceManager failed to create libusb context.";
         return 1;
     }
 
@@ -138,20 +164,6 @@ int main(int argc, char* argv[])
     startUSBWorkers(ioService, usbContext, threadPool);
     startIOServiceWorkers(ioService, threadPool);
 
-    auto configuration = std::make_shared<autoapp::configuration::Configuration>();
-
-    std::unique_ptr<f1x::openauto::btservice::BluetoothHandler> bluetoothHandler;
-    if (configuration->getWirelessProjectionEnabled()) {
-        try {
-            auto androidBluetoothServer = std::make_shared<f1x::openauto::btservice::BluezBluetoothServer>(configuration);
-            bluetoothHandler = std::make_unique<f1x::openauto::btservice::BluetoothHandler>(
-                androidBluetoothServer,
-                configuration);
-        } catch (const std::runtime_error& e) {
-            OPENAUTO_LOG(error) << "[AutoApp] Bluetooth service init failed: " << e.what();
-        }
-    }
-
     autoapp::projection::IBluetoothDevice::Pointer bluetoothDevice =
         createBluetoothDevice(configuration);
 
@@ -159,10 +171,7 @@ int main(int argc, char* argv[])
     recentAddressesList.read();
 
     aasdk::tcp::TCPWrapper tcpWrapper;
-
     aasdk::usb::USBWrapper usbWrapper(usbContext);
-    aasdk::usb::AccessoryModeQueryFactory queryFactory(usbWrapper, ioService);
-    aasdk::usb::AccessoryModeQueryChainFactory queryChainFactory(usbWrapper, ioService, queryFactory);
     autoapp::service::ServiceFactory serviceFactory(ioService, configuration);
 
     autoapp::configuration::ServiceConfig serviceConfig(
@@ -241,8 +250,7 @@ int main(int argc, char* argv[])
     autoapp::service::AndroidAutoEntityFactory androidAutoEntityFactory(ioService, configuration,
                                                                         serviceConfig, serviceFactory);
 
-    auto usbHub(std::make_shared<aasdk::usb::USBHub>(usbWrapper, ioService, queryChainFactory));
-    auto app = std::make_shared<autoapp::App>(ioService, usbWrapper, tcpWrapper, androidAutoEntityFactory, std::move(usbHub));
+    auto app = std::make_shared<autoapp::App>(ioService, usbWrapper, tcpWrapper, androidAutoEntityFactory);
 
     boost::asio::signal_set signals(ioService, SIGINT, SIGTERM);
     signals.async_wait([app, &ioService](const boost::system::error_code& error, int) {
@@ -254,17 +262,54 @@ int main(int argc, char* argv[])
         handleShutdown();
     });
 
-    app->waitForUSBDevice();
+    // DeviceManager callbacks and startup
+    deviceManager.onDeviceFound = [](const DeviceInfo& info) {
+        OPENAUTO_LOG(info) << "[DeviceManager] Device found: " << info.id
+                          << " (" << info.displayName << ")";
+    };
+    deviceManager.onDeviceLost = [](const std::string& id) {
+        OPENAUTO_LOG(info) << "[DeviceManager] Device lost: " << id;
+    };
+    deviceManager.onConnected = []() {
+        OPENAUTO_LOG(info) << "[DeviceManager] Device connected";
+    };
+    deviceManager.onDisconnected = [](const std::string& reason) {
+        OPENAUTO_LOG(info) << "[DeviceManager] Device disconnected: " << reason;
+    };
+    deviceManager.onUSBDeviceAvailable = [&usbWrapper, app](uint16_t vid, uint16_t pid) {
+        OPENAUTO_LOG(info) << "[DeviceManager] AOAP device detected (" << std::hex
+                          << vid << ":" << pid << std::dec << "), opening on App context";
+        auto handle = usbWrapper.openDeviceWithVidPid(vid, pid);
+        if (!handle) {
+            OPENAUTO_LOG(error) << "[DeviceManager] Failed to open AOAP device";
+            return;
+        }
+        OPENAUTO_LOG(info) << "[DeviceManager] AOAP device opened, starting USB session";
+        app->startUSBDevice(std::move(handle));
+    };
+    deviceManager.onWifiClientConnected = [&ioService, app](int fd, const std::string& peerAddress) {
+        OPENAUTO_LOG(info) << "[DeviceManager] WiFi client connected from " << peerAddress << " fd=" << fd;
+        auto socket = std::make_shared<boost::asio::ip::tcp::socket>(ioService);
+        boost::system::error_code ec;
+        socket->assign(boost::asio::ip::tcp::v4(), fd, ec);
+        if (ec) {
+            OPENAUTO_LOG(error) << "[DeviceManager] Failed to assign fd to Boost socket: " << ec.message();
+            ::close(fd);
+            return;
+        }
+        app->start(std::move(socket));
+    };
+    deviceManager.start();
 
     {
         std::unique_lock<std::mutex> lock(gShutdownMutex);
         gShutdownCv.wait(lock, [] { return !gRunning.load(); });
     }
 
+    deviceManager.stop();
     ioService.stop();
 
     std::for_each(threadPool.begin(), threadPool.end(), std::bind(&std::thread::join, std::placeholders::_1));
 
-    libusb_exit(usbContext);
     return 0;
 }

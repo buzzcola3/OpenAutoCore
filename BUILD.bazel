@@ -11,6 +11,37 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
+# ── DeviceManager (independent module) ──
+# Standalone USB/WiFi device discovery and raw I/O.
+# No Boost, no OpenAutoSDK — only libusb + ELL.
+
+cc_library(
+    name = "devicemanager_lib",
+    srcs = glob(["src/DeviceManager/**/*.cpp"]),
+    hdrs = glob(["include/DeviceManager/**/*.hpp"]),
+    includes = ["include"],
+    copts = [
+        "-Wall",
+        "-pedantic",
+        "-fPIC",
+    ],
+    deps = [
+        "@libusb//:libusb",
+        "@libell_src//:ell",
+    ],
+    alwayslink = True,
+    visibility = ["//visibility:public"],
+)
+
+cc_binary(
+    name = "libdevicemanager.so",
+    linkshared = True,
+    deps = [":devicemanager_lib"],
+    visibility = ["//visibility:public"],
+)
+
+# ── OpenAutoCore ──
+
 cc_library(
     name = "openautocore_lib",
     srcs = glob([
@@ -19,11 +50,13 @@ cc_library(
         "bazel-*/**",
         "src/autoapp/autoapp.cpp",
         "src/autoapp.cpp",
+        "src/DeviceManager/**",
     ]),
     hdrs = glob([
         "include/**/*.hpp",
     ], exclude = [
         "bazel-*/**",
+        "include/DeviceManager/**",
     ]),
     includes = [
         "include",
@@ -37,6 +70,7 @@ cc_library(
         "-fPIC",
     ],
     deps = [
+        ":devicemanager_lib",
         "//OpenAutoSDK:aap_protobuf_cc",
         "//OpenAutoSDK:aasdk",
         "@libell_src//:ell",

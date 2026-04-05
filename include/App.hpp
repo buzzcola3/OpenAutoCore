@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <USB/IUSBHub.hpp>
 #include <USB/USBWrapper.hpp>
 #include <TCP/ITCPWrapper.hpp>
 #include <TCP/ITCPEndpoint.hpp>
@@ -37,11 +36,11 @@ class App: public service::IAndroidAutoEntityEventHandler, public std::enable_sh
 public:
     typedef std::shared_ptr<App> Pointer;
 
-    App(boost::asio::io_service& ioService, aasdk::usb::USBWrapper& usbWrapper, aasdk::tcp::ITCPWrapper& tcpWrapper, service::IAndroidAutoEntityFactory& androidAutoEntityFactory,
-        aasdk::usb::IUSBHub::Pointer usbHub);
+    App(boost::asio::io_service& ioService, aasdk::usb::USBWrapper& usbWrapper, aasdk::tcp::ITCPWrapper& tcpWrapper,
+        service::IAndroidAutoEntityFactory& androidAutoEntityFactory);
 
-    void waitForUSBDevice();
     void start(aasdk::tcp::ITCPEndpoint::SocketPointer socket);
+    void startUSBDevice(aasdk::usb::DeviceHandle deviceHandle);
     void stop();
     void pause();
     void resume();
@@ -50,25 +49,15 @@ public:
 
 private:
     using std::enable_shared_from_this<App>::shared_from_this;
-    void waitForDevice();
-    void scheduleAOAPRescan();
     void aoapDeviceHandler(aasdk::usb::DeviceHandle deviceHandle);
-    void onUSBHubError(const aasdk::error::Error& error);
 
     boost::asio::io_service& ioService_;
     aasdk::usb::USBWrapper& usbWrapper_;
     aasdk::tcp::ITCPWrapper& tcpWrapper_;
-    boost::asio::ip::tcp::acceptor acceptor_;
     boost::asio::io_service::strand strand_;
     service::IAndroidAutoEntityFactory& androidAutoEntityFactory_;
-    aasdk::usb::IUSBHub::Pointer usbHub_;
     service::IAndroidAutoEntity::Pointer androidAutoEntity_;
     bool isStopped_;
-    uint32_t rescanGeneration_{0};
-
-    void startServerSocket();
-
-    void handleNewClient(std::shared_ptr<boost::asio::ip::tcp::socket> socket, const boost::system::error_code &err);
 };
 
 }
