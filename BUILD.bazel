@@ -11,6 +11,19 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
+# ── Protobuf ──
+
+proto_library(
+    name = "aap_protobuf_proto",
+    srcs = glob(["protobuf/aap_protobuf/**/*.proto"]),
+    strip_import_prefix = "protobuf",
+)
+
+cc_proto_library(
+    name = "aap_protobuf_cc",
+    deps = [":aap_protobuf_proto"],
+)
+
 # ── DeviceManager ──
 # Unified USB/WiFi device discovery and transport creation.
 
@@ -51,6 +64,7 @@ cc_library(
         "src/autoapp/autoapp.cpp",
         "src/autoapp.cpp",
         "src/DeviceManager/**",
+        "src/**/*.ut.cpp",
     ]),
     hdrs = glob([
         "include/**/*.hpp",
@@ -61,7 +75,6 @@ cc_library(
     includes = [
         "include",
         "include/Common",
-        "include/btservice",
     ],
     copts = [
         "-include", "Common/AsioCompat.hpp",
@@ -71,10 +84,11 @@ cc_library(
     ],
     deps = [
         ":devicemanager_lib",
-        "//OpenAutoSDK:aap_protobuf_cc",
-        "//OpenAutoSDK:aasdk",
+        ":aap_protobuf_cc",
+        "@open_auto_transport//:open_auto_transport",
         "@libell_src//:ell",
         "@boost.asio//:boost.asio",
+        "@boost.circular_buffer//:boost.circular_buffer",
         "@boost.filesystem//:boost.filesystem",
         "@boost.log//:boost.log",
         "@boost.system//:boost.system",
@@ -95,7 +109,6 @@ cc_binary(
     includes = [
         "include",
         "include/Common",
-        "include/btservice",
     ],
     copts = [
         "-include", "Common/AsioCompat.hpp",
