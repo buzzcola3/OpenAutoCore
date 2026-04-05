@@ -33,7 +33,7 @@ namespace aasdk {
       USBHub(IUSBWrapper &usbWrapper, boost::asio::io_service &ioService,
              IAccessoryModeQueryChainFactory &queryChainFactory);
 
-      void start(Promise::Pointer promise) override;
+      void start(DeviceHandler onDevice, ErrorHandler onError) override;
 
       void cancel() override;
 
@@ -51,7 +51,8 @@ namespace aasdk {
       IUSBWrapper &usbWrapper_;
       boost::asio::io_service::strand strand_;
       IAccessoryModeQueryChainFactory &queryChainFactory_;
-      Promise::Pointer hotplugPromise_;
+      DeviceHandler onDevice_;
+      ErrorHandler onError_;
       Pointer self_;
       HotplugCallbackHandle hotplugHandle_;
       QueryChainQueue queryChainQueue_;

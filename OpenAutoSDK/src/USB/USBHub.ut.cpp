@@ -44,12 +44,17 @@ protected:
         : queryChain_(&queryChainMock_, [](auto*) {})
         , device_(reinterpret_cast<libusb_device*>(-1))
         , deviceHandle_(reinterpret_cast<libusb_device_handle*>(&dummyDeviceHandle_), [](auto*) {})
-        , promise_(IUSBHub::Promise::defer(ioService_))
         , rawHotplugCallbacHandle_(-1)
         , hotplugCallbackHandle_(&rawHotplugCallbacHandle_, [](auto*) {})
     {
-        promise_->then(std::bind(&USBHubPromiseHandlerMock::onResolve, &promiseHandlerMock_, std::placeholders::_1),
-                      std::bind(&USBHubPromiseHandlerMock::onReject, &promiseHandlerMock_, std::placeholders::_1));
+    }
+
+    IUSBHub::DeviceHandler makeDeviceHandler() {
+        return std::bind(&USBHubPromiseHandlerMock::onResolve, &promiseHandlerMock_, std::placeholders::_1);
+    }
+
+    IUSBHub::ErrorHandler makeErrorHandler() {
+        return std::bind(&USBHubPromiseHandlerMock::onReject, &promiseHandlerMock_, std::placeholders::_1);
     }
 
     boost::asio::io_service ioService_;
@@ -61,7 +66,6 @@ protected:
     USBWrapperMock::DummyDeviceHandle dummyDeviceHandle_;
     DeviceHandle deviceHandle_;
     USBHubPromiseHandlerMock promiseHandlerMock_;
-    IUSBHub::Promise::Pointer promise_;
     libusb_hotplug_callback_handle rawHotplugCallbacHandle_;
     HotplugCallbackHandle hotplugCallbackHandle_;
     libusb_hotplug_callback_fn hotplugCallback_;
@@ -80,7 +84,7 @@ TEST_F(USBHubUnitTest, USBHub_QueryDevice)
             .WillOnce(DoAll(SaveArg<5>(&hotplugCallback_), SaveArg<6>(&userData), Return(hotplugCallbackHandle_)));
 
     USBHub::Pointer usbHub(std::make_shared<USBHub>(usbWrapperMock_, ioService_, queryChainFactoryMock_));
-    usbHub->start(std::move(promise_));
+    usbHub->start(makeDeviceHandler(), makeErrorHandler());
 
     ioService_.run();
     ioService_.reset();
@@ -101,7 +105,8 @@ TEST_F(USBHubUnitTest, USBHub_QueryDevice)
     ioService_.reset();
 
     EXPECT_CALL(promiseHandlerMock_, onResolve(_)).Times(0);
-    EXPECT_CALL(promiseHandlerMock_, onReject(error::Error(error::ErrorCode::OPERATION_ABORTED)));
+    EXPECT_CALL(promiseHandlerMock_, onReject(_)).Times(0);
+    EXPECT_CALL(queryChainMock_, cancel());
     queryChainPromise->resolve(deviceHandle_);
     usbHub->cancel();
     ioService_.run();
@@ -116,7 +121,7 @@ TEST_F(USBHubUnitTest, USBHub_AOAPDeviceConnected)
             .WillOnce(DoAll(SaveArg<5>(&hotplugCallback_), SaveArg<6>(&userData), Return(hotplugCallbackHandle_)));
 
     USBHub::Pointer usbHub(std::make_shared<USBHub>(usbWrapperMock_, ioService_, queryChainFactoryMock_));
-    usbHub->start(std::move(promise_));
+    usbHub->start(makeDeviceHandler(), makeErrorHandler());
 
     ioService_.run();
     ioService_.reset();
@@ -147,7 +152,7 @@ TEST_F(USBHubUnitTest, USBHub_GetDeviceDescriptorFailed)
             .WillOnce(DoAll(SaveArg<5>(&hotplugCallback_), SaveArg<6>(&userData), Return(hotplugCallbackHandle_)));
 
     USBHub::Pointer usbHub(std::make_shared<USBHub>(usbWrapperMock_, ioService_, queryChainFactoryMock_));
-    usbHub->start(std::move(promise_));
+    usbHub->start(makeDeviceHandler(), makeErrorHandler());
 
     ioService_.run();
     ioService_.reset();
@@ -160,7 +165,7 @@ TEST_F(USBHubUnitTest, USBHub_GetDeviceDescriptorFailed)
     ioService_.reset();
 
     EXPECT_CALL(promiseHandlerMock_, onResolve(_)).Times(0);
-    EXPECT_CALL(promiseHandlerMock_, onReject(error::Error(error::ErrorCode::OPERATION_ABORTED)));
+    EXPECT_CALL(promiseHandlerMock_, onReject(_)).Times(0);
     usbHub->cancel();
     ioService_.run();
 }
@@ -174,7 +179,7 @@ TEST_F(USBHubUnitTest, USBHub_OpenDeviceFailed)
             .WillOnce(DoAll(SaveArg<5>(&hotplugCallback_), SaveArg<6>(&userData), Return(hotplugCallbackHandle_)));
 
     USBHub::Pointer usbHub(std::make_shared<USBHub>(usbWrapperMock_, ioService_, queryChainFactoryMock_));
-    usbHub->start(std::move(promise_));
+    usbHub->start(makeDeviceHandler(), makeErrorHandler());
 
     ioService_.run();
     ioService_.reset();
@@ -188,7 +193,7 @@ TEST_F(USBHubUnitTest, USBHub_OpenDeviceFailed)
     ioService_.reset();
 
     EXPECT_CALL(promiseHandlerMock_, onResolve(_)).Times(0);
-    EXPECT_CALL(promiseHandlerMock_, onReject(error::Error(error::ErrorCode::OPERATION_ABORTED)));
+    EXPECT_CALL(promiseHandlerMock_, onReject(_)).Times(0);
     usbHub->cancel();
     ioService_.run();
 }
@@ -202,7 +207,7 @@ TEST_F(USBHubUnitTest, USBHub_CancelAllQueryChains)
             .WillOnce(DoAll(SaveArg<5>(&hotplugCallback_), SaveArg<6>(&userData), Return(hotplugCallbackHandle_)));
 
     USBHub::Pointer usbHub(std::make_shared<USBHub>(usbWrapperMock_, ioService_, queryChainFactoryMock_));
-    usbHub->start(std::move(promise_));
+    usbHub->start(makeDeviceHandler(), makeErrorHandler());
 
     ioService_.run();
     ioService_.reset();
@@ -228,7 +233,7 @@ TEST_F(USBHubUnitTest, USBHub_CancelAllQueryChains)
 
     EXPECT_CALL(queryChainMock_, cancel()).Times(2);
     EXPECT_CALL(promiseHandlerMock_, onResolve(_)).Times(0);
-    EXPECT_CALL(promiseHandlerMock_, onReject(error::Error(error::ErrorCode::OPERATION_ABORTED)));
+    EXPECT_CALL(promiseHandlerMock_, onReject(_)).Times(0);
     usbHub->cancel();
     ioService_.run();
     ioService_.reset();

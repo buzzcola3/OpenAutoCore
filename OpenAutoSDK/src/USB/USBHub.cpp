@@ -30,14 +30,11 @@ namespace aasdk {
         : usbWrapper_(usbWrapper), strand_(ioService), queryChainFactory_(queryChainFactory) {
     }
 
-    void USBHub::start(Promise::Pointer promise) {
-      strand_.dispatch([this, self = this->shared_from_this(), promise = std::move(promise)]() {
-        if (hotplugPromise_ != nullptr) {
-          hotplugPromise_->reject(error::Error(error::ErrorCode::OPERATION_ABORTED));
-          hotplugPromise_.reset();
-        }
-
-        hotplugPromise_ = std::move(promise);
+    void USBHub::start(DeviceHandler onDevice, ErrorHandler onError) {
+      strand_.dispatch([this, self = this->shared_from_this(),
+                        onDevice = std::move(onDevice), onError = std::move(onError)]() mutable {
+        onDevice_ = std::move(onDevice);
+        onError_ = std::move(onError);
 
         if (self_ == nullptr) {
           self_ = this->shared_from_this();
@@ -53,10 +50,8 @@ namespace aasdk {
 
     void USBHub::cancel() {
       strand_.dispatch([this, self = this->shared_from_this()]() mutable {
-        if (hotplugPromise_ != nullptr) {
-          hotplugPromise_->reject(error::Error(error::ErrorCode::OPERATION_ABORTED));
-          hotplugPromise_.reset();
-        }
+        onDevice_ = nullptr;
+        onError_ = nullptr;
 
         std::for_each(queryChainQueue_.begin(), queryChainQueue_.end(),
                       std::bind(&IAccessoryModeQueryChain::cancel, std::placeholders::_1));
@@ -84,7 +79,7 @@ namespace aasdk {
     }
 
     void USBHub::handleDevice(libusb_device *device) {
-      if (hotplugPromise_ == nullptr) {
+      if (!onDevice_) {
         return;
       }
 
@@ -101,8 +96,10 @@ namespace aasdk {
       }
 
       if (this->isAOAPDevice(deviceDescriptor)) {
-        hotplugPromise_->resolve(std::move(handle));
-        hotplugPromise_.reset();
+        auto handler = std::move(onDevice_);
+        onDevice_ = nullptr;
+        onError_ = nullptr;
+        handler(std::move(handle));
       } else {
         ////////// Workaround for VMware
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));

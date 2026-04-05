@@ -160,6 +160,12 @@ namespace f1x {
             OPENAUTO_LOG(info) << "[AndroidAutoEntity] onPingResponse() ts=" << response.timestamp();
             pinger_->pong();
           };
+
+          pinger_->onPingReady = [this, self]() { sendPing(); };
+          pinger_->onPingTimeout = [this, self]() {
+            OPENAUTO_LOG(error) << "[AndroidAutoEntity] Ping timer exceeded.";
+            triggerQuit();
+          };
         }
 
         void AndroidAutoEntity::start(IAndroidAutoEntityEventHandler &eventHandler) {
@@ -176,6 +182,8 @@ namespace f1x {
 
             OPENAUTO_LOG(debug) << "[AndroidAutoEntity] Send Version Request.";
             controlHandler_.sendVersionRequest();
+
+            pinger_->start();
           });
         }
 
@@ -199,6 +207,10 @@ namespace f1x {
               controlHandler_.onPingRequest = nullptr;
               controlHandler_.onPingResponse = nullptr;
               controlHandler_.onChannelOpenRequest = nullptr;
+
+              pinger_->onPingReady = nullptr;
+              pinger_->onPingTimeout = nullptr;
+              pinger_->cancel();
 
               std::for_each(serviceList_.begin(), serviceList_.end(),
                             std::bind(&IService::stop, std::placeholders::_1));
@@ -243,24 +255,6 @@ namespace f1x {
           if (eventHandler_ != nullptr) {
             eventHandler_->onAndroidAutoQuit();
           }
-        }
-
-        void AndroidAutoEntity::schedulePing() {
-          OPENAUTO_LOG(info) << "[AndroidAutoEntity] schedulePing()";
-          auto promise = IPinger::Promise::defer(strand_);
-          promise->then([this, self = this->shared_from_this()]() {
-                          this->sendPing();
-                          this->schedulePing();
-                        },
-                        [this, self = this->shared_from_this()](auto error) {
-                          if (error != aasdk::error::ErrorCode::OPERATION_ABORTED &&
-                              error != aasdk::error::ErrorCode::OPERATION_IN_PROGRESS) {
-                            OPENAUTO_LOG(error) << "[AndroidAutoEntity] Ping timer exceeded.";
-                            this->triggerQuit();
-                          }
-                        });
-
-          pinger_->ping(std::move(promise));
         }
 
         void AndroidAutoEntity::sendPing() {

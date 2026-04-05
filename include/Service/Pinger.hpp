@@ -34,7 +34,7 @@ class Pinger: public IPinger, public std::enable_shared_from_this<Pinger>
 public:
     Pinger(boost::asio::io_service& ioService, time_t duration);
 
-    void ping(Promise::Pointer promise) override;
+    void start() override;
     void pong() override;
     void cancel() override;
 
@@ -47,7 +47,6 @@ private:
     boost::asio::deadline_timer timer_;
     time_t duration_;
     bool cancelled_;
-    Promise::Pointer promise_;
     int64_t pingsCount_;
     int64_t pongsCount_;
 };

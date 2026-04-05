@@ -63,7 +63,6 @@ public:
 private:
     using std::enable_shared_from_this<AndroidAutoEntity>::shared_from_this;
     void triggerQuit();
-    void schedulePing();
     void sendPing();
     void wireControlCallbacks();
 

@@ -21,7 +21,6 @@
 #include <functional>
 #include <USB/IUSBWrapper.hpp>
 #include <Error/Error.hpp>
-#include <IO/Promise.hpp>
 
 
 namespace aasdk {
@@ -30,13 +29,14 @@ namespace aasdk {
     class IUSBHub {
     public:
       typedef std::shared_ptr<IUSBHub> Pointer;
-      typedef io::Promise<DeviceHandle> Promise;
+      typedef std::function<void(DeviceHandle)> DeviceHandler;
+      typedef std::function<void(const error::Error&)> ErrorHandler;
 
       IUSBHub() = default;
 
       virtual ~IUSBHub() = default;
 
-      virtual void start(Promise::Pointer promise) = 0;
+      virtual void start(DeviceHandler onDevice, ErrorHandler onError) = 0;
 
       virtual void cancel() = 0;
     };

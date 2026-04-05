@@ -18,7 +18,8 @@
 
 #pragma once
 
-#include <IO/Promise.hpp>
+#include <functional>
+#include <memory>
 
 namespace f1x
 {
@@ -33,12 +34,14 @@ class IPinger
 {
 public:
     typedef std::shared_ptr<IPinger> Pointer;
-    typedef aasdk::io::Promise<void> Promise;
 
     virtual ~IPinger() = default;
-    virtual void ping(Promise::Pointer promise) = 0;
+    virtual void start() = 0;
     virtual void pong() = 0;
     virtual void cancel() = 0;
+
+    std::function<void()> onPingReady;
+    std::function<void()> onPingTimeout;
 };
 
 }

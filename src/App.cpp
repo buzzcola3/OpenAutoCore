@@ -136,10 +136,8 @@ namespace f1x::openauto::autoapp {
   void App::waitForDevice() {
     OPENAUTO_LOG(info) << "[App] Waiting for device...";
 
-    auto promise = aasdk::usb::IUSBHub::Promise::defer(strand_);
-    promise->then(std::bind(&App::aoapDeviceHandler, this->shared_from_this(), std::placeholders::_1),
-                  std::bind(&App::onUSBHubError, this->shared_from_this(), std::placeholders::_1));
-    usbHub_->start(std::move(promise));
+    usbHub_->start(std::bind(&App::aoapDeviceHandler, this->shared_from_this(), std::placeholders::_1),
+                   std::bind(&App::onUSBHubError, this->shared_from_this(), std::placeholders::_1));
     startServerSocket();
     scheduleAOAPRescan();
   }
@@ -154,11 +152,9 @@ namespace f1x::openauto::autoapp {
 
         OPENAUTO_LOG(info) << "[App] Re-scanning for AOAP device";
         usbHub_->cancel();
-        auto promise = aasdk::usb::IUSBHub::Promise::defer(strand_);
-        promise->then(
+        usbHub_->start(
             std::bind(&App::aoapDeviceHandler, self, std::placeholders::_1),
             std::bind(&App::onUSBHubError, self, std::placeholders::_1));
-        usbHub_->start(std::move(promise));
 
         this->scheduleAOAPRescan();
       });
