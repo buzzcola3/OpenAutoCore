@@ -64,10 +64,41 @@ namespace aasdk {
         throw error::Error(error::ErrorCode::USB_INVALID_DEVICE_ENDPOINTS);
       }
 
+      // Detach kernel driver if active (may reattach after a previous session release)
+      libusb_set_auto_detach_kernel_driver(handle.get(), 1);
+
       auto result = usbWrapper.claimInterface(handle, interfaceDescriptor->bInterfaceNumber);
 
       if (result != 0) {
         throw error::Error(error::ErrorCode::USB_CLAIM_INTERFACE, result);
+      }
+
+      // Clear halt on both endpoints to reset any stale error state from a
+      // previous session.
+      for (int i = 0; i < interfaceDescriptor->bNumEndpoints; ++i) {
+        libusb_clear_halt(handle.get(), interfaceDescriptor->endpoint[i].bEndpointAddress);
+      }
+
+      // Drain any stale data left in the IN endpoint from a previous SSL session.
+      // Without this, reconnecting (without cable removal) fails with SSL errors
+      // because old encrypted data is still buffered in the USB endpoint.
+      {
+        uint8_t inAddr = 0;
+        for (int i = 0; i < interfaceDescriptor->bNumEndpoints; ++i) {
+          if ((interfaceDescriptor->endpoint[i].bEndpointAddress & LIBUSB_ENDPOINT_DIR_MASK) == LIBUSB_ENDPOINT_IN) {
+            inAddr = interfaceDescriptor->endpoint[i].bEndpointAddress;
+            break;
+          }
+        }
+        if (inAddr) {
+          uint8_t drainBuf[16384];
+          int transferred = 0;
+          for (int attempt = 0; attempt < 32; ++attempt) {
+            int rc = libusb_bulk_transfer(handle.get(), inAddr, drainBuf, sizeof(drainBuf),
+                                          &transferred, 50 /* ms */);
+            if (rc != LIBUSB_SUCCESS || transferred == 0) break;
+          }
+        }
       }
 
       return std::make_unique<AOAPDevice>(usbWrapper, ioService, std::move(handle), interfaceDescriptor);

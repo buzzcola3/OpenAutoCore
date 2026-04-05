@@ -52,6 +52,8 @@ namespace f1x::openauto::autoapp {
         }
       }
 
+      isStopped_ = false;
+
       try {
         auto tcpEndpoint(std::make_shared<aasdk::tcp::TCPEndpoint>(tcpWrapper_, std::move(socket)));
         androidAutoEntity_ = androidAutoEntityFactory_.create(std::move(tcpEndpoint));
@@ -86,9 +88,20 @@ namespace f1x::openauto::autoapp {
     OPENAUTO_LOG(info) << "[App] Device connected.";
 
     if (androidAutoEntity_ != nullptr) {
-      OPENAUTO_LOG(warning) << "[App] android auto entity is still running.";
-      return;
+      OPENAUTO_LOG(warning) << "[App] android auto entity is still running, stopping it first.";
+      try {
+        androidAutoEntity_->stop();
+      } catch (...) {
+        OPENAUTO_LOG(error) << "[App] aoapDeviceHandler: exception caused by androidAutoEntity_->stop();";
+      }
+      try {
+        androidAutoEntity_.reset();
+      } catch (...) {
+        OPENAUTO_LOG(error) << "[App] aoapDeviceHandler: exception caused by androidAutoEntity_.reset();";
+      }
     }
+
+    isStopped_ = false;
 
     try {
       if (!disableAutostartEntity) {
