@@ -16,30 +16,23 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <thread>
-#include <USB/AOAPDevice.hpp>
-#include <TCP/TCPEndpoint.hpp>
 #include <App.hpp>
 #include <Common/Log.hpp>
 
 namespace f1x::openauto::autoapp {
 
-  App::App(boost::asio::io_service &ioService, aasdk::usb::USBWrapper &usbWrapper, aasdk::tcp::ITCPWrapper &tcpWrapper,
+  App::App(boost::asio::io_service &ioService,
            service::IAndroidAutoEntityFactory &androidAutoEntityFactory)
-      : ioService_(ioService), usbWrapper_(usbWrapper), tcpWrapper_(tcpWrapper), strand_(ioService_),
+      : ioService_(ioService), strand_(ioService_),
         androidAutoEntityFactory_(androidAutoEntityFactory), isStopped_(false) {
   }
 
-  void App::startUSBDevice(aasdk::usb::DeviceHandle deviceHandle) {
-    strand_.dispatch([this, self = this->shared_from_this(), deviceHandle = std::move(deviceHandle)]() mutable {
-      aoapDeviceHandler(std::move(deviceHandle));
-    });
-  }
+  void App::start(DeviceConnection::Pointer connection) {
+    strand_.dispatch([this, self = this->shared_from_this(), conn = std::move(connection)]() mutable {
+      OPENAUTO_LOG(info) << "[App] Device connected.";
 
-  void App::start(aasdk::tcp::ITCPEndpoint::SocketPointer socket) {
-    strand_.dispatch([this, self = this->shared_from_this(), socket = std::move(socket)]() mutable {
-      OPENAUTO_LOG(info) << "Start from socket";
       if (androidAutoEntity_ != nullptr) {
+        OPENAUTO_LOG(warning) << "[App] android auto entity is still running, stopping it first.";
         try {
           androidAutoEntity_->stop();
         } catch (...) {
@@ -55,12 +48,17 @@ namespace f1x::openauto::autoapp {
       isStopped_ = false;
 
       try {
-        auto tcpEndpoint(std::make_shared<aasdk::tcp::TCPEndpoint>(tcpWrapper_, std::move(socket)));
-        androidAutoEntity_ = androidAutoEntityFactory_.create(std::move(tcpEndpoint));
-        androidAutoEntity_->start(*this);
+        if (!disableAutostartEntity) {
+          OPENAUTO_LOG(info) << "[App] Start Android Auto allowed - let's go.";
+          androidAutoEntity_ = androidAutoEntityFactory_.create(std::move(conn));
+          androidAutoEntity_->start(*this);
+        } else {
+          OPENAUTO_LOG(info) << "[App] Start Android Auto not allowed - skip.";
+        }
       }
       catch (const aasdk::error::Error &error) {
-        OPENAUTO_LOG(error) << "[App] TCP AndroidAutoEntity create error: " << error.what();
+        OPENAUTO_LOG(error) << "[App] AndroidAutoEntity create error: " << error.what();
+        androidAutoEntity_.reset();
       }
     });
   }
@@ -82,42 +80,6 @@ namespace f1x::openauto::autoapp {
         }
       }
     });
-  }
-
-  void App::aoapDeviceHandler(aasdk::usb::DeviceHandle deviceHandle) {
-    OPENAUTO_LOG(info) << "[App] Device connected.";
-
-    if (androidAutoEntity_ != nullptr) {
-      OPENAUTO_LOG(warning) << "[App] android auto entity is still running, stopping it first.";
-      try {
-        androidAutoEntity_->stop();
-      } catch (...) {
-        OPENAUTO_LOG(error) << "[App] aoapDeviceHandler: exception caused by androidAutoEntity_->stop();";
-      }
-      try {
-        androidAutoEntity_.reset();
-      } catch (...) {
-        OPENAUTO_LOG(error) << "[App] aoapDeviceHandler: exception caused by androidAutoEntity_.reset();";
-      }
-    }
-
-    isStopped_ = false;
-
-    try {
-      if (!disableAutostartEntity) {
-        OPENAUTO_LOG(info) << "[App] Start Android Auto allowed - let's go.";
-
-        auto aoapDevice(aasdk::usb::AOAPDevice::create(usbWrapper_, ioService_, deviceHandle));
-        androidAutoEntity_ = androidAutoEntityFactory_.create(std::move(aoapDevice));
-        androidAutoEntity_->start(*this);
-      } else {
-        OPENAUTO_LOG(info) << "[App] Start Android Auto not allowed - skip.";
-      }
-    }
-    catch (const aasdk::error::Error &error) {
-      OPENAUTO_LOG(error) << "[App] USB AndroidAutoEntity create error: " << error.what();
-      androidAutoEntity_.reset();
-    }
   }
 
   void App::pause() {

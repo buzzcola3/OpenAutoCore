@@ -21,6 +21,7 @@
 #include <poll.h>
 #include <sys/eventfd.h>
 #include <algorithm>
+#include <DeviceManager/USBDeviceConnection.hpp>
 #include <DeviceManager/EllCompat.hpp>
 #include <DeviceManager/DmLog.hpp>
 #include <DeviceManager/USBDeviceManager.hpp>
@@ -67,6 +68,29 @@ USBDeviceManager::~USBDeviceManager() {
     }
 }
 
+DeviceConnection::Pointer USBDeviceManager::openDeviceConnection(uint16_t vid, uint16_t pid) {
+    auto raw = libusb_open_device_with_vid_pid(usbContext_, vid, pid);
+    if (!raw) {
+        DM_LOG(error) << "USBDeviceManager: failed to open device "
+                      << std::hex << vid << ":" << pid << std::dec;
+        return nullptr;
+    }
+    auto handle = std::shared_ptr<libusb_device_handle>(raw, &libusb_close);
+    return std::make_shared<USBDeviceConnection>(std::move(handle), usbContext_);
+}
+
+void USBDeviceManager::resetDevice(uint16_t vid, uint16_t pid) {
+    auto raw = libusb_open_device_with_vid_pid(usbContext_, vid, pid);
+    if (raw) {
+        int rc = libusb_reset_device(raw);
+        DM_LOG(info) << "USB reset to exit AOAP: "
+                     << libusb_strerror(static_cast<libusb_error>(rc));
+        libusb_close(raw);
+    } else {
+        DM_LOG(warning) << "Could not open AOAP device for reset";
+    }
+}
+
 // ══════════════════════════════════════════════════════════════
 // Scanning Lifecycle
 // ══════════════════════════════════════════════════════════════
@@ -98,11 +122,15 @@ void USBDeviceManager::start() {
         DM_LOG(error) << "USBDeviceManager: hotplug registration failed: "
                       << libusb_strerror(static_cast<libusb_error>(rc));
     }
+
+    startEventThreads();
 }
 
 void USBDeviceManager::stop() {
     if (!running_) return;
     running_ = false;
+
+    stopEventThreads();
 
     // Cancel in-flight AOAP setups
     for (auto& setup : aoapSetups_) {
@@ -125,6 +153,32 @@ void USBDeviceManager::stop() {
     unregisterLibusbFds();
 
     DM_LOG(info) << "USBDeviceManager: stopped";
+}
+
+// ══════════════════════════════════════════════════════════════
+// Event Threads
+// ══════════════════════════════════════════════════════════════
+
+void USBDeviceManager::startEventThreads() {
+    for (int i = 0; i < 4; ++i) {
+        eventThreads_.emplace_back([this]() {
+            timeval timeout{1, 0};
+            while (running_.load(std::memory_order_relaxed)) {
+                libusb_handle_events_timeout_completed(usbContext_, &timeout, nullptr);
+            }
+        });
+    }
+    DM_LOG(info) << "USBDeviceManager: 4 event threads started";
+}
+
+void USBDeviceManager::stopEventThreads() {
+    if (usbContext_) {
+        libusb_interrupt_event_handler(usbContext_);
+    }
+    for (auto& t : eventThreads_) {
+        if (t.joinable()) t.join();
+    }
+    eventThreads_.clear();
 }
 
 // ══════════════════════════════════════════════════════════════

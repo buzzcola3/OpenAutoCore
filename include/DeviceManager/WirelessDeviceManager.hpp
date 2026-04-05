@@ -26,10 +26,12 @@
 #include <atomic>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
+#include <DeviceManager/DeviceConnection.hpp>
 
 struct l_dbus;
 struct l_io;
@@ -57,9 +59,10 @@ public:
 
     // ── Callbacks (set before start()) ──
 
-    // WiFi client connected via TCP (after BT handshake directed phone to connect).
+    // WiFi client connected — connection is ready to use.
     // deviceId is the same stable ID reported by onBtDeviceAvailable.
-    std::function<void(const std::string& deviceId, int fd, const std::string& peerAddress)> onWifiClientConnected;
+    std::function<void(const std::string& deviceId,
+                       DeviceConnection::Pointer connection)> onWifiClientConnected;
 
     // Bluetooth device paired and connected (before WiFi handshake).
     // deviceId: stable reproducible ID ("wireless:<BT_MAC>").

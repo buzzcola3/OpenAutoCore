@@ -18,9 +18,8 @@
 
 #pragma once
 
-#include <USB/USBWrapper.hpp>
-#include <TCP/ITCPWrapper.hpp>
-#include <TCP/ITCPEndpoint.hpp>
+#include <boost/asio.hpp>
+#include <DeviceManager/DeviceConnection.hpp>
 #include <Service/IAndroidAutoEntityEventHandler.hpp>
 #include <Service/IAndroidAutoEntityFactory.hpp>
 
@@ -36,11 +35,10 @@ class App: public service::IAndroidAutoEntityEventHandler, public std::enable_sh
 public:
     typedef std::shared_ptr<App> Pointer;
 
-    App(boost::asio::io_service& ioService, aasdk::usb::USBWrapper& usbWrapper, aasdk::tcp::ITCPWrapper& tcpWrapper,
+    App(boost::asio::io_service& ioService,
         service::IAndroidAutoEntityFactory& androidAutoEntityFactory);
 
-    void start(aasdk::tcp::ITCPEndpoint::SocketPointer socket);
-    void startUSBDevice(aasdk::usb::DeviceHandle deviceHandle);
+    void start(DeviceConnection::Pointer connection);
     void stop();
     void pause();
     void resume();
@@ -49,11 +47,8 @@ public:
 
 private:
     using std::enable_shared_from_this<App>::shared_from_this;
-    void aoapDeviceHandler(aasdk::usb::DeviceHandle deviceHandle);
 
     boost::asio::io_service& ioService_;
-    aasdk::usb::USBWrapper& usbWrapper_;
-    aasdk::tcp::ITCPWrapper& tcpWrapper_;
     boost::asio::io_service::strand strand_;
     service::IAndroidAutoEntityFactory& androidAutoEntityFactory_;
     service::IAndroidAutoEntity::Pointer androidAutoEntity_;

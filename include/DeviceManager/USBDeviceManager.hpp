@@ -24,6 +24,7 @@
 // Non-AOAP Android phones are held in pendingPhones_ until the consumer
 // requests AOAP setup via beginAoapSetup().
 
+#include <atomic>
 #include <cstdint>
 #include <functional>
 #include <list>
@@ -31,8 +32,10 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <thread>
 #include <vector>
 #include <libusb.h>
+#include <DeviceManager/DeviceConnection.hpp>
 
 struct l_io;
 
@@ -44,7 +47,11 @@ public:
     void start();
     void stop();
 
-    libusb_context* usbContext() const { return usbContext_; }
+    // Open an AOAP-ready device and create a DeviceConnection for it.
+    DeviceConnection::Pointer openDeviceConnection(uint16_t vid, uint16_t pid);
+
+    // Reset a USB device out of AOAP mode.
+    void resetDevice(uint16_t vid, uint16_t pid);
 
     // Thread-safe: queues command and wakes ELL thread.
     void beginAoapSetup(const std::string& deviceId);
@@ -99,12 +106,17 @@ private:
     static bool onLibusbFdReady(struct l_io* io, void* userData);
     void handleLibusbEvents();
 
+    // ── Event threads (pump libusb for AASDK bulk transfers) ──
+    void startEventThreads();
+    void stopEventThreads();
+
     // ── State ──
     libusb_context* usbContext_ = nullptr;
     libusb_hotplug_callback_handle hotplugHandle_ = 0;
     bool hotplugRegistered_ = false;
-    bool running_ = false;
+    std::atomic_bool running_{false};
     std::map<int, struct l_io*> libusbWatches_;
+    std::vector<std::thread> eventThreads_;
 
     // Cross-thread wakeup: hotplug callback + commands queue from any thread,
     // then signal the ELL thread via eventfd.

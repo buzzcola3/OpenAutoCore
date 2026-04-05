@@ -17,28 +17,29 @@
 
 #pragma once
 
-// DeviceManager — unified device discovery for Android Auto.
+// DeviceManager — unified device discovery and connection for Android Auto.
 //
-// Composes USBDeviceManager (USB hotplug, AOAP) and WirelessDeviceManager
-// (Bluetooth, TCP WiFi) behind a single interface. All callbacks and
-// operations are forwarded to the appropriate sub-manager.
+// Owns the device registry, composes USBDeviceManager and WirelessDeviceManager,
+// and handles all connect/disconnect logic. Consumers just call connectDevice(id)
+// and receive a ready-to-use DeviceConnection via the onDeviceReady callback.
 
+#include <atomic>
 #include <cstdint>
 #include <functional>
+#include <memory>
+#include <mutex>
 #include <string>
+#include <vector>
 #include <DeviceManager/USBDeviceManager.hpp>
 #include <DeviceManager/WirelessDeviceManager.hpp>
 
-struct libusb_context;
-
-// Configuration for DeviceManager — pass before calling start().
 struct DeviceManagerConfig {
-    bool bluetoothEnabled = true;            // Register BlueZ profile for WiFi projection
-    std::string bluetoothAdapterAddress;     // empty = auto-detect first adapter
-    std::string wifiInterface;               // empty = auto-detect wireless interface
+    bool bluetoothEnabled = true;
+    std::string bluetoothAdapterAddress;
+    std::string wifiInterface;
     std::string wifiSSID = "OpenAutoAP";
     std::string wifiPassword = "OpenAutoPass123";
-    uint16_t wifiPort = 5000;                // TCP listen port announced to phone
+    uint16_t wifiPort = 5000;
 };
 
 class DeviceManager {
@@ -49,28 +50,48 @@ public:
     void start();
     void stop();
 
-    // Expose the libusb context so consumers can create USB objects on it.
-    libusb_context* usbContext() const;
+    // ── Device list (JSON for FE) ──
+    std::string getDeviceListJson() const;
 
-    // ── USB operations ──
-    void beginAoapSetup(const std::string& deviceId);
-    void rescanUSB();
+    // ── Connection control ──
+    void connectDevice(const std::string& deviceId);
+    void disconnectDevice(const std::string& deviceId);
 
-    // ── Wireless operations ──
-    void beginWifiProjection();
-    void reconnectBluetooth();
+    // ── Callbacks (set before start()) ──
 
-    // ── Sub-manager access ──
-    USBDeviceManager&      usb()      { return usb_; }
-    WirelessDeviceManager& wireless() { return wireless_; }
+    // Device is ready — connection is ready to use for Android Auto session.
+    std::function<void(const std::string& deviceId,
+                       DeviceConnection::Pointer connection)> onDeviceReady;
 
-    // ── Callbacks (forwarded to sub-managers in start()) ──
-    std::function<void(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid)> onUSBDeviceAvailable;
-    std::function<void(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid)> onUSBPhoneDetected;
-    std::function<void(const std::string& deviceId, int fd, const std::string& peerAddress)> onWifiClientConnected;
-    std::function<void(const std::string& deviceId, const std::string& btAddress)> onBtDeviceAvailable;
+    // Device list has changed (status update for FE push during connect flow).
+    std::function<void()> onDeviceListChanged;
 
 private:
+    struct DeviceEntry {
+        std::string id;
+        std::string displayName;
+        std::string transport;   // "usb" | "wireless"
+        std::string status = "available";
+        // USB
+        uint16_t vid = 0, pid = 0;
+        uint8_t bus = 0, port = 0;
+        bool aoapReady = false;
+        // Wireless
+        DeviceConnection::Pointer pendingConnection;
+        std::string peerAddress;
+    };
+
+    void onUSBDeviceAvailable(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid);
+    void onUSBPhoneDetected(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid);
+    void onBtDeviceAvailable(const std::string& deviceId, const std::string& btAddress);
+    void onWifiClientConnected(const std::string& deviceId,
+                               DeviceConnection::Pointer connection);
+
+    mutable std::mutex mutex_;
+    std::vector<DeviceEntry> devices_;
+    std::atomic_bool pendingUSBAutoConnect_{false};
+    std::atomic_bool pendingWifiAutoConnect_{false};
+
     USBDeviceManager usb_;
     WirelessDeviceManager wireless_;
 };

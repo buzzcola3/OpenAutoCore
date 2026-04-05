@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <TCP/ITCPEndpoint.hpp>
-#include <USB/IAOAPDevice.hpp>
+#include <Transport/ITransport.hpp>
+#include <DeviceManager/DeviceConnection.hpp>
 #include <Service/IAndroidAutoEntity.hpp>
 
 namespace f1x
@@ -36,8 +36,8 @@ class IAndroidAutoEntityFactory
 public:
     virtual ~IAndroidAutoEntityFactory() = default;
 
-    virtual IAndroidAutoEntity::Pointer create(aasdk::usb::IAOAPDevice::Pointer aoapDevice) = 0;
-    virtual IAndroidAutoEntity::Pointer create(aasdk::tcp::ITCPEndpoint::Pointer tcpEndpoint) = 0;
+    virtual IAndroidAutoEntity::Pointer create(aasdk::transport::ITransport::Pointer transport) = 0;
+    virtual IAndroidAutoEntity::Pointer create(DeviceConnection::Pointer connection) = 0;
 };
 
 }

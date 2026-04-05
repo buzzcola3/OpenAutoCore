@@ -21,12 +21,10 @@
 #include <chrono>
 #include <condition_variable>
 #include <boost/asio/signal_set.hpp>
-#include <boost/asio/steady_timer.hpp>
 #include <fstream>
 #include <mutex>
 #include <thread>
 #include <unistd.h>
-#include <TCP/TCPWrapper.hpp>
 #include <boost/log/utility/setup.hpp>
 #include <App.hpp>
 #include <Messenger/MessageInStreamInterceptor.hpp>
@@ -60,48 +58,6 @@ namespace {
     std::condition_variable gShutdownCv;
     std::mutex gShutdownMutex;
 
-    // ── Available-device registry (populated by DeviceManager callbacks) ──
-    struct AvailableDevice {
-        std::string id;
-        std::string displayName;
-        std::string transport;   // "usb" | "usb_raw" | "bt" | "wifi"
-        std::string status = "available";  // "available" | "connecting" | "connected"
-        // USB-specific
-        uint16_t vid = 0;
-        uint16_t pid = 0;
-        uint8_t bus = 0;
-        uint8_t port = 0;
-        // WiFi-specific
-        int fd = -1;
-        std::string peerAddress;
-    };
-
-    std::mutex gDevicesMutex;
-    std::vector<AvailableDevice> gAvailableDevices;
-    std::atomic_bool gPendingUSBAutoConnect{false};
-    std::atomic_bool gPendingWifiAutoConnect{false};
-
-    json devicesJson() {
-        json arr = json::array();
-        std::lock_guard<std::mutex> lock(gDevicesMutex);
-        for (auto& d : gAvailableDevices) {
-            arr.push_back({
-                {"id",          d.id},
-                {"displayName", d.displayName},
-                {"transport",   d.transport},
-                {"status",      d.status}
-            });
-        }
-        return arr;
-    }
-
-    void broadcastDeviceList(const std::shared_ptr<buzz::autoapp::Transport::Transport>& tp) {
-        if (!tp || !tp->isRunning()) return;
-        json msg = {{"action", "device_list"}, {"devices", devicesJson()}};
-        auto s = msg.dump();
-        tp->send(buzz::wire::MsgType::CONTROL, 0, s.data(), s.size());
-    }
-
     void handleShutdown() {
         gRunning.store(false);
         gShutdownCv.notify_all();
@@ -118,23 +74,6 @@ namespace {
         return std::make_shared<autoapp::projection::BluezBluetoothDevice>(
             configuration->getBluetoothAdapterAddress());
     }
-}
-
-void startUSBWorkers(boost::asio::io_service& ioService, libusb_context* usbContext, ThreadPool& threadPool)
-{
-    auto usbWorker = [&ioService, usbContext]() {
-        timeval libusbEventTimeout{180, 0};
-
-        while(!ioService.stopped())
-        {
-            libusb_handle_events_timeout_completed(usbContext, &libusbEventTimeout, nullptr);
-        }
-    };
-
-    threadPool.emplace_back(usbWorker);
-    threadPool.emplace_back(usbWorker);
-    threadPool.emplace_back(usbWorker);
-    threadPool.emplace_back(usbWorker);
 }
 
 void startIOServiceWorkers(boost::asio::io_service& ioService, ThreadPool& threadPool)
@@ -182,8 +121,12 @@ int main(int argc, char* argv[])
 
     auto configuration = std::make_shared<autoapp::configuration::Configuration>();
 
-    // DeviceManager — unified USB/WiFi/BT device discovery (ELL-native)
-    // Created early because it owns the libusb context used by all USB objects.
+    boost::asio::io_service ioService;
+    boost::asio::io_service::work work(ioService);
+    std::vector<std::thread> threadPool;
+    startIOServiceWorkers(ioService, threadPool);
+
+    // DeviceManager — unified USB/WiFi/BT device discovery and transport creation.
     DeviceManagerConfig dmConfig;
     dmConfig.bluetoothEnabled = configuration->getWirelessProjectionEnabled();
     dmConfig.bluetoothAdapterAddress = configuration->getBluetoothAdapterAddress();
@@ -198,17 +141,6 @@ int main(int argc, char* argv[])
     if (!pass.empty()) dmConfig.wifiPassword = pass;
 
     DeviceManager deviceManager(dmConfig);
-    libusb_context* usbContext = deviceManager.usbContext();
-    if (!usbContext) {
-        OPENAUTO_LOG(error) << "[AutoApp] DeviceManager failed to create libusb context.";
-        return 1;
-    }
-
-    boost::asio::io_service ioService;
-    boost::asio::io_service::work work(ioService);
-    std::vector<std::thread> threadPool;
-    startUSBWorkers(ioService, usbContext, threadPool);
-    startIOServiceWorkers(ioService, threadPool);
 
     autoapp::projection::IBluetoothDevice::Pointer bluetoothDevice =
         createBluetoothDevice(configuration);
@@ -216,8 +148,6 @@ int main(int argc, char* argv[])
     autoapp::configuration::RecentAddressesList recentAddressesList(7);
     recentAddressesList.read();
 
-    aasdk::tcp::TCPWrapper tcpWrapper;
-    aasdk::usb::USBWrapper usbWrapper(usbContext);
     autoapp::service::ServiceFactory serviceFactory(ioService, configuration);
 
     autoapp::configuration::ServiceConfig serviceConfig(
@@ -296,12 +226,25 @@ int main(int argc, char* argv[])
     autoapp::service::AndroidAutoEntityFactory androidAutoEntityFactory(ioService, configuration,
                                                                         serviceConfig, serviceFactory);
 
-    auto app = std::make_shared<autoapp::App>(ioService, usbWrapper, tcpWrapper, androidAutoEntityFactory);
+    auto app = std::make_shared<autoapp::App>(ioService, androidAutoEntityFactory);
 
-    // Device management via MsgType::CONTROL (JSON RPC) — must be after app creation
+    // ── DeviceManager callbacks ──
+    // DeviceManager creates transports internally; autoapp just forwards them to App.
+    deviceManager.onDeviceReady = [app](const std::string& deviceId,
+                                        DeviceConnection::Pointer connection) {
+        OPENAUTO_LOG(info) << "[AutoApp] Device ready: " << deviceId;
+        app->start(std::move(connection));
+    };
+    deviceManager.onDeviceListChanged = [transport, &deviceManager]() {
+        if (!transport || !transport->isRunning()) return;
+        std::string s = "{\"action\":\"device_list\",\"devices\":" + deviceManager.getDeviceListJson() + "}";
+        transport->send(buzz::wire::MsgType::CONTROL, 0, s.data(), s.size());
+    };
+
+    // Device management via MsgType::CONTROL (JSON RPC)
     transport->addTypeHandler(
         buzz::wire::MsgType::CONTROL,
-        [transport, &usbWrapper, &ioService, app, &deviceManager](uint64_t, const void* data, std::size_t size) {
+        [transport, app, &deviceManager](uint64_t, const void* data, std::size_t size) {
             auto req = json::parse(
                 static_cast<const char*>(data),
                 static_cast<const char*>(data) + size,
@@ -309,160 +252,19 @@ int main(int argc, char* argv[])
             if (req.is_discarded()) return;
 
             auto action = req.value("action", "");
-            if (action == "get_devices") {
-                json msg = {{"action", "device_list"}, {"devices", devicesJson()}};
-                auto s = msg.dump();
+            if (action == "get_devices" || action == "scan_devices") {
+                std::string s = "{\"action\":\"device_list\",\"devices\":" + deviceManager.getDeviceListJson() + "}";
                 transport->send(buzz::wire::MsgType::CONTROL, 0, s.data(), s.size());
-
             } else if (action == "connect_device") {
                 auto deviceId = req.value("id", "");
                 if (deviceId.empty()) return;
-
-                AvailableDevice target;
-                bool found = false;
-                {
-                    std::lock_guard<std::mutex> lock(gDevicesMutex);
-                    for (auto& d : gAvailableDevices) {
-                        if (d.id == deviceId) { target = d; found = true; break; }
-                    }
-                }
-                if (!found) {
-                    OPENAUTO_LOG(warning) << "[AutoApp] connect_device: unknown id " << deviceId;
-                    return;
-                }
-
-                if (target.transport == "usb") {
-                    // AOAP device — open and connect directly
-                    app->stop();
-
-                    auto handle = usbWrapper.openDeviceWithVidPid(target.vid, target.pid);
-                    if (!handle) {
-                        OPENAUTO_LOG(error) << "[AutoApp] Failed to open USB device " << deviceId;
-                        return;
-                    }
-                    OPENAUTO_LOG(info) << "[AutoApp] Connecting USB device " << deviceId;
-                    app->startUSBDevice(std::move(handle));
-                } else if (target.transport == "usb_raw") {
-                    // Non-AOAP phone — start AOAP setup, auto-connect when it re-enumerates
-                    app->stop();
-                    gPendingUSBAutoConnect.store(true);
-                    OPENAUTO_LOG(info) << "[AutoApp] Starting AOAP setup for " << deviceId;
-                    deviceManager.beginAoapSetup(deviceId);
-                    {
-                        std::lock_guard<std::mutex> lock(gDevicesMutex);
-                        for (auto& d : gAvailableDevices) {
-                            if (d.id == deviceId) { d.status = "connecting"; break; }
-                        }
-                    }
-                    broadcastDeviceList(transport);
-                    return;
-                } else if (target.transport == "bt") {
-                    // BT device — start WiFi projection handshake, auto-connect when WiFi arrives
-                    app->stop();
-                    gPendingWifiAutoConnect.store(true);
-                    OPENAUTO_LOG(info) << "[AutoApp] Starting WiFi projection for " << deviceId;
-                    deviceManager.beginWifiProjection();
-                    {
-                        std::lock_guard<std::mutex> lock(gDevicesMutex);
-                        for (auto& d : gAvailableDevices) {
-                            if (d.id == deviceId) { d.status = "connecting"; break; }
-                        }
-                    }
-                    broadcastDeviceList(transport);
-                    return;
-                } else if (target.transport == "wifi") {
-                    if (target.fd < 0) {
-                        OPENAUTO_LOG(error) << "[AutoApp] WiFi device " << deviceId << " has no valid fd";
-                        return;
-                    }
-                    app->stop();
-
-                    // Consume the fd from the device list so it can't be reused
-                    {
-                        std::lock_guard<std::mutex> lock(gDevicesMutex);
-                        for (auto& d : gAvailableDevices) {
-                            if (d.id == deviceId) { d.fd = -1; break; }
-                        }
-                    }
-
-                    auto socket = std::make_shared<boost::asio::ip::tcp::socket>(ioService);
-                    boost::system::error_code ec;
-                    socket->assign(boost::asio::ip::tcp::v4(), target.fd, ec);
-                    if (ec) {
-                        OPENAUTO_LOG(error) << "[AutoApp] Failed to assign WiFi fd: " << ec.message();
-                        ::close(target.fd);
-                        return;
-                    }
-                    OPENAUTO_LOG(info) << "[AutoApp] Connecting WiFi device " << deviceId;
-                    app->start(std::move(socket));
-                }
-
-                // Mark as connected (keep in list so FE can see it)
-                {
-                    std::lock_guard<std::mutex> lock(gDevicesMutex);
-                    for (auto& d : gAvailableDevices) {
-                        if (d.id == deviceId) { d.status = "connected"; break; }
-                    }
-                }
-                broadcastDeviceList(transport);
-
+                app->stop();
+                deviceManager.connectDevice(deviceId);
             } else if (action == "disconnect_device") {
                 auto deviceId = req.value("id", "");
                 if (deviceId.empty()) return;
-
-                OPENAUTO_LOG(info) << "[AutoApp] Disconnecting device " << deviceId;
-
-                // Check if this is a WiFi or USB device (for post-disconnect actions)
-                bool wasWifi = false;
-                bool wasUSB = false;
-                uint16_t usbVid = 0, usbPid = 0;
-                {
-                    std::lock_guard<std::mutex> lock(gDevicesMutex);
-                    for (auto& d : gAvailableDevices) {
-                        if (d.id == deviceId) {
-                            wasWifi = (d.transport == "wifi");
-                            wasUSB = (d.transport == "usb");
-                            usbVid = d.vid;
-                            usbPid = d.pid;
-                            break;
-                        }
-                    }
-                }
-
                 app->stop();
-
-                // Remove the stale entry — the device will re-appear via
-                // hotplug (USB) or TCP accept (WiFi) with fresh connection info.
-                {
-                    std::lock_guard<std::mutex> lock(gDevicesMutex);
-                    gAvailableDevices.erase(
-                        std::remove_if(gAvailableDevices.begin(), gAvailableDevices.end(),
-                                       [&deviceId](const AvailableDevice& d) { return d.id == deviceId; }),
-                        gAvailableDevices.end());
-                }
-                broadcastDeviceList(transport);
-
-                // For WiFi devices: cycle BT connection so phone can reconnect wirelessly
-                if (wasWifi) {
-                    deviceManager.reconnectBluetooth();
-                }
-                // For USB devices: reset device to exit AOAP mode.
-                // The phone re-enumerates as its normal VID/PID, hotplug fires,
-                // and it reappears as a usb_raw phone ready to connect again.
-                if (wasUSB && usbVid && usbPid) {
-                    auto resetTimer = std::make_shared<boost::asio::steady_timer>(ioService, std::chrono::milliseconds(200));
-                    resetTimer->async_wait([resetTimer, &usbWrapper, usbVid, usbPid](const boost::system::error_code& ec) {
-                        if (ec) return;
-                        auto handle = usbWrapper.openDeviceWithVidPid(usbVid, usbPid);
-                        if (handle) {
-                            int rc = libusb_reset_device(handle.get());
-                            OPENAUTO_LOG(info) << "[AutoApp] USB reset to exit AOAP: "
-                                              << libusb_strerror(static_cast<libusb_error>(rc));
-                        } else {
-                            OPENAUTO_LOG(warning) << "[AutoApp] Could not open AOAP device for reset";
-                        }
-                    });
-                }
+                deviceManager.disconnectDevice(deviceId);
             }
         });
 
@@ -476,178 +278,6 @@ int main(int argc, char* argv[])
         handleShutdown();
     });
 
-    // DeviceManager callbacks — register available devices & broadcast to FE
-    deviceManager.onUSBDeviceAvailable = [transport, &usbWrapper, &ioService, app](uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid) {
-        std::string id = "usb:" + std::to_string(bus) + ":" + std::to_string(port);
-        OPENAUTO_LOG(info) << "[DeviceManager] AOAP device available: " << id
-                          << " " << std::hex << vid << ":" << pid << std::dec;
-
-        if (gPendingUSBAutoConnect.exchange(false)) {
-            // User already clicked connect — delay 500ms for udev to set permissions
-            OPENAUTO_LOG(info) << "[AutoApp] Auto-connecting AOAP device " << id << " (waiting for udev)";
-            auto timer = std::make_shared<boost::asio::steady_timer>(ioService, std::chrono::milliseconds(500));
-            timer->async_wait([timer, transport, &usbWrapper, app, id, bus, port, vid, pid](const boost::system::error_code& ec) {
-                if (ec) return;
-                auto handle = usbWrapper.openDeviceWithVidPid(vid, pid);
-                if (handle) {
-                    {
-                        std::lock_guard<std::mutex> lock(gDevicesMutex);
-                        gAvailableDevices.erase(
-                            std::remove_if(gAvailableDevices.begin(), gAvailableDevices.end(),
-                                           [](const AvailableDevice& d) {
-                                               return d.transport == "usb_raw" || d.transport == "usb";
-                                           }),
-                            gAvailableDevices.end());
-                        AvailableDevice dev;
-                        dev.id = id;
-                        dev.displayName = "Android Auto (USB)";
-                        dev.transport = "usb";
-                        dev.status = "connected";
-                        dev.vid = vid;
-                        dev.pid = pid;
-                        dev.bus = bus;
-                        dev.port = port;
-                        gAvailableDevices.push_back(std::move(dev));
-                    }
-                    app->startUSBDevice(std::move(handle));
-                    broadcastDeviceList(transport);
-                } else {
-                    OPENAUTO_LOG(error) << "[AutoApp] Failed to open auto-connect AOAP device";
-                    gPendingUSBAutoConnect.store(true); // retry on next enumeration
-                }
-            });
-            return;
-        }
-
-        // Normal listing (phone was already in AOAP mode)
-        AvailableDevice dev;
-        dev.id = id;
-        dev.displayName = "Android Auto (USB)";
-        dev.transport = "usb";
-        dev.vid = vid;
-        dev.pid = pid;
-        dev.bus = bus;
-        dev.port = port;
-        {
-            std::lock_guard<std::mutex> lock(gDevicesMutex);
-            auto it = std::find_if(gAvailableDevices.begin(), gAvailableDevices.end(),
-                                   [&id](const AvailableDevice& d) { return d.id == id; });
-            if (it != gAvailableDevices.end()) {
-                it->vid = vid;
-                it->pid = pid;
-            } else {
-                // Remove any stale (non-connected) USB entry before adding
-                gAvailableDevices.erase(
-                    std::remove_if(gAvailableDevices.begin(), gAvailableDevices.end(),
-                                   [](const AvailableDevice& d) {
-                                       return d.transport == "usb" && d.status != "connected";
-                                   }),
-                    gAvailableDevices.end());
-                gAvailableDevices.push_back(std::move(dev));
-            }
-        }
-        broadcastDeviceList(transport);
-    };
-    deviceManager.onWifiClientConnected = [transport, &ioService, app](const std::string& deviceId, int fd, const std::string& peerAddress) {
-        OPENAUTO_LOG(info) << "[DeviceManager] WiFi client available: " << deviceId << " fd=" << fd;
-
-        if (gPendingWifiAutoConnect.exchange(false)) {
-            // User already clicked connect on BT device — auto-connect this WiFi client
-            OPENAUTO_LOG(info) << "[AutoApp] Auto-connecting WiFi device " << deviceId;
-            {
-                std::lock_guard<std::mutex> lock(gDevicesMutex);
-                // Update existing entry from bt → wifi
-                for (auto& d : gAvailableDevices) {
-                    if (d.id == deviceId) {
-                        d.transport = "wifi";
-                        d.status = "connected";
-                        d.fd = -1;
-                        d.peerAddress = peerAddress;
-                        d.displayName = "Android Auto (WiFi - " + peerAddress + ")";
-                        break;
-                    }
-                }
-            }
-            auto socket = std::make_shared<boost::asio::ip::tcp::socket>(ioService);
-            boost::system::error_code ec;
-            socket->assign(boost::asio::ip::tcp::v4(), fd, ec);
-            if (ec) {
-                OPENAUTO_LOG(error) << "[AutoApp] Failed to assign auto-connect WiFi fd: " << ec.message();
-                ::close(fd);
-            } else {
-                app->start(std::move(socket));
-            }
-            broadcastDeviceList(transport);
-            return;
-        }
-
-        // Normal listing — update existing entry or add new
-        {
-            std::lock_guard<std::mutex> lock(gDevicesMutex);
-            bool found = false;
-            for (auto& d : gAvailableDevices) {
-                if (d.id == deviceId) {
-                    d.transport = "wifi";
-                    d.fd = fd;
-                    d.peerAddress = peerAddress;
-                    d.displayName = "Android Auto (WiFi - " + peerAddress + ")";
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                AvailableDevice dev;
-                dev.id = deviceId;
-                dev.displayName = "Android Auto (WiFi - " + peerAddress + ")";
-                dev.transport = "wifi";
-                dev.fd = fd;
-                dev.peerAddress = peerAddress;
-                gAvailableDevices.push_back(std::move(dev));
-            }
-        }
-        broadcastDeviceList(transport);
-    };
-    deviceManager.onUSBPhoneDetected = [transport](uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid) {
-        std::string id = "usb:" + std::to_string(bus) + ":" + std::to_string(port);
-        OPENAUTO_LOG(info) << "[DeviceManager] USB phone detected: " << id
-                          << " " << std::hex << vid << ":" << pid << std::dec;
-
-        AvailableDevice dev;
-        dev.id = id;
-        dev.displayName = "Android Phone (USB)";
-        dev.transport = "usb_raw";
-        dev.vid = vid;
-        dev.pid = pid;
-        dev.bus = bus;
-        dev.port = port;
-        {
-            std::lock_guard<std::mutex> lock(gDevicesMutex);
-            gAvailableDevices.erase(
-                std::remove_if(gAvailableDevices.begin(), gAvailableDevices.end(),
-                               [&id](const AvailableDevice& d) { return d.id == id; }),
-                gAvailableDevices.end());
-            gAvailableDevices.push_back(std::move(dev));
-        }
-        broadcastDeviceList(transport);
-    };
-    deviceManager.onBtDeviceAvailable = [transport](const std::string& deviceId, const std::string& btAddress) {
-        OPENAUTO_LOG(info) << "[DeviceManager] BT device available: " << deviceId;
-
-        AvailableDevice dev;
-        dev.id = deviceId;
-        dev.displayName = "Android Auto (BT - " + btAddress + ")";
-        dev.transport = "bt";
-        {
-            std::lock_guard<std::mutex> lock(gDevicesMutex);
-            // Remove any existing BT entry (only one BT device at a time)
-            gAvailableDevices.erase(
-                std::remove_if(gAvailableDevices.begin(), gAvailableDevices.end(),
-                               [](const AvailableDevice& d) { return d.transport == "bt"; }),
-                gAvailableDevices.end());
-            gAvailableDevices.push_back(std::move(dev));
-        }
-        broadcastDeviceList(transport);
-    };
     deviceManager.start();
 
     {

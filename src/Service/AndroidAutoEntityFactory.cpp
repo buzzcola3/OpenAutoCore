@@ -16,16 +16,14 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <USB/AOAPDevice.hpp>
 #include <Transport/SSLWrapper.hpp>
-#include <Transport/USBTransport.hpp>
-#include <Transport/TCPTransport.hpp>
 #include <Messenger/Cryptor.hpp>
 #include <Messenger/MessageInStream.hpp>
 #include <Messenger/MessageOutStream.hpp>
 #include <Messenger/Messenger.hpp>
 #include <Messenger/MessageSender.hpp>
 #include <Messenger/MessageInStreamInterceptor.hpp>
+#include <DeviceConnectionTransport.hpp>
 #include <Service/AndroidAutoEntityFactory.hpp>
 #include <Service/AndroidAutoEntity.hpp>
 #include <Service/Pinger.hpp>
@@ -43,13 +41,8 @@ namespace f1x {
 
         }
 
-        IAndroidAutoEntity::Pointer AndroidAutoEntityFactory::create(aasdk::usb::IAOAPDevice::Pointer aoapDevice) {
-          auto transport(std::make_shared<aasdk::transport::USBTransport>(ioService_, std::move(aoapDevice)));
-          return create(std::move(transport));
-        }
-
-        IAndroidAutoEntity::Pointer AndroidAutoEntityFactory::create(aasdk::tcp::ITCPEndpoint::Pointer tcpEndpoint) {
-          auto transport(std::make_shared<aasdk::transport::TCPTransport>(ioService_, std::move(tcpEndpoint)));
+        IAndroidAutoEntity::Pointer AndroidAutoEntityFactory::create(DeviceConnection::Pointer connection) {
+          auto transport = std::make_shared<DeviceConnectionTransport>(ioService_, std::move(connection));
           return create(std::move(transport));
         }
 

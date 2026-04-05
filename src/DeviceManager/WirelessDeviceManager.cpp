@@ -32,6 +32,7 @@
 #include <mutex>
 #include <ell/dbus.h>
 #include <ell/dbus-service.h>
+#include <DeviceManager/TCPDeviceConnection.hpp>
 #include <DeviceManager/EllCompat.hpp>
 #include <DeviceManager/DmLog.hpp>
 #include <DeviceManager/WirelessDeviceManager.hpp>
@@ -502,7 +503,8 @@ bool WirelessDeviceManager::onTCPAcceptable(struct l_io*, void* userData) {
     DM_LOG(info) << "WirelessDeviceManager: WiFi client connected from " << peerAddr;
 
     if (self->onWifiClientConnected) {
-        self->onWifiClientConnected(self->deviceId_, clientFd, peerAddr);
+        auto connection = std::make_shared<TCPDeviceConnection>(clientFd);
+        self->onWifiClientConnected(self->deviceId_, std::move(connection));
     } else {
         ::close(clientFd);
     }

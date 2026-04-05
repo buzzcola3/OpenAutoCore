@@ -42,11 +42,10 @@ public:
                              configuration::ServiceConfig& serviceConfig,
                              IServiceFactory& serviceFactory);
 
-    IAndroidAutoEntity::Pointer create(aasdk::usb::IAOAPDevice::Pointer aoapDevice) override;
-    IAndroidAutoEntity::Pointer create(aasdk::tcp::ITCPEndpoint::Pointer tcpEndpoint) override;
+    IAndroidAutoEntity::Pointer create(aasdk::transport::ITransport::Pointer transport) override;
+    IAndroidAutoEntity::Pointer create(DeviceConnection::Pointer connection) override;
 
 private:
-    IAndroidAutoEntity::Pointer create(aasdk::transport::ITransport::Pointer transport);
 
     boost::asio::io_service& ioService_;
     configuration::IConfiguration::Pointer configuration_;

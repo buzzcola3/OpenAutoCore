@@ -1,0 +1,46 @@
+// Copyright (C) 2024 CubeOne (Simon Dean - simon.dean@cubeone.co.uk)
+//
+// This file is part of OpenAutoCore.
+
+#pragma once
+
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <string>
+
+// DeviceConnection — universal byte-stream device abstraction.
+//
+// Wraps either a USB AOAP device (libusb bulk transfers) or a TCP socket
+// (ELL fd watches). DeviceManager delivers a DeviceConnection when a device
+// is ready; the consumer can either use the raw I/O (send/read) directly,
+// or extract the underlying resource for bridging to legacy stacks.
+//
+// I/O is not active until start() is called.
+
+class DeviceConnection {
+public:
+    using Pointer = std::shared_ptr<DeviceConnection>;
+    using ReadCallback = std::function<void(const uint8_t* data, size_t len)>;
+    using ErrorCallback = std::function<void(const std::string& error)>;
+
+    enum class Type { USB, TCP };
+
+    virtual ~DeviceConnection() = default;
+
+    virtual Type type() const = 0;
+
+    // Start/stop the read loop. I/O is not active until start() is called.
+    virtual void start() = 0;
+    virtual void stop() = 0;
+
+    virtual void send(const uint8_t* data, size_t len) = 0;
+
+    void setReadCallback(ReadCallback cb) { readCallback_ = std::move(cb); }
+    void setErrorCallback(ErrorCallback cb) { errorCallback_ = std::move(cb); }
+
+protected:
+    ReadCallback readCallback_;
+    ErrorCallback errorCallback_;
+};

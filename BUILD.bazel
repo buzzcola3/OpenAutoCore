@@ -11,9 +11,8 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
-# ── DeviceManager (independent module) ──
-# Standalone USB/WiFi device discovery and raw I/O.
-# No Boost, no OpenAutoSDK — only libusb + ELL.
+# ── DeviceManager ──
+# Unified USB/WiFi device discovery and transport creation.
 
 cc_library(
     name = "devicemanager_lib",
@@ -28,6 +27,7 @@ cc_library(
     deps = [
         "@libusb//:libusb",
         "@libell_src//:ell",
+        "@nlohmann_json//:json",
     ],
     alwayslink = True,
     visibility = ["//visibility:public"],
