@@ -5,7 +5,6 @@
 #include <boost/endian/conversion.hpp>
 #include <cstring>
 #include <IO/PromiseLink.hpp>
-#include <Channel/IChannel.hpp>
 #include <Common/Log.hpp>
 
 namespace aasdk::messenger {
@@ -167,25 +166,6 @@ void MessageSender::reset() {
   offset_ = 0;
   remainingSize_ = 0;
   message_.reset();
-}
-
-void MessageSender::registerChannel(::aasdk::channel::IChannel& channel) {
-  std::lock_guard<std::mutex> lock(channelMutex_);
-  channels_[channel.getId()] = &channel;
-}
-
-void MessageSender::unregisterChannel(ChannelId channelId) {
-  std::lock_guard<std::mutex> lock(channelMutex_);
-  channels_.erase(channelId);
-}
-
-::aasdk::channel::IChannel* MessageSender::getChannel(ChannelId channelId) const {
-  std::lock_guard<std::mutex> lock(channelMutex_);
-  auto iter = channels_.find(channelId);
-  if (iter == channels_.end()) {
-    return nullptr;
-  }
-  return iter->second;
 }
 
 }

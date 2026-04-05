@@ -27,6 +27,7 @@ class RadioHandler;
 class MediaBrowserHandler;
 class MediaPlaybackStatusHandler;
 class VendorExtensionHandler;
+class ControlHandler;
 }
 
 namespace aasdk::messenger::interceptor {
@@ -38,5 +39,6 @@ void setVideoTransport(const std::shared_ptr<buzz::autoapp::Transport::Transport
 ::aasdk::lite::SensorHandler& getSensorHandler();
 ::aasdk::lite::BluetoothHandler& getBluetoothHandler();
 ::aasdk::lite::MediaSourceHandler& getMediaSourceHandler();
+::aasdk::lite::ControlHandler& getControlHandler();
 
 }

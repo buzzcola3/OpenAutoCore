@@ -39,6 +39,8 @@ namespace aasdk {
 
       virtual void enqueueSend(Message::Pointer message, SendPromise::Pointer promise) = 0;
 
+      virtual void startReceiveLoop() = 0;
+
       virtual void stop() = 0;
     };
 

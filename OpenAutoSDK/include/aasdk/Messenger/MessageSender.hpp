@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <mutex>
-#include <unordered_map>
 #include <google/protobuf/message.h>
 #include <boost/asio.hpp>
 #include <cstdint>
@@ -19,12 +18,6 @@
 #include <Transport/ITransport.hpp>
 #include <Common/Data.hpp>
 #include <Error/Error.hpp>
-
-namespace aasdk {
-namespace channel {
-class IChannel;
-}
-}
 
 namespace aasdk::messenger {
 
@@ -46,10 +39,6 @@ public:
                     uint16_t messageId,
                     const google::protobuf::Message& payload);
 
-  void registerChannel(::aasdk::channel::IChannel& channel);
-  void unregisterChannel(ChannelId channelId);
-  ::aasdk::channel::IChannel* getChannel(ChannelId channelId) const;
-
 private:
   void dispatch(Message::Pointer message);
   bool canSend() const;
@@ -68,8 +57,6 @@ private:
   size_t remainingSize_;
   SendPromise::Pointer promise_;
   boost::asio::io_service& ioService_;
-  mutable std::mutex channelMutex_;
-  std::unordered_map<ChannelId, ::aasdk::channel::IChannel*> channels_;
 
   static constexpr size_t cMaxFramePayloadSize = 0x4000;
 };

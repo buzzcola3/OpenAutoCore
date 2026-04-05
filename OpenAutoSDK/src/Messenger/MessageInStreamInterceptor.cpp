@@ -18,6 +18,7 @@
 #include <Lite/SystemAudioHandler.hpp>
 #include <Lite/TelephonyAudioHandler.hpp>
 #include <Lite/VendorExtensionHandler.hpp>
+#include <Lite/ControlHandler.hpp>
 #include <Lite/FrameIO.hpp>
 #include <Messenger/MessageSender.hpp>
 #include <Messenger/MessageSenderLocator.hpp>
@@ -63,6 +64,7 @@ aasdk::lite::RadioHandler RADIO_HANDLER{makeLazySendFn()};
 aasdk::lite::MediaBrowserHandler MEDIA_BROWSER_HANDLER{makeLazySendFn()};
 aasdk::lite::MediaPlaybackStatusHandler MEDIA_PLAYBACK_STATUS_HANDLER{makeLazySendFn()};
 aasdk::lite::VendorExtensionHandler VENDOR_EXTENSION_HANDLER{makeLazySendFn()};
+aasdk::lite::ControlHandler CONTROL_HANDLER{makeLazySendFn()};
 
 }
 
@@ -154,6 +156,15 @@ bool handleMessage(const ::aasdk::messenger::Message& message) {
       }
       return true;
     }
+    case ::aasdk::messenger::ChannelId::CONTROL: {
+      aasdk::lite::InMessage in;
+      in.channelId = message.getChannelId();
+      in.encryptionType = message.getEncryptionType();
+      in.messageType = message.getType();
+      in.payload.assign(message.getPayload().begin(), message.getPayload().end());
+      CONTROL_HANDLER(in);
+      return true;
+    }
     default:
       return false;
   }
@@ -199,6 +210,10 @@ aasdk::lite::BluetoothHandler& getBluetoothHandler() {
 
 aasdk::lite::MediaSourceHandler& getMediaSourceHandler() {
   return MEDIA_SOURCE_HANDLER;
+}
+
+aasdk::lite::ControlHandler& getControlHandler() {
+  return CONTROL_HANDLER;
 }
 
 }

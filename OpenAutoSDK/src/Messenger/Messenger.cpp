@@ -63,6 +63,22 @@ namespace aasdk::messenger {
         });
   }
 
+  void Messenger::startReceiveLoop() {
+    receiveStrand_.dispatch([this, self = this->shared_from_this()]() {
+      auto inStreamPromise = ReceivePromise::defer(receiveStrand_);
+      inStreamPromise->then(
+          [this, self = this->shared_from_this()](Message::Pointer message) {
+            AASDK_LOG(warning) << "[Messenger] Unhandled message on channel "
+                               << channelIdToString(message->getChannelId());
+            this->startReceiveLoop();
+          },
+          [this, self = this->shared_from_this()](const error::Error &e) {
+            AASDK_LOG(error) << "[Messenger] Receive loop error: " << e.what();
+          });
+      messageInStream_->startReceive(std::move(inStreamPromise));
+    });
+  }
+
   void Messenger::inStreamMessageHandler(Message::Pointer message) {
     auto channelId = message->getChannelId();
     //AASDK_LOG(debug) << "[Messenger::inStreamMessageHandler] Handling message for ChannelId "

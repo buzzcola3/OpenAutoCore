@@ -38,6 +38,8 @@ namespace aasdk {
 
       void enqueueSend(Message::Pointer message, SendPromise::Pointer promise) override;
 
+      void startReceiveLoop() override;
+
       void stop() override;
 
     private:
