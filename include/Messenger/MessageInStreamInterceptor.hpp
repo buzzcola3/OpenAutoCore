@@ -1,39 +1,25 @@
-// This file is part of aasdk library project.
-//
-// Interceptor entry point for custom message handling during message stream
-// processing. Returning true from the interceptor consumes the message and
-// prevents the default channel handlers from seeing it.
+// Interceptor — handler dispatch and global Lite handler registry.
 
 #pragma once
 
+#include <functional>
 #include <memory>
+#include <Lite/FrameIO.hpp>
 
 namespace buzz { namespace autoapp { namespace Transport { class Transport; } } }
-
-namespace aasdk::messenger {
-	class Message;
-	class MessageSender;
-}
 
 namespace aasdk::lite {
 class BluetoothHandler;
 class MediaSourceHandler;
 class InputSourceHandler;
 class SensorHandler;
-class PhoneStatusHandler;
-class GenericNotificationHandler;
-class NavigationStatusHandler;
-class RadioHandler;
-class MediaBrowserHandler;
-class MediaPlaybackStatusHandler;
-class VendorExtensionHandler;
 class ControlHandler;
 }
 
 namespace aasdk::messenger::interceptor {
 
-bool handleMessage(const ::aasdk::messenger::Message& message);
-void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender);
+void handleMessage(const ::aasdk::lite::InMessage& message);
+void setSendFn(::aasdk::lite::SendFn fn);
 void setVideoTransport(const std::shared_ptr<buzz::autoapp::Transport::Transport>& transport);
 ::aasdk::lite::InputSourceHandler& getInputSourceHandler();
 ::aasdk::lite::SensorHandler& getSensorHandler();

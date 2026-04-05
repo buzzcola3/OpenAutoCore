@@ -19,7 +19,6 @@
 #pragma once
 
 #include <boost/asio.hpp>
-#include <Transport/ITransport.hpp>
 #include <Configuration/IConfiguration.hpp>
 #include <Configuration/ServiceConfig.hpp>
 #include <Service/IAndroidAutoEntityFactory.hpp>
@@ -42,7 +41,6 @@ public:
                              configuration::ServiceConfig& serviceConfig,
                              IServiceFactory& serviceFactory);
 
-    IAndroidAutoEntity::Pointer create(aasdk::transport::ITransport::Pointer transport) override;
     IAndroidAutoEntity::Pointer create(DeviceConnection::Pointer connection) override;
 
 private:

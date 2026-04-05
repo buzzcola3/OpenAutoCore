@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <Messenger/IMessenger.hpp>
 #include <Service/IService.hpp>
 #include <memory>
 
@@ -38,7 +37,7 @@ class IServiceFactory
 public:
     virtual ~IServiceFactory() = default;
 
-    virtual ServiceList create(aasdk::messenger::IMessenger::Pointer messenger) = 0;
+    virtual ServiceList create() = 0;
 
     virtual std::shared_ptr<buzz::autoapp::Transport::Transport> getTransport() = 0;
 };

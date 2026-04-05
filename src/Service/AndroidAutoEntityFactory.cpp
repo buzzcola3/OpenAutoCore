@@ -18,12 +18,8 @@
 
 #include <Transport/SSLWrapper.hpp>
 #include <Messenger/Cryptor.hpp>
-#include <Messenger/MessageInStream.hpp>
-#include <Messenger/MessageOutStream.hpp>
-#include <Messenger/Messenger.hpp>
-#include <Messenger/MessageSender.hpp>
 #include <Messenger/MessageInStreamInterceptor.hpp>
-#include <DeviceConnectionTransport.hpp>
+#include <FrameRouter.hpp>
 #include <Service/AndroidAutoEntityFactory.hpp>
 #include <Service/AndroidAutoEntity.hpp>
 #include <Service/Pinger.hpp>
@@ -42,29 +38,21 @@ namespace f1x {
         }
 
         IAndroidAutoEntity::Pointer AndroidAutoEntityFactory::create(DeviceConnection::Pointer connection) {
-          auto transport = std::make_shared<DeviceConnectionTransport>(ioService_, std::move(connection));
-          return create(std::move(transport));
-        }
-
-        IAndroidAutoEntity::Pointer AndroidAutoEntityFactory::create(aasdk::transport::ITransport::Pointer transport) {
           auto sslWrapper(std::make_shared<aasdk::transport::SSLWrapper>());
           auto cryptor(std::make_shared<aasdk::messenger::Cryptor>(std::move(sslWrapper)));
           cryptor->init();
 
-              auto messageOutStream = std::make_shared<aasdk::messenger::MessageOutStream>(ioService_, transport, cryptor);
-              auto messenger(std::make_shared<aasdk::messenger::Messenger>(ioService_,
-                                             std::make_shared<aasdk::messenger::MessageInStream>(
-                                               ioService_, transport, cryptor),
-                                             messageOutStream));
+          auto router = std::make_shared<aasdk::FrameRouter>(std::move(connection), cryptor);
 
-              auto messageSender = std::make_shared<aasdk::messenger::MessageSender>(ioService_, transport, cryptor);
-            aasdk::messenger::interceptor::setMessageSender(std::move(messageSender));
+          // Set the FrameRouter's send function as the global send path for all handlers
+          aasdk::messenger::interceptor::setSendFn(router->makeSendFn());
 
-          auto serviceList = serviceFactory_.create(messenger);
+          auto serviceList = serviceFactory_.create();
           auto pinger(std::make_shared<Pinger>(ioService_, 5000));
-          return std::make_shared<AndroidAutoEntity>(ioService_, std::move(cryptor), std::move(transport),
-                                                     std::move(messenger), configuration_, serviceConfig_,
-                                                     std::move(serviceList), std::move(pinger));
+          return std::make_shared<AndroidAutoEntity>(ioService_, std::move(cryptor),
+                                                     std::move(router), configuration_,
+                                                     serviceConfig_, std::move(serviceList),
+                                                     std::move(pinger));
         }
 
       }

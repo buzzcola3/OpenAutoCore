@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <Transport/ITransport.hpp>
 #include <DeviceManager/DeviceConnection.hpp>
 #include <Service/IAndroidAutoEntity.hpp>
 
@@ -36,7 +35,6 @@ class IAndroidAutoEntityFactory
 public:
     virtual ~IAndroidAutoEntityFactory() = default;
 
-    virtual IAndroidAutoEntity::Pointer create(aasdk::transport::ITransport::Pointer transport) = 0;
     virtual IAndroidAutoEntity::Pointer create(DeviceConnection::Pointer connection) = 0;
 };
 

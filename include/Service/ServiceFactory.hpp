@@ -30,12 +30,10 @@ namespace f1x {
         class ServiceFactory : public IServiceFactory {
         public:
           ServiceFactory(boost::asio::io_service &ioService, configuration::IConfiguration::Pointer configuration);
-          ServiceList create(aasdk::messenger::IMessenger::Pointer messenger) override;
+          ServiceList create() override;
           std::shared_ptr<buzz::autoapp::Transport::Transport> getTransport() override;
 
         private:
-          IService::Pointer createWifiProjectionService(aasdk::messenger::IMessenger::Pointer messenger);
-
           boost::asio::io_service &ioService_;
           configuration::IConfiguration::Pointer configuration_;
           std::shared_ptr<buzz::autoapp::Transport::Transport> transport_;

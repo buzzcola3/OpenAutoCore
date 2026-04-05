@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -19,6 +20,12 @@ struct InMessage {
     messenger::MessageType    messageType{messenger::MessageType::SPECIFIC};
     std::vector<uint8_t>      payload; // complete decrypted payload
 };
+
+/// Callback type for sending a raw payload (2-byte messageId + protobuf body).
+using SendFn = std::function<void(messenger::ChannelId,
+                                  messenger::EncryptionType,
+                                  messenger::MessageType,
+                                  const uint8_t*, size_t)>;
 
 class FrameIO {
 public:

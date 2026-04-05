@@ -16,9 +16,10 @@
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <IO/Promise.hpp>
-
 #pragma once
+
+#include <memory>
+#include <string>
 
 namespace f1x
 {
@@ -32,7 +33,6 @@ namespace projection
 class IBluetoothDevice
 {
 public:
-    typedef aasdk::io::Promise<void, void> PairingPromise;
     typedef std::shared_ptr<IBluetoothDevice> Pointer;
 
     virtual void stop() = 0;

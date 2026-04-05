@@ -28,14 +28,12 @@ namespace f1x {
 
         AndroidAutoEntity::AndroidAutoEntity(boost::asio::io_service &ioService,
                                              aasdk::messenger::ICryptor::Pointer cryptor,
-                                             aasdk::transport::ITransport::Pointer transport,
-                                             aasdk::messenger::IMessenger::Pointer messenger,
+                                             aasdk::FrameRouter::Pointer router,
                                              configuration::IConfiguration::Pointer configuration,
                                              configuration::ServiceConfig& serviceConfig,
                                              ServiceList serviceList,
                                              IPinger::Pointer pinger)
-            : strand_(ioService), cryptor_(std::move(cryptor)), transport_(std::move(transport)),
-              messenger_(std::move(messenger)),
+            : strand_(ioService), cryptor_(std::move(cryptor)), router_(std::move(router)),
               controlHandler_(aasdk::messenger::interceptor::getControlHandler()),
               configuration_(std::move(configuration)), serviceConfig_(serviceConfig),
               serviceList_(std::move(serviceList)),
@@ -177,8 +175,8 @@ namespace f1x {
 
             this->wireControlCallbacks();
 
-            OPENAUTO_LOG(debug) << "[AndroidAutoEntity] Starting receive loop.";
-            messenger_->startReceiveLoop();
+            OPENAUTO_LOG(debug) << "[AndroidAutoEntity] Starting FrameRouter.";
+            router_->start();
 
             OPENAUTO_LOG(debug) << "[AndroidAutoEntity] Send Version Request.";
             controlHandler_.sendVersionRequest();
@@ -215,8 +213,7 @@ namespace f1x {
               std::for_each(serviceList_.begin(), serviceList_.end(),
                             std::bind(&IService::stop, std::placeholders::_1));
 
-              messenger_->stop();
-              transport_->stop();
+              router_->stop();
               cryptor_->deinit();
             } catch (...) {
               OPENAUTO_LOG(error) << "[AndroidAutoEntity] stop() - exception when stopping.";

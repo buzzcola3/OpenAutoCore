@@ -19,9 +19,8 @@
 #pragma once
 
 #include <boost/asio.hpp>
-#include <Transport/ITransport.hpp>
 #include <Messenger/ICryptor.hpp>
-#include <Messenger/IMessenger.hpp>
+#include <FrameRouter.hpp>
 #include <Configuration/IConfiguration.hpp>
 #include <Configuration/ServiceConfig.hpp>
 #include <Service/IAndroidAutoEntity.hpp>
@@ -47,8 +46,7 @@ class AndroidAutoEntity: public IAndroidAutoEntity, public std::enable_shared_fr
 public:
     AndroidAutoEntity(boost::asio::io_service& ioService,
                       aasdk::messenger::ICryptor::Pointer cryptor,
-                      aasdk::transport::ITransport::Pointer transport,
-                      aasdk::messenger::IMessenger::Pointer messenger,
+                      aasdk::FrameRouter::Pointer router,
                       configuration::IConfiguration::Pointer configuration,
                       configuration::ServiceConfig& serviceConfig,
                       ServiceList serviceList,
@@ -68,8 +66,7 @@ private:
 
     boost::asio::io_service::strand strand_;
     aasdk::messenger::ICryptor::Pointer cryptor_;
-    aasdk::transport::ITransport::Pointer transport_;
-    aasdk::messenger::IMessenger::Pointer messenger_;
+    aasdk::FrameRouter::Pointer router_;
     aasdk::lite::ControlHandler& controlHandler_;
     configuration::IConfiguration::Pointer configuration_;
     configuration::ServiceConfig& serviceConfig_;

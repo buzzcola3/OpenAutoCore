@@ -1,5 +1,4 @@
-// Default interceptor implementation; override to short-circuit message
-// delivery for specific channel IDs when required.
+// Interceptor — handler dispatch and global Lite handler registry.
 
 #include <Messenger/MessageInStreamInterceptor.hpp>
 #include <Lite/BluetoothHandler.hpp>
@@ -20,11 +19,9 @@
 #include <Lite/VendorExtensionHandler.hpp>
 #include <Lite/ControlHandler.hpp>
 #include <Lite/FrameIO.hpp>
-#include <Messenger/MessageSender.hpp>
-#include <Messenger/MessageSenderLocator.hpp>
-#include <Messenger/Message.hpp>
 #include <Messenger/ChannelId.hpp>
 #include <Common/Data.hpp>
+#include <Common/Log.hpp>
 #include <memory>
 #include <mutex>
 #include <utility>
@@ -33,23 +30,22 @@ namespace aasdk::messenger::interceptor {
 
 namespace {
 
-std::shared_ptr<::aasdk::messenger::MessageSender> MESSAGE_SENDER_STRONG_REF;
+// Global SendFn — set by FrameRouter (or legacy MessageSender bridge).
+// All handler lazy-sends resolve through this at call time.
+aasdk::lite::SendFn gSendFn;
 
 std::unique_ptr<aasdk::lite::MediaSinkVideoHandler> MEDIA_SINK_VIDEO_HANDLER;
 std::unique_ptr<aasdk::lite::MediaSinkAudioHandler> MEDIA_SINK_AUDIO_HANDLER;
 std::unique_ptr<aasdk::lite::GuidanceAudioHandler> GUIDANCE_AUDIO_HANDLER;
 std::unique_ptr<aasdk::lite::SystemAudioHandler> SYSTEM_AUDIO_HANDLER;
 std::unique_ptr<aasdk::lite::TelephonyAudioHandler> TELEPHONY_AUDIO_HANDLER;
+
 aasdk::lite::SendFn makeLazySendFn() {
   return [](::aasdk::messenger::ChannelId ch,
             ::aasdk::messenger::EncryptionType enc,
             ::aasdk::messenger::MessageType mt,
             const uint8_t* data, size_t size) {
-    auto s = MessageSenderLocator::get();
-    if (!s || size < 2) return;
-    uint16_t msgId = (static_cast<uint16_t>(data[0]) << 8) | data[1];
-    ::aasdk::common::DataConstBuffer buf(data + 2, size - 2);
-    s->sendRaw(ch, enc, mt, msgId, buf);
+    if (gSendFn) gSendFn(ch, enc, mt, data, size);
   };
 }
 
@@ -66,134 +62,85 @@ aasdk::lite::MediaPlaybackStatusHandler MEDIA_PLAYBACK_STATUS_HANDLER{makeLazySe
 aasdk::lite::VendorExtensionHandler VENDOR_EXTENSION_HANDLER{makeLazySendFn()};
 aasdk::lite::ControlHandler CONTROL_HANDLER{makeLazySendFn()};
 
-}
+} // namespace
 
-bool handleMessage(const ::aasdk::messenger::Message& message) {
-  switch (message.getChannelId()) {
-    case ::aasdk::messenger::ChannelId::MEDIA_SINK_VIDEO:
-      if (MEDIA_SINK_VIDEO_HANDLER) {
-        // Adapt old Message to Lite InMessage and dispatch
-        aasdk::lite::InMessage in;
-        in.channelId = message.getChannelId();
-        in.encryptionType = message.getEncryptionType();
-        in.messageType = message.getType();
-        in.payload.assign(message.getPayload().begin(), message.getPayload().end());
-        (*MEDIA_SINK_VIDEO_HANDLER)(in);
-        return true;
-      }
-      return false;
-    case ::aasdk::messenger::ChannelId::MEDIA_SINK_MEDIA_AUDIO:
-    case ::aasdk::messenger::ChannelId::MEDIA_SINK_GUIDANCE_AUDIO:
-    case ::aasdk::messenger::ChannelId::MEDIA_SINK_SYSTEM_AUDIO:
-    case ::aasdk::messenger::ChannelId::MEDIA_SINK_TELEPHONY_AUDIO: {
-      auto* handler = [&]() -> void* {
-        switch (message.getChannelId()) {
-          case ::aasdk::messenger::ChannelId::MEDIA_SINK_MEDIA_AUDIO:     return MEDIA_SINK_AUDIO_HANDLER.get();
-          case ::aasdk::messenger::ChannelId::MEDIA_SINK_GUIDANCE_AUDIO:  return GUIDANCE_AUDIO_HANDLER.get();
-          case ::aasdk::messenger::ChannelId::MEDIA_SINK_SYSTEM_AUDIO:    return SYSTEM_AUDIO_HANDLER.get();
-          case ::aasdk::messenger::ChannelId::MEDIA_SINK_TELEPHONY_AUDIO: return TELEPHONY_AUDIO_HANDLER.get();
-          default: return nullptr;
-        }
-      }();
-      if (!handler) return false;
-      aasdk::lite::InMessage in;
-      in.channelId = message.getChannelId();
-      in.encryptionType = message.getEncryptionType();
-      in.messageType = message.getType();
-      in.payload.assign(message.getPayload().begin(), message.getPayload().end());
-      switch (message.getChannelId()) {
-        case ::aasdk::messenger::ChannelId::MEDIA_SINK_MEDIA_AUDIO:     (*MEDIA_SINK_AUDIO_HANDLER)(in); break;
-        case ::aasdk::messenger::ChannelId::MEDIA_SINK_GUIDANCE_AUDIO:  (*GUIDANCE_AUDIO_HANDLER)(in); break;
-        case ::aasdk::messenger::ChannelId::MEDIA_SINK_SYSTEM_AUDIO:    (*SYSTEM_AUDIO_HANDLER)(in); break;
-        case ::aasdk::messenger::ChannelId::MEDIA_SINK_TELEPHONY_AUDIO: (*TELEPHONY_AUDIO_HANDLER)(in); break;
-        default: break;
-      }
-      return true;
-    }
-    case ::aasdk::messenger::ChannelId::INPUT_SOURCE: {
-        aasdk::lite::InMessage in;
-        in.channelId = message.getChannelId();
-        in.encryptionType = message.getEncryptionType();
-        in.messageType = message.getType();
-        in.payload.assign(message.getPayload().begin(), message.getPayload().end());
-        INPUT_SOURCE_HANDLER(in);
-        return true;
-      }
-    case ::aasdk::messenger::ChannelId::SENSOR: {
-        aasdk::lite::InMessage in;
-        in.channelId = message.getChannelId();
-        in.encryptionType = message.getEncryptionType();
-        in.messageType = message.getType();
-        in.payload.assign(message.getPayload().begin(), message.getPayload().end());
-        SENSOR_HANDLER(in);
-        return true;
-      }
-    case ::aasdk::messenger::ChannelId::BLUETOOTH:
-    case ::aasdk::messenger::ChannelId::MEDIA_SOURCE_MICROPHONE:
-    case ::aasdk::messenger::ChannelId::PHONE_STATUS:
-    case ::aasdk::messenger::ChannelId::GENERIC_NOTIFICATION:
-    case ::aasdk::messenger::ChannelId::NAVIGATION_STATUS:
-    case ::aasdk::messenger::ChannelId::RADIO:
-    case ::aasdk::messenger::ChannelId::MEDIA_BROWSER:
-    case ::aasdk::messenger::ChannelId::MEDIA_PLAYBACK_STATUS:
-    case ::aasdk::messenger::ChannelId::VENDOR_EXTENSION: {
-      aasdk::lite::InMessage in;
-      in.channelId = message.getChannelId();
-      in.encryptionType = message.getEncryptionType();
-      in.messageType = message.getType();
-      in.payload.assign(message.getPayload().begin(), message.getPayload().end());
-      switch (message.getChannelId()) {
-        case ::aasdk::messenger::ChannelId::BLUETOOTH:              BLUETOOTH_HANDLER(in); break;
-        case ::aasdk::messenger::ChannelId::MEDIA_SOURCE_MICROPHONE: MEDIA_SOURCE_HANDLER(in); break;
-        case ::aasdk::messenger::ChannelId::PHONE_STATUS:           PHONE_STATUS_HANDLER(in); break;
-        case ::aasdk::messenger::ChannelId::GENERIC_NOTIFICATION:   GENERIC_NOTIFICATION_HANDLER(in); break;
-        case ::aasdk::messenger::ChannelId::NAVIGATION_STATUS:      NAVIGATION_STATUS_HANDLER(in); break;
-        case ::aasdk::messenger::ChannelId::RADIO:                  RADIO_HANDLER(in); break;
-        case ::aasdk::messenger::ChannelId::MEDIA_BROWSER:          MEDIA_BROWSER_HANDLER(in); break;
-        case ::aasdk::messenger::ChannelId::MEDIA_PLAYBACK_STATUS:  MEDIA_PLAYBACK_STATUS_HANDLER(in); break;
-        case ::aasdk::messenger::ChannelId::VENDOR_EXTENSION:       VENDOR_EXTENSION_HANDLER(in); break;
-        default: break;
-      }
-      return true;
-    }
-    case ::aasdk::messenger::ChannelId::CONTROL: {
-      aasdk::lite::InMessage in;
-      in.channelId = message.getChannelId();
-      in.encryptionType = message.getEncryptionType();
-      in.messageType = message.getType();
-      in.payload.assign(message.getPayload().begin(), message.getPayload().end());
-      CONTROL_HANDLER(in);
-      return true;
-    }
+void handleMessage(const ::aasdk::lite::InMessage& message) {
+  using ChannelId = ::aasdk::messenger::ChannelId;
+
+  switch (message.channelId) {
+    case ChannelId::MEDIA_SINK_VIDEO:
+      if (MEDIA_SINK_VIDEO_HANDLER) { (*MEDIA_SINK_VIDEO_HANDLER)(message); }
+      break;
+    case ChannelId::MEDIA_SINK_MEDIA_AUDIO:
+      if (MEDIA_SINK_AUDIO_HANDLER) { (*MEDIA_SINK_AUDIO_HANDLER)(message); }
+      break;
+    case ChannelId::MEDIA_SINK_GUIDANCE_AUDIO:
+      if (GUIDANCE_AUDIO_HANDLER) { (*GUIDANCE_AUDIO_HANDLER)(message); }
+      break;
+    case ChannelId::MEDIA_SINK_SYSTEM_AUDIO:
+      if (SYSTEM_AUDIO_HANDLER) { (*SYSTEM_AUDIO_HANDLER)(message); }
+      break;
+    case ChannelId::MEDIA_SINK_TELEPHONY_AUDIO:
+      if (TELEPHONY_AUDIO_HANDLER) { (*TELEPHONY_AUDIO_HANDLER)(message); }
+      break;
+    case ChannelId::INPUT_SOURCE:
+      INPUT_SOURCE_HANDLER(message);
+      break;
+    case ChannelId::SENSOR:
+      SENSOR_HANDLER(message);
+      break;
+    case ChannelId::BLUETOOTH:
+      BLUETOOTH_HANDLER(message);
+      break;
+    case ChannelId::MEDIA_SOURCE_MICROPHONE:
+      MEDIA_SOURCE_HANDLER(message);
+      break;
+    case ChannelId::PHONE_STATUS:
+      PHONE_STATUS_HANDLER(message);
+      break;
+    case ChannelId::GENERIC_NOTIFICATION:
+      GENERIC_NOTIFICATION_HANDLER(message);
+      break;
+    case ChannelId::NAVIGATION_STATUS:
+      NAVIGATION_STATUS_HANDLER(message);
+      break;
+    case ChannelId::RADIO:
+      RADIO_HANDLER(message);
+      break;
+    case ChannelId::MEDIA_BROWSER:
+      MEDIA_BROWSER_HANDLER(message);
+      break;
+    case ChannelId::MEDIA_PLAYBACK_STATUS:
+      MEDIA_PLAYBACK_STATUS_HANDLER(message);
+      break;
+    case ChannelId::VENDOR_EXTENSION:
+      VENDOR_EXTENSION_HANDLER(message);
+      break;
+    case ChannelId::CONTROL:
+      CONTROL_HANDLER(message);
+      break;
     default:
-      return false;
+      AASDK_LOG(warning) << "[Interceptor] Unhandled channel: "
+                         << channelIdToString(message.channelId);
+      break;
   }
 }
 
-void setMessageSender(std::shared_ptr<::aasdk::messenger::MessageSender> sender) {
-  MESSAGE_SENDER_STRONG_REF = sender;
-  MessageSenderLocator::set(sender);
+void setSendFn(aasdk::lite::SendFn fn) {
+  gSendFn = std::move(fn);
 }
 
 void setVideoTransport(const std::shared_ptr<buzz::autoapp::Transport::Transport>& transport) {
-  // Create the Lite video handler with a SendFn that resolves MessageSender lazily,
-  // since setVideoTransport may be called before setMessageSender.
-  aasdk::lite::SendFn sendFn = [](::aasdk::messenger::ChannelId ch,
-                                  ::aasdk::messenger::EncryptionType enc,
-                                  ::aasdk::messenger::MessageType mt,
-                                  const uint8_t* data, size_t size) {
-    auto sender = MessageSenderLocator::get();
-    if (!sender || size < 2) return;
-    uint16_t msgId = (static_cast<uint16_t>(data[0]) << 8) | data[1];
-    ::aasdk::common::DataConstBuffer buf(data + 2, size - 2);
-    sender->sendRaw(ch, enc, mt, msgId, buf);
-  };
   MEDIA_SINK_VIDEO_HANDLER = std::make_unique<aasdk::lite::MediaSinkVideoHandler>(
-      std::move(sendFn), transport);
-  MEDIA_SINK_AUDIO_HANDLER = std::make_unique<aasdk::lite::MediaSinkAudioHandler>(makeLazySendFn(), transport);
-  GUIDANCE_AUDIO_HANDLER = std::make_unique<aasdk::lite::GuidanceAudioHandler>(makeLazySendFn(), transport);
-  SYSTEM_AUDIO_HANDLER = std::make_unique<aasdk::lite::SystemAudioHandler>(makeLazySendFn(), transport);
-  TELEPHONY_AUDIO_HANDLER = std::make_unique<aasdk::lite::TelephonyAudioHandler>(makeLazySendFn(), transport);
+      makeLazySendFn(), transport);
+  MEDIA_SINK_AUDIO_HANDLER = std::make_unique<aasdk::lite::MediaSinkAudioHandler>(
+      makeLazySendFn(), transport);
+  GUIDANCE_AUDIO_HANDLER = std::make_unique<aasdk::lite::GuidanceAudioHandler>(
+      makeLazySendFn(), transport);
+  SYSTEM_AUDIO_HANDLER = std::make_unique<aasdk::lite::SystemAudioHandler>(
+      makeLazySendFn(), transport);
+  TELEPHONY_AUDIO_HANDLER = std::make_unique<aasdk::lite::TelephonyAudioHandler>(
+      makeLazySendFn(), transport);
 }
 
 aasdk::lite::InputSourceHandler& getInputSourceHandler() {

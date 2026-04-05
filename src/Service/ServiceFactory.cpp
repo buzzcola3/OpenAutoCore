@@ -28,19 +28,9 @@ namespace f1x::openauto::autoapp::service {
 
   }
 
-  ServiceList ServiceFactory::create(aasdk::messenger::IMessenger::Pointer messenger) {
+  ServiceList ServiceFactory::create() {
     OPENAUTO_LOG(info) << "[ServiceFactory] create()";
     ServiceList serviceList;
-
-    if (configuration_->getWirelessProjectionEnabled()) {
-      // TODO: What is WiFi Projection Service?
-      /*
-       * The btservice seems to handle connecting over bluetooth and allow AA to establish a WiFi connection for Projection
-       * If WifiProjection is a legitimate service, then it seems clear it is not what we think it actually is.
-       */
-      // serviceList.emplace_back(this->createWifiProjectionService(messenger));
-    }
-
     return serviceList;
   }
 
