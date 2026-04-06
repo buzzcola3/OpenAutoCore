@@ -28,22 +28,13 @@ bazel build -c dbg //:openautocore
 
 ### System dependencies
 
-Ensure the following are installed:
+A C++ compiler is required for `rules_foreign_cc` (used to build libell):
 
 ```bash
-sudo apt-get install -y \
-    g++ \
-    libssl-dev \
-    libusb-1.0-0-dev \
-    libell-dev \
-    qtbase5-dev \
-    qttools5-dev \
-    qtmultimedia5-dev \
-    libprotobuf-dev \
-    protobuf-compiler
+sudo apt-get install -y g++
 ```
 
-Remaining dependencies (Boost, nlohmann_json, googletest, etc.) are managed by Bazel via `MODULE.bazel`.
+All other dependencies (OpenSSL, libusb, libell, Boost, protobuf, nlohmann_json, googletest, etc.) are managed by Bazel via `MODULE.bazel`.
 
 ## Platform
 
