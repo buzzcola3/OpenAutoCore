@@ -17,29 +17,21 @@
 
 #pragma once
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <string>
+#include <memory>
 #include <vector>
-#include <Messenger/ChannelId.hpp>
-#include <Messenger/EncryptionType.hpp>
-#include <Messenger/MessageType.hpp>
+#include <boost/asio.hpp>
+#include <Common/ChannelId.hpp>
+#include <Common/EncryptionType.hpp>
+#include <Common/MessageType.hpp>
 #include <Common/Data.hpp>
-#include <aap_protobuf/service/control/message/AudioFocusRequest.pb.h>
-#include <aap_protobuf/service/control/message/BatteryStatusNotification.pb.h>
-#include <aap_protobuf/service/control/message/ByeByeRequest.pb.h>
-#include <aap_protobuf/service/control/message/ByeByeResponse.pb.h>
-#include <aap_protobuf/service/control/message/NavFocusRequestNotification.pb.h>
-#include <aap_protobuf/service/control/message/PingRequest.pb.h>
-#include <aap_protobuf/service/control/message/PingResponse.pb.h>
-#include <aap_protobuf/service/control/message/ServiceDiscoveryRequest.pb.h>
-#include <aap_protobuf/service/control/message/VoiceSessionNotification.pb.h>
-#include <aap_protobuf/service/control/message/AuthResponse.pb.h>
-#include <aap_protobuf/service/control/message/ServiceDiscoveryResponse.pb.h>
-#include <aap_protobuf/service/control/message/AudioFocusNotification.pb.h>
-#include <aap_protobuf/service/control/message/NavFocusNotification.pb.h>
-#include <aap_protobuf/shared/MessageStatus.pb.h>
+
+namespace google::protobuf { class MessageLite; }
+namespace aasdk::messenger { class ICryptor; }
+namespace f1x::openauto::autoapp::configuration { class ServiceConfig; }
 
 namespace aasdk::lite {
 
@@ -52,33 +44,23 @@ using SendFn = std::function<void(messenger::ChannelId,
 class ControlHandler {
 public:
     explicit ControlHandler(SendFn sender);
+
+    /// Dispatch an inbound control-channel message.
     void operator()(const InMessage& msg);
 
-    // --- Outbound sends (called by AndroidAutoEntity) ---
-    void sendVersionRequest();
-    void sendHandshake(const common::Data& buffer);
-    void sendAuthComplete(const aap_protobuf::service::control::message::AuthResponse& response);
-    void sendServiceDiscoveryResponse(const aap_protobuf::service::control::message::ServiceDiscoveryResponse& response);
-    void sendAudioFocusResponse(const aap_protobuf::service::control::message::AudioFocusNotification& response);
-    void sendNavigationFocusResponse(const aap_protobuf::service::control::message::NavFocusNotification& response);
-    void sendShutdownRequest(const aap_protobuf::service::control::message::ByeByeRequest& request);
-    void sendShutdownResponse(const aap_protobuf::service::control::message::ByeByeResponse& response);
-    void sendPingRequest(const aap_protobuf::service::control::message::PingRequest& request);
-    void sendPingResponse(const aap_protobuf::service::control::message::PingResponse& response);
+    // ── Session lifecycle ──
 
-    // --- Inbound callbacks (set by AndroidAutoEntity) ---
-    std::function<void(uint16_t, uint16_t, aap_protobuf::shared::MessageStatus)> onVersionResponse;
-    std::function<void(const common::DataConstBuffer&)> onHandshake;
-    std::function<void(const aap_protobuf::service::control::message::ServiceDiscoveryRequest&)> onServiceDiscoveryRequest;
-    std::function<void(const aap_protobuf::service::control::message::AudioFocusRequest&)> onAudioFocusRequest;
-    std::function<void(const aap_protobuf::service::control::message::NavFocusRequestNotification&)> onNavigationFocusRequest;
-    std::function<void(const aap_protobuf::service::control::message::ByeByeRequest&)> onByeByeRequest;
-    std::function<void(const aap_protobuf::service::control::message::ByeByeResponse&)> onByeByeResponse;
-    std::function<void(const aap_protobuf::service::control::message::BatteryStatusNotification&)> onBatteryStatusNotification;
-    std::function<void(const aap_protobuf::service::control::message::VoiceSessionNotification&)> onVoiceSessionRequest;
-    std::function<void(const aap_protobuf::service::control::message::PingRequest&)> onPingRequest;
-    std::function<void(const aap_protobuf::service::control::message::PingResponse&)> onPingResponse;
-    std::function<void(uint16_t)> onChannelOpenRequest;
+    /// Wire the AA session state machine and start infrastructure.
+    void initSession(messenger::ICryptor& cryptor,
+                     f1x::openauto::autoapp::configuration::ServiceConfig& serviceConfig,
+                     boost::asio::io_service& ioService,
+                     std::function<void()> onSessionEnd);
+
+    /// Tear down session: cancel ping timer, clear references.
+    void teardownSession();
+
+    /// Send the initial version request (kicks off the AA protocol).
+    void sendVersionRequest();
 
 private:
     void sendRaw(uint16_t messageId, messenger::EncryptionType enc,
@@ -86,7 +68,36 @@ private:
     void sendProto(uint16_t messageId, messenger::EncryptionType enc,
                    const google::protobuf::MessageLite& proto);
 
+    // ── Inbound handlers ──
+    void handleVersionResponse(const uint8_t* data, size_t size);
+    void handleHandshake(const uint8_t* data, size_t size);
+    void handleServiceDiscovery(const uint8_t* data, size_t size);
+    void handleAudioFocus(const uint8_t* data, size_t size);
+    void handleNavFocus(const uint8_t* data, size_t size);
+    void handleByeByeRequest(const uint8_t* data, size_t size);
+    void handleByeByeResponse();
+    void handlePingResponse(const uint8_t* data, size_t size);
+
+    // ── Ping ──
+    void sendPing();
+    void schedulePing();
+    void onPingTimer(const boost::system::error_code& ec);
+
+    void triggerSessionEnd();
+
     SendFn send_;
+
+    // Session state (valid between initSession / teardownSession)
+    messenger::ICryptor* cryptor_ = nullptr;
+    f1x::openauto::autoapp::configuration::ServiceConfig* serviceConfig_ = nullptr;
+    std::function<void()> onSessionEnd_;
+    std::unique_ptr<boost::asio::deadline_timer> pingTimer_;
+    std::atomic<int64_t> pingsCount_{0};
+    std::atomic<int64_t> pongsCount_{0};
+    std::atomic<bool> sessionActive_{false};
+
+    static constexpr int64_t kPingIntervalMs = 5000;
+    static constexpr int64_t kMaxMissedPongs = 4;
 };
 
 } // namespace aasdk::lite

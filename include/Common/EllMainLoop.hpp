@@ -19,7 +19,6 @@
 
 #include <atomic>
 #include <mutex>
-#include <thread>
 
 namespace f1x::openauto::common {
 
@@ -27,7 +26,12 @@ class EllMainLoop {
 public:
     static EllMainLoop& instance();
 
+    /// Initialise ELL (l_main_init). Safe to call multiple times.
     void ensureRunning();
+
+    /// Non-blocking: process any pending ELL events.
+    void step();
+
     void shutdown();
 
 private:
@@ -37,9 +41,8 @@ private:
     EllMainLoop(const EllMainLoop&) = delete;
     EllMainLoop& operator=(const EllMainLoop&) = delete;
 
-    std::atomic_bool running_{false};
+    std::atomic_bool initialized_{false};
     std::mutex mutex_;
-    std::thread loopThread_;
 };
 
 }

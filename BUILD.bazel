@@ -63,6 +63,7 @@ cc_library(
         "bazel-*/**",
         "src/autoapp/autoapp.cpp",
         "src/autoapp.cpp",
+        "src/main.cpp",
         "src/DeviceManager/**",
         "src/**/*.ut.cpp",
     ]),
@@ -104,7 +105,7 @@ cc_library(
 cc_binary(
     name = "openautocore",
     srcs = [
-        "src/autoapp.cpp",
+        "src/main.cpp",
     ],
     includes = [
         "include",

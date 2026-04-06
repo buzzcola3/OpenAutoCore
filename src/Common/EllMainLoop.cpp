@@ -34,33 +34,26 @@ EllMainLoop& EllMainLoop::instance() {
 
 void EllMainLoop::ensureRunning() {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (running_.load()) {
-        return;
-    }
+    if (initialized_.load()) return;
 
     if (!l_main_init()) {
         OPENAUTO_LOG(error) << "[EllMainLoop] Failed to initialize l_main";
         return;
     }
+    initialized_.store(true);
+}
 
-    running_.store(true);
-    loopThread_ = std::thread([this]() {
-        while (running_.load()) {
-            l_main_iterate(50);
-        }
-    });
+void EllMainLoop::step() {
+    if (initialized_.load()) {
+        l_main_iterate(0);
+    }
 }
 
 void EllMainLoop::shutdown() {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (!running_.load()) {
-        return;
-    }
-    running_.store(false);
+    if (!initialized_.load()) return;
+    initialized_.store(false);
     l_main_exit();
-    if (loopThread_.joinable()) {
-        loopThread_.join();
-    }
 }
 
 }

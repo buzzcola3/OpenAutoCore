@@ -18,8 +18,8 @@
 #include <Lite/TelephonyAudioHandler.hpp>
 #include <Lite/FrameIO.hpp>
 
-#include <Messenger/MessageType.hpp>
-#include <Messenger/Timestamp.hpp>
+#include <Common/MessageType.hpp>
+#include <Common/Timestamp.hpp>
 #include <Common/Log.hpp>
 #include <open_auto_transport/transport.hpp>
 #include <open_auto_transport/wire.hpp>

@@ -20,9 +20,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <Messenger/ChannelId.hpp>
-#include <Messenger/EncryptionType.hpp>
-#include <Messenger/MessageType.hpp>
+#include <Common/ChannelId.hpp>
+#include <Common/EncryptionType.hpp>
+#include <Common/MessageType.hpp>
 
 namespace google::protobuf { class MessageLite; }
 

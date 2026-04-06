@@ -18,7 +18,7 @@
 #include <Lite/SensorHandler.hpp>
 #include <Lite/FrameIO.hpp>
 
-#include <Messenger/MessageType.hpp>
+#include <Common/MessageType.hpp>
 #include <Common/Log.hpp>
 #include <nlohmann/json.hpp>
 #include <aap_protobuf/service/control/ControlMessageType.pb.h>

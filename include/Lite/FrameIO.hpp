@@ -22,11 +22,11 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <Messenger/ChannelId.hpp>
-#include <Messenger/EncryptionType.hpp>
-#include <Messenger/FrameType.hpp>
-#include <Messenger/MessageType.hpp>
-#include <Messenger/ICryptor.hpp>
+#include <Common/ChannelId.hpp>
+#include <Common/EncryptionType.hpp>
+#include <Common/FrameType.hpp>
+#include <Common/MessageType.hpp>
+#include <Common/ICryptor.hpp>
 #include <Lite/USBDevice.hpp>
 
 namespace aasdk::lite {

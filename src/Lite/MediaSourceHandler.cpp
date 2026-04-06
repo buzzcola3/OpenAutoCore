@@ -18,8 +18,8 @@
 #include <Lite/MediaSourceHandler.hpp>
 #include <Lite/FrameIO.hpp>
 
-#include <Messenger/MessageType.hpp>
-#include <Messenger/Timestamp.hpp>
+#include <Common/MessageType.hpp>
+#include <Common/Timestamp.hpp>
 #include <Common/Data.hpp>
 #include <Common/Log.hpp>
 #include <aap_protobuf/service/control/ControlMessageType.pb.h>
