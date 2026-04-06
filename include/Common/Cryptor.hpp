@@ -19,7 +19,7 @@
 #pragma once
 
 #include <mutex>
-#include <Transport/ISSLWrapper.hpp>
+#include <Common/ISSLWrapper.hpp>
 #include <Common/ICryptor.hpp>
 
 

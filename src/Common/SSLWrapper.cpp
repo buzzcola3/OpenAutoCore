@@ -21,7 +21,7 @@
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 #include <openssl/conf.h>
-#include <Transport/SSLWrapper.hpp>
+#include <Common/SSLWrapper.hpp>
 #include <Common/Log.hpp>
 
 namespace aasdk {

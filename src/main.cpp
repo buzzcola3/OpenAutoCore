@@ -31,7 +31,7 @@
 #include <open_auto_transport/transport.hpp>
 #include <aap_protobuf/service/inputsource/message/InputReport.pb.h>
 
-#include <Transport/SSLWrapper.hpp>
+#include <Common/SSLWrapper.hpp>
 #include <Common/Cryptor.hpp>
 #include <Common/ICryptor.hpp>
 #include <FrameRouter/FrameRouter.hpp>
@@ -46,9 +46,6 @@
 #include <Configuration/ServiceConfig.hpp>
 #include <Configuration/RecentAddressesList.hpp>
 #include <Configuration/Configuration.hpp>
-#include <Projection/IBluetoothDevice.hpp>
-#include <Projection/BluezBluetoothDevice.hpp>
-#include <Projection/DummyBluetoothDevice.hpp>
 #include <DeviceManager/Common/DeviceConnection.hpp>
 #include <DeviceManager/Common/DeviceManager.hpp>
 #include <DeviceManager/Common/DmLog.hpp>
@@ -153,18 +150,6 @@ void handleShutdown(int) {
     gRunning.store(false);
 }
 
-autoapp::projection::IBluetoothDevice::Pointer createBluetoothDevice(
-    const autoapp::configuration::IConfiguration::Pointer& configuration) {
-    if (configuration == nullptr || configuration->getBluetoothAdapterAddress().empty()) {
-        OPENAUTO_LOG(debug) << "[AutoApp] Using Dummy Bluetooth";
-        return std::make_shared<autoapp::projection::DummyBluetoothDevice>();
-    }
-
-    OPENAUTO_LOG(info) << "[AutoApp] Using Local Bluetooth Adapter";
-    return std::make_shared<autoapp::projection::BluezBluetoothDevice>(
-        configuration->getBluetoothAdapterAddress());
-}
-
 void configureLogging() {
     const std::string logIni = "openauto-logs.ini";
     std::ifstream logSettings(logIni);
@@ -213,9 +198,6 @@ int main(int argc, char* argv[])
 
     DeviceManager deviceManager(dmConfig);
 
-    autoapp::projection::IBluetoothDevice::Pointer bluetoothDevice =
-        createBluetoothDevice(configuration);
-
     autoapp::configuration::RecentAddressesList recentAddressesList(7);
     recentAddressesList.read();
 
@@ -233,13 +215,6 @@ int main(int argc, char* argv[])
         }
     }
     auto app = std::make_shared<App>(serviceConfig, transport);
-
-    // Bluetooth pairing check — deferred through app->router() since
-    // the router (and thus handlers) are created per-session.
-    auto bluetoothIsPaired = [bluetoothDevice](const std::string& address) -> bool {
-        if (bluetoothDevice == nullptr) return false;
-        return bluetoothDevice->isPaired(address);
-    };
 
     if (transport) {
         // Transport type handlers dereference through app->router() at call time.
@@ -289,11 +264,6 @@ int main(int argc, char* argv[])
                 }
             });
     }
-
-    // Wire bluetooth pairing callback into each new session's handler.
-    app->setOnSessionStarted([bluetoothIsPaired](aasdk::FrameRouter& router) {
-        router.bluetoothHandler().setIsPairedCallback(bluetoothIsPaired);
-    });
 
     deviceManager.onDeviceReady = [app](const std::string& deviceId,
                                         DeviceConnection::Pointer connection) {

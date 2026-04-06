@@ -1,86 +1,72 @@
 
-# OpenAuto
+# OpenAutoCore
 
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
+An Android Auto head unit implementation for Linux, built on a lightweight callback-driven architecture with no async frameworks.
 
-### Support project
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=R4HXE5ESDR4U4)
+![Architecture](doc/architecture.png)
 
-For support of other platforms please contact me at f1xstudiopl@gmail.com
+See [doc/Architecture.md](doc/Architecture.md) for detailed documentation on each layer.
 
-### Community
-[![Join the chat at https://gitter.im/publiclab/publiclab](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/openauto_androidauto/Lobby)
+## Features
 
-### Description
-OpenAuto is an AndroidAuto(tm) headunit emulator based on aasdk library and Qt libraries. Main goal is to run this application on the RaspberryPI 3 board computer smoothly.
+- USB (AOAP) and wireless (Bluetooth + WiFi) device connectivity
+- Video projection (H.264/VP9) up to 1080p@60
+- Audio playback — media, system, guidance, and telephony channels
+- Audio input for voice commands (microphone capture)
+- Touchscreen and key input
+- Bluetooth pairing
+- Automatic USB hotplug detection
+- IPC transport to frontend via shared memory
 
-[See demo video](https://www.youtube.com/watch?v=k9tKRqIkQs8)
+## Building
 
-### Supported functionalities
- - 480p, 720p and 1080p with 30 or 60 FPS
- - RaspberryPI 3 hardware acceleration support to decode video stream (up to 1080p@60!)
- - Audio playback from all audio channels (Media, System and Speech)
- - Audio input for voice commands
- - Touchscreen and buttons input
- - Bluetooth
- - Automatic launch after device hotplug
- - Automatic detection of connected Android devices
- - Wireless (WiFi) mode via head unit server (must be enabled in hidden developer settings)
- - User-friendly settings
+**Build system:** [Bazel](https://bazel.build/) with Bzlmod
 
-### Supported platforms
+```bash
+bazel build -c dbg //:openautocore
+```
 
- - Linux
- - RaspberryPI 3
- - Windows
+### System dependencies
 
-### License
-GNU GPLv3
+Ensure the following are installed:
 
-Copyrights (c) 2018 f1x.studio (Michal Szwaj)
-
-*AndroidAuto is registered trademark of Google Inc.*
-
-### Used software
- - [aasdk](https://github.com/f1xpl/aasdk)
- - [Boost libraries](http://www.boost.org/)
- - [Qt libraries](https://www.qt.io/)
- - Broadcom ilclient from RaspberryPI 3 firmware
- - OpenMAX IL API
-
-### Building
-
+```bash
 sudo apt-get install -y \
     g++ \
-    qtbase5-dev \
-    libqt5serialport5-dev \
     libssl-dev \
-    libcurl4-openssl-dev \
-    pulseaudio libusb-1.0-0-dev \
-    libasound2-dev \
-    libprotobuf-dev \
-    protobuf-compiler \
+    libusb-1.0-0-dev \
+    libell-dev \
     qtbase5-dev \
     qttools5-dev \
-    qttools5-dev-tools \
     qtmultimedia5-dev \
-    autoconf \
-    automake \
-    libtool \
-    pkg-config \
-    libboost-all-dev
+    libprotobuf-dev \
+    protobuf-compiler
+```
 
+Remaining dependencies (Boost, nlohmann_json, googletest, etc.) are managed by Bazel via `MODULE.bazel`.
 
-#### Amd64
-Install the packages specified in the [prebuilts](https://github.com/opencardev/prebuilts) repository. Qt5 is required, versions packaged in modern Ubuntu and Debian
-seem to work fine.
+## Platform
 
-You will also likely need to install the udev rules from `prebuilts`
+- Linux (amd64, arm64)
 
+## License
 
-#### Raspberry Pi
-Just run the scripts in the `prebuilts` repository for `aasdk` and `openauto`. It is possible to cross compile if your raspberry pi is too slow to compile the code itself.
-However, its easiest to just develop on a more capable `amd64` device.
+GNU GPLv3
 
-### Remarks
+*Android Auto is a registered trademark of Google Inc.*
+
+## Author
+
+**Samuel Betak** ([buzzcola3](https://github.com/buzzcola3))
+
+### Thanks
+
+This project builds on the work of many contributors. Special thanks to:
+
+- **Michal Szwaj** (f1x.studio) — original OpenAuto and aasdk author
+- **Simon Dean** (CubeOne) — major contributions and modernization
+- **Daniel Herr**, **Huan Truong**, **Marc Hillesheim**, **Matthew Hilton**, **Parker Reed**, **Sean Gibson** — patches and improvements
+
+## Disclaimer
+
 **This software is not certified by Google Inc. It is created for R&D purposes and may not work as expected by the original authors. Do not use while driving. You use this software at your own risk.**
