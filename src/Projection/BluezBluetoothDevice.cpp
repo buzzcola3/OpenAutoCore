@@ -18,12 +18,12 @@
 */
 
 #include <Projection/BluezBluetoothDevice.hpp>
-#include <Common/EllDbusUtils.hpp>
-#include <Common/EllMainLoop.hpp>
 #include <Common/Log.hpp>
+#include <ell/main.h>
 #include <algorithm>
 #include <chrono>
 #include <cstring>
+#include <thread>
 
 namespace f1x::openauto::autoapp::projection {
 
@@ -40,7 +40,52 @@ namespace {
 }
 
 namespace {
-    constexpr auto kDbusTimeout = 5s;
+    constexpr int kDbusTimeoutMs = 5000;
+
+    void dbusReadyHandler(void* ud) {
+        *static_cast<bool*>(ud) = true;
+    }
+
+    bool dbusWaitReady(l_dbus* bus, int timeoutMs) {
+        bool ready = false;
+        if (!l_dbus_set_ready_handler(bus, dbusReadyHandler, &ready, nullptr))
+            return false;
+        auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
+        while (!ready) {
+            if (std::chrono::steady_clock::now() >= deadline) return false;
+            l_main_iterate(0);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        return true;
+    }
+
+    struct ReplyWaiter {
+        bool done = false;
+        l_dbus_message* reply = nullptr;
+    };
+
+    void dbusReplyHandler(l_dbus_message* msg, void* ud) {
+        auto* w = static_cast<ReplyWaiter*>(ud);
+        w->reply = msg ? l_dbus_message_ref(msg) : nullptr;
+        w->done = true;
+    }
+
+    l_dbus_message* dbusSendSync(l_dbus* bus, l_dbus_message* msg, int timeoutMs) {
+        if (!bus || !msg) return nullptr;
+        ReplyWaiter w;
+        auto serial = l_dbus_send_with_reply(bus, msg, dbusReplyHandler, &w, nullptr);
+        if (serial == 0) {
+            l_dbus_message_unref(msg);
+            return nullptr;
+        }
+        auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
+        while (!w.done) {
+            if (std::chrono::steady_clock::now() >= deadline) return nullptr;
+            l_main_iterate(0);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        return w.reply;
+    }
 
     bool getPropertyString(struct l_dbus_message_iter props, const char* key, std::string& out) {
         const char* name = nullptr;
@@ -87,10 +132,10 @@ namespace {
 
 BluezBluetoothDevice::BluezBluetoothDevice(std::string adapterAddress)
     : adapterAddress_(std::move(adapterAddress)) {
-    common::EllMainLoop::instance().ensureRunning();
+    l_main_init();
     bus_.reset(l_dbus_new_default(L_DBUS_SYSTEM_BUS));
     if (bus_) {
-        common::ellDbusWaitReady(bus_.get(), kDbusTimeout);
+        dbusWaitReady(bus_.get(), kDbusTimeoutMs);
     } else {
         OPENAUTO_LOG(error) << "[BluezBluetoothDevice] Failed to create system bus";
     }
@@ -123,7 +168,7 @@ std::string BluezBluetoothDevice::resolveAdapterPath() const {
     auto* msg = l_dbus_message_new_method_call(bus_.get(), "org.bluez", "/",
                                                L_DBUS_INTERFACE_OBJECT_MANAGER,
                                                "GetManagedObjects");
-    auto* reply = common::ellDbusSendWithReplySync(bus_.get(), msg, kDbusTimeout);
+    auto* reply = dbusSendSync(bus_.get(), msg, kDbusTimeoutMs);
     if (reply == nullptr || l_dbus_message_is_error(reply)) {
         if (reply != nullptr) {
             l_dbus_message_unref(reply);
@@ -177,7 +222,7 @@ bool BluezBluetoothDevice::getDevicePaired(const std::string& deviceAddress) con
     auto* msg = l_dbus_message_new_method_call(bus_.get(), "org.bluez", "/",
                                                L_DBUS_INTERFACE_OBJECT_MANAGER,
                                                "GetManagedObjects");
-    auto* reply = common::ellDbusSendWithReplySync(bus_.get(), msg, kDbusTimeout);
+    auto* reply = dbusSendSync(bus_.get(), msg, kDbusTimeoutMs);
     if (reply == nullptr || l_dbus_message_is_error(reply)) {
         if (reply != nullptr) {
             l_dbus_message_unref(reply);

@@ -21,7 +21,7 @@
 //
 // Owns the libusb context and all USB-related state. Hotplug events from
 // the libusb worker thread are marshalled via eventfd and drained in
-// execute(). Non-AOAP Android phones are held in pendingPhones_ until
+// pollDevices(). Non-AOAP Android phones are held in pendingPhones_ until
 // the consumer requests AOAP setup via beginAoapSetup().
 
 #include <atomic>
@@ -48,7 +48,7 @@ public:
 
     /// Poll for hotplug events, AOAP completions, and queued commands.
     /// Call this periodically from a scheduler (e.g. every 1ms).
-    void execute();
+    void pollDevices();
 
     // Open an AOAP-ready device and create a DeviceConnection for it.
     DeviceConnection::Pointer openDeviceConnection(uint16_t vid, uint16_t pid);

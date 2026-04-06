@@ -33,6 +33,7 @@
 #include <mutex>
 #include <ell/dbus.h>
 #include <ell/dbus-service.h>
+#include <ell/main.h>
 #include <DeviceManager/Wireless/TCPDeviceConnection.hpp>
 #include <DeviceManager/Common/DmLog.hpp>
 #include <DeviceManager/Wireless/WirelessDeviceManager.hpp>
@@ -141,8 +142,6 @@ static bool pbReadField(const uint8_t*& p, const uint8_t* end, PbField& f) {
 //
 // These pump l_main_iterate(0) in a spin loop so that ELL dispatches
 // D-Bus callbacks while we wait.  All callers run on the main thread.
-
-extern "C" { int l_main_iterate(int timeout); }
 
 namespace {
 
@@ -270,6 +269,11 @@ WirelessDeviceManager::~WirelessDeviceManager() {
 void WirelessDeviceManager::start() {
     if (running_) return;
     running_ = true;
+
+    // Initialise ELL event loop (needed by l_dbus)
+    if (!l_main_init()) {
+        DM_LOG(error) << "WirelessDeviceManager: l_main_init() failed";
+    }
 
     // Create eventfd for cross-thread command dispatch
     eventFd_ = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
@@ -482,7 +486,7 @@ void WirelessDeviceManager::pollTCPListener() {
     }
 }
 
-void WirelessDeviceManager::execute() {
+void WirelessDeviceManager::pollDevices() {
     // Drain command queue
     if (eventFd_ >= 0) {
         struct pollfd pfd = {eventFd_, POLLIN, 0};
@@ -495,6 +499,9 @@ void WirelessDeviceManager::execute() {
 
     // Accept incoming TCP connections
     pollTCPListener();
+
+    // Pump ELL event loop for D-Bus dispatch
+    if (bus_) l_main_iterate(0);
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -693,6 +700,8 @@ void WirelessDeviceManager::teardownBluetooth() {
         l_dbus_destroy(bus_);
         bus_ = nullptr;
     }
+
+    l_main_exit();
 }
 
 std::string WirelessDeviceManager::resolveAdapterPath(const std::string& address) {

@@ -54,7 +54,7 @@ public:
 
     /// Poll all sub-managers and execute pending timers.
     /// Call this periodically from a scheduler (e.g. every 1ms).
-    void execute();
+    void pollDevices();
 
     // ── Device list (JSON for FE) ──
     std::string getDeviceListJson() const;

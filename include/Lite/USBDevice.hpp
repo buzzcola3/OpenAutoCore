@@ -19,8 +19,12 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <libusb.h>
-#include <USB/IUSBWrapper.hpp>
+
+namespace aasdk::usb {
+    using DeviceHandle = std::shared_ptr<libusb_device_handle>;
+}
 
 namespace aasdk::lite {
 
@@ -34,10 +38,9 @@ public:
               uint8_t inEndpointAddress,
               uint8_t outEndpointAddress);
 
-    /// Create from an AOAP device by probing its config descriptor for endpoints.
+    /// Create from a raw device handle by probing its config descriptor for endpoints.
     /// Claims the interface. Throws aasdk::error::Error on failure.
-    static USBDevice create(aasdk::usb::IUSBWrapper& usbWrapper,
-                            aasdk::usb::DeviceHandle handle);
+    static USBDevice create(aasdk::usb::DeviceHandle handle);
 
     /// Blocking exact-size read. Returns false on USB error.
     bool read(uint8_t* buf, size_t size, unsigned int timeoutMs = 0);

@@ -29,7 +29,7 @@ USBDevice::USBDevice(usb::DeviceHandle handle,
     , outAddr_(outEndpointAddress)
     , open_(true) {}
 
-USBDevice USBDevice::create(usb::IUSBWrapper& usbWrapper, usb::DeviceHandle handle) {
+USBDevice USBDevice::create(usb::DeviceHandle handle) {
     libusb_config_descriptor* rawDesc = nullptr;
     libusb_device* dev = libusb_get_device(handle.get());
     int rc = libusb_get_config_descriptor(dev, 0, &rawDesc);

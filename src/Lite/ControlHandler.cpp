@@ -106,23 +106,22 @@ void ControlHandler::operator()(const InMessage& msg) {
 
 void ControlHandler::initSession(messenger::ICryptor& cryptor,
                                   f1x::openauto::autoapp::configuration::ServiceConfig& serviceConfig,
-                                  boost::asio::io_service& ioService,
                                   std::function<void()> onSessionEnd) {
     cryptor_ = &cryptor;
     serviceConfig_ = &serviceConfig;
     onSessionEnd_ = std::move(onSessionEnd);
     pingsCount_ = 0;
     pongsCount_ = 0;
-    pingTimer_ = std::make_unique<boost::asio::deadline_timer>(ioService);
     sessionActive_ = true;
 }
 
 void ControlHandler::teardownSession() {
-    sessionActive_ = false;
-    if (pingTimer_) {
-        pingTimer_->cancel();
-        pingTimer_.reset();
+    {
+        std::lock_guard<std::mutex> lock(pingMutex_);
+        sessionActive_ = false;
     }
+    pingCv_.notify_all();
+    if (pingThread_.joinable()) pingThread_.join();
     cryptor_ = nullptr;
     serviceConfig_ = nullptr;
     onSessionEnd_ = nullptr;
@@ -283,32 +282,35 @@ void ControlHandler::sendPing() {
 }
 
 void ControlHandler::schedulePing() {
-    if (!pingTimer_ || !sessionActive_) return;
+    if (!sessionActive_) return;
     pingsCount_.fetch_add(1, std::memory_order_relaxed);
-    pingTimer_->expires_from_now(boost::posix_time::milliseconds(kPingIntervalMs));
-    pingTimer_->async_wait([this](const boost::system::error_code& ec) {
-        onPingTimer(ec);
-    });
+    pingThread_ = std::thread(&ControlHandler::pingThreadFunc, this);
 }
 
-void ControlHandler::onPingTimer(const boost::system::error_code& ec) {
-    if (ec == boost::asio::error::operation_aborted || !sessionActive_) return;
+void ControlHandler::pingThreadFunc() {
+    while (true) {
+        std::unique_lock<std::mutex> lock(pingMutex_);
+        pingCv_.wait_for(lock, std::chrono::milliseconds(kPingIntervalMs));
+        if (!sessionActive_) return;
+        lock.unlock();
 
-    int64_t missed = pingsCount_.load(std::memory_order_relaxed)
-                   - pongsCount_.load(std::memory_order_relaxed);
-    if (missed > kMaxMissedPongs) {
-        AASDK_LOG(error) << "[ControlHandler] Ping timeout (" << missed << " missed)";
-        triggerSessionEnd();
-        return;
+        int64_t missed = pingsCount_.load(std::memory_order_relaxed)
+                       - pongsCount_.load(std::memory_order_relaxed);
+        if (missed > kMaxMissedPongs) {
+            AASDK_LOG(error) << "[ControlHandler] Ping timeout (" << missed << " missed)";
+            triggerSessionEnd();
+            return;
+        }
+
+        sendPing();
+        pingsCount_.fetch_add(1, std::memory_order_relaxed);
     }
-
-    sendPing();
-    schedulePing();
 }
 
 void ControlHandler::triggerSessionEnd() {
     bool expected = true;
     if (!sessionActive_.compare_exchange_strong(expected, false)) return;
+    pingCv_.notify_all();
     AASDK_LOG(info) << "[ControlHandler] Session ending.";
     if (onSessionEnd_) onSessionEnd_();
 }

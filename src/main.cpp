@@ -20,11 +20,11 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <csignal>
 #include <fstream>
+#include <mutex>
 #include <thread>
 #include <unistd.h>
-#include <boost/asio.hpp>
-#include <boost/asio/signal_set.hpp>
 #include <boost/log/utility/setup.hpp>
 #include <nlohmann/json.hpp>
 #include <open_auto_transport/wire.hpp>
@@ -53,10 +53,8 @@
 #include <DeviceManager/Common/DeviceManager.hpp>
 #include <DeviceManager/Common/DmLog.hpp>
 #include <Common/Log.hpp>
-#include <Common/EllMainLoop.hpp>
 
 namespace autoapp = f1x::openauto::autoapp;
-using ThreadPool = std::vector<std::thread>;
 using json = nlohmann::json;
 
 // ── App — session lifecycle ──
@@ -65,59 +63,53 @@ class App : public std::enable_shared_from_this<App> {
 public:
     using Pointer = std::shared_ptr<App>;
 
-    App(boost::asio::io_service& ioService,
-        autoapp::configuration::ServiceConfig& serviceConfig,
+    App(autoapp::configuration::ServiceConfig& serviceConfig,
         std::shared_ptr<buzz::autoapp::Transport::Transport> transport)
-        : ioService_(ioService), strand_(ioService_),
-          serviceConfig_(serviceConfig), transport_(std::move(transport)) {}
+        : serviceConfig_(serviceConfig), transport_(std::move(transport)) {}
 
     void start(DeviceConnection::Pointer connection) {
-        strand_.dispatch([this, self = shared_from_this(), conn = std::move(connection)]() mutable {
-            OPENAUTO_LOG(info) << "[App] Device connected.";
+        std::lock_guard<std::mutex> lock(mutex_);
+        OPENAUTO_LOG(info) << "[App] Device connected.";
 
-            if (router_) {
-                OPENAUTO_LOG(warning) << "[App] Session still running, stopping first.";
-                router_->controlHandler().teardownSession();
-                router_->stop();
-                cryptor_->deinit();
-                router_.reset();
-                cryptor_.reset();
-            }
+        if (router_) {
+            OPENAUTO_LOG(warning) << "[App] Session still running, stopping first.";
+            doStop();
+        }
 
-            try {
-                auto sslWrapper = std::make_shared<aasdk::transport::SSLWrapper>();
-                cryptor_ = std::make_shared<aasdk::messenger::Cryptor>(std::move(sslWrapper));
-                cryptor_->init();
+        try {
+            auto sslWrapper = std::make_shared<aasdk::transport::SSLWrapper>();
+            cryptor_ = std::make_shared<aasdk::messenger::Cryptor>(std::move(sslWrapper));
+            cryptor_->init();
 
-                router_ = std::make_shared<aasdk::FrameRouter>(std::move(conn), cryptor_, transport_);
+            router_ = std::make_shared<aasdk::FrameRouter>(std::move(connection), cryptor_, transport_);
 
-                if (onSessionStarted_) onSessionStarted_(*router_);
+            if (onSessionStarted_) onSessionStarted_(*router_);
 
-                auto& ctrl = router_->controlHandler();
-                ctrl.initSession(*cryptor_, serviceConfig_, ioService_,
-                                 [this, self]() { onSessionEnd(); });
+            auto& ctrl = router_->controlHandler();
+            ctrl.initSession(*cryptor_, serviceConfig_,
+                             [this]() { onSessionEnd(); });
 
-                router_->start();
-                ctrl.sendVersionRequest();
-            } catch (const aasdk::error::Error& error) {
-                OPENAUTO_LOG(error) << "[App] Session create error: " << error.what();
-                router_.reset();
-                cryptor_.reset();
-            }
-        });
+            router_->start();
+            ctrl.sendVersionRequest();
+        } catch (const aasdk::error::Error& error) {
+            OPENAUTO_LOG(error) << "[App] Session create error: " << error.what();
+            router_.reset();
+            cryptor_.reset();
+        }
     }
 
     void stop() {
-        strand_.dispatch([this, self = shared_from_this()]() {
-            if (!router_) return;
-            OPENAUTO_LOG(info) << "[App] stop()";
+        std::lock_guard<std::mutex> lock(mutex_);
+        doStop();
+    }
 
-            router_->controlHandler().teardownSession();
-            router_->stop();
-            cryptor_->deinit();
-            router_.reset();
-            cryptor_.reset();
-        });
+    /// Check for and handle asynchronous session-end events.
+    void poll() {
+        if (sessionEndPending_.exchange(false)) {
+            std::lock_guard<std::mutex> lock(mutex_);
+            OPENAUTO_LOG(info) << "[App] Session ended.";
+            doStop();
+        }
     }
 
     /// Access the current router (may be null between sessions).
@@ -130,21 +122,20 @@ public:
 
 private:
     void onSessionEnd() {
-        strand_.dispatch([this, self = shared_from_this()]() {
-            OPENAUTO_LOG(info) << "[App] Session ended.";
-
-            if (router_) {
-                router_->controlHandler().teardownSession();
-                router_->stop();
-                cryptor_->deinit();
-                router_.reset();
-                cryptor_.reset();
-            }
-        });
+        sessionEndPending_.store(true);
     }
 
-    boost::asio::io_service& ioService_;
-    boost::asio::io_service::strand strand_;
+    void doStop() {
+        if (!router_) return;
+        router_->controlHandler().teardownSession();
+        router_->stop();
+        cryptor_->deinit();
+        router_.reset();
+        cryptor_.reset();
+    }
+
+    std::mutex mutex_;
+    std::atomic<bool> sessionEndPending_{false};
     autoapp::configuration::ServiceConfig& serviceConfig_;
     std::shared_ptr<buzz::autoapp::Transport::Transport> transport_;
     aasdk::messenger::ICryptor::Pointer cryptor_;
@@ -158,7 +149,7 @@ namespace {
 
 std::atomic_bool gRunning{true};
 
-void handleShutdown() {
+void handleShutdown(int) {
     gRunning.store(false);
 }
 
@@ -172,14 +163,6 @@ autoapp::projection::IBluetoothDevice::Pointer createBluetoothDevice(
     OPENAUTO_LOG(info) << "[AutoApp] Using Local Bluetooth Adapter";
     return std::make_shared<autoapp::projection::BluezBluetoothDevice>(
         configuration->getBluetoothAdapterAddress());
-}
-
-void startIOServiceWorkers(boost::asio::io_service& ioService, ThreadPool& threadPool) {
-    auto ioServiceWorker = [&ioService]() { ioService.run(); };
-    threadPool.emplace_back(ioServiceWorker);
-    threadPool.emplace_back(ioServiceWorker);
-    threadPool.emplace_back(ioServiceWorker);
-    threadPool.emplace_back(ioServiceWorker);
 }
 
 void configureLogging() {
@@ -212,14 +195,7 @@ int main(int argc, char* argv[])
         }
     });
 
-    f1x::openauto::common::EllMainLoop::instance().ensureRunning();
-
     auto configuration = std::make_shared<autoapp::configuration::Configuration>();
-
-    boost::asio::io_service ioService;
-    boost::asio::io_service::work work(ioService);
-    std::vector<std::thread> threadPool;
-    startIOServiceWorkers(ioService, threadPool);
 
     // DeviceManager
     DeviceManagerConfig dmConfig;
@@ -256,7 +232,7 @@ int main(int argc, char* argv[])
             OPENAUTO_LOG(info) << "[AutoApp] OpenAutoTransport started at startup (side A).";
         }
     }
-    auto app = std::make_shared<App>(ioService, serviceConfig, transport);
+    auto app = std::make_shared<App>(serviceConfig, transport);
 
     // Bluetooth pairing check — deferred through app->router() since
     // the router (and thus handlers) are created per-session.
@@ -356,25 +332,19 @@ int main(int argc, char* argv[])
             }
         });
 
-    boost::asio::signal_set signals(ioService, SIGINT, SIGTERM);
-    signals.async_wait([app, &ioService](const boost::system::error_code& error, int) {
-        if (error) return;
-        app->stop();
-        ioService.stop();
-        handleShutdown();
-    });
+    std::signal(SIGINT,  handleShutdown);
+    std::signal(SIGTERM, handleShutdown);
 
     deviceManager.start();
 
     while (gRunning.load()) {
-        deviceManager.execute();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        app->poll();
+        deviceManager.pollDevices();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
+    app->stop();
     deviceManager.stop();
-    ioService.stop();
-
-    std::for_each(threadPool.begin(), threadPool.end(), std::bind(&std::thread::join, std::placeholders::_1));
 
     return 0;
 }

@@ -204,7 +204,7 @@ void USBDeviceManager::wakeEventFd() {
     (void)::write(eventFd_, &val, sizeof(val));
 }
 
-void USBDeviceManager::execute() {
+void USBDeviceManager::pollDevices() {
     if (eventFd_ < 0) return;
     struct pollfd pfd = {eventFd_, POLLIN, 0};
     if (::poll(&pfd, 1, 0) > 0 && (pfd.revents & POLLIN)) {

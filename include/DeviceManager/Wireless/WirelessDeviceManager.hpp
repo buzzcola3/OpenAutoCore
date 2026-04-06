@@ -21,7 +21,7 @@
 //
 // Owns the BlueZ D-Bus profile, BT read loop, WiFi handshake protocol,
 // and TCP listener for incoming WiFi connections. Commands from other
-// threads are dispatched via eventfd and drained in execute().
+// threads are dispatched via eventfd and drained in pollDevices().
 
 #include <atomic>
 #include <cstdint>
@@ -54,7 +54,7 @@ public:
 
     /// Poll for queued commands and incoming TCP connections.
     /// Call this periodically from a scheduler (e.g. every 1ms).
-    void execute();
+    void pollDevices();
 
     // Thread-safe: queues command and wakes ELL thread.
     void beginWifiProjection();

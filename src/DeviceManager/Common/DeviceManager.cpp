@@ -20,10 +20,6 @@
 #include <DeviceManager/Common/DeviceManager.hpp>
 #include <DeviceManager/Common/DmLog.hpp>
 
-extern "C" {
-    int l_main_iterate(int timeout);
-}
-
 using json = nlohmann::json;
 
 // ── Construction / lifetime ──
@@ -292,12 +288,11 @@ void DeviceManager::onWifiClientConnected(const std::string& deviceId,
     }
 }
 
-// ── execute / timers ──
+// ── pollDevices / timers ──
 
-void DeviceManager::execute() {
-    usb_.execute();
-    wireless_.execute();
-    l_main_iterate(0);
+void DeviceManager::pollDevices() {
+    usb_.pollDevices();
+    wireless_.pollDevices();
     executeTimers();
 }
 

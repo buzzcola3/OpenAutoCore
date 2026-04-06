@@ -18,12 +18,13 @@
 #pragma once
 
 #include <atomic>
+#include <condition_variable>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <memory>
+#include <mutex>
+#include <thread>
 #include <vector>
-#include <boost/asio.hpp>
 #include <Common/ChannelId.hpp>
 #include <Common/EncryptionType.hpp>
 #include <Common/MessageType.hpp>
@@ -53,10 +54,9 @@ public:
     /// Wire the AA session state machine and start infrastructure.
     void initSession(messenger::ICryptor& cryptor,
                      f1x::openauto::autoapp::configuration::ServiceConfig& serviceConfig,
-                     boost::asio::io_service& ioService,
                      std::function<void()> onSessionEnd);
 
-    /// Tear down session: cancel ping timer, clear references.
+    /// Tear down session: stop ping thread, clear references.
     void teardownSession();
 
     /// Send the initial version request (kicks off the AA protocol).
@@ -81,7 +81,7 @@ private:
     // ── Ping ──
     void sendPing();
     void schedulePing();
-    void onPingTimer(const boost::system::error_code& ec);
+    void pingThreadFunc();
 
     void triggerSessionEnd();
 
@@ -91,7 +91,9 @@ private:
     messenger::ICryptor* cryptor_ = nullptr;
     f1x::openauto::autoapp::configuration::ServiceConfig* serviceConfig_ = nullptr;
     std::function<void()> onSessionEnd_;
-    std::unique_ptr<boost::asio::deadline_timer> pingTimer_;
+    std::thread pingThread_;
+    std::mutex pingMutex_;
+    std::condition_variable pingCv_;
     std::atomic<int64_t> pingsCount_{0};
     std::atomic<int64_t> pongsCount_{0};
     std::atomic<bool> sessionActive_{false};
