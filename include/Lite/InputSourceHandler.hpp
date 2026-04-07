@@ -63,6 +63,8 @@ private:
     SendFn send_;
     uint32_t touchWidth_{1920};
     uint32_t touchHeight_{1080};
+    uint32_t marginX_{0};
+    uint32_t marginY_{0};
     messenger::ChannelId touchChannelId_{messenger::ChannelId::NONE};
     messenger::EncryptionType touchEncryptionType_{messenger::EncryptionType::PLAIN};
     uint64_t messageCount_{0};

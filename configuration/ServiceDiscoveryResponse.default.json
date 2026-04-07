@@ -33,7 +33,25 @@
         "sensors": [
           { "sensor_type": "SENSOR_DRIVING_STATUS_DATA" },
           { "sensor_type": "SENSOR_LOCATION" },
-          { "sensor_type": "SENSOR_NIGHT_MODE" }
+          { "sensor_type": "SENSOR_NIGHT_MODE" },
+          { "sensor_type": "SENSOR_COMPASS" },
+          { "sensor_type": "SENSOR_SPEED" },
+          { "sensor_type": "SENSOR_RPM" },
+          { "sensor_type": "SENSOR_ODOMETER" },
+          { "sensor_type": "SENSOR_FUEL" },
+          { "sensor_type": "SENSOR_PARKING_BRAKE" },
+          { "sensor_type": "SENSOR_GEAR" },
+          { "sensor_type": "SENSOR_ENVIRONMENT_DATA" },
+          { "sensor_type": "SENSOR_HVAC_DATA" },
+          { "sensor_type": "SENSOR_DEAD_RECKONING_DATA" },
+          { "sensor_type": "SENSOR_PASSENGER_DATA" },
+          { "sensor_type": "SENSOR_DOOR_DATA" },
+          { "sensor_type": "SENSOR_LIGHT_DATA" },
+          { "sensor_type": "SENSOR_TIRE_PRESSURE_DATA" },
+          { "sensor_type": "SENSOR_ACCELEROMETER_DATA" },
+          { "sensor_type": "SENSOR_GYROSCOPE_DATA" },
+          { "sensor_type": "SENSOR_GPS_SATELLITE_DATA" },
+          { "sensor_type": "SENSOR_TOLL_CARD" }
         ]
       }
     },

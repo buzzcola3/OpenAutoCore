@@ -57,6 +57,24 @@ private:
     void sendLocationIndication(const nlohmann::json& location);
     void sendNightModeIndication(const nlohmann::json& nightMode);
     void sendDrivingStatusIndication(const nlohmann::json& drivingStatus);
+    void sendCompassIndication(const nlohmann::json& j);
+    void sendSpeedIndication(const nlohmann::json& j);
+    void sendRpmIndication(const nlohmann::json& j);
+    void sendOdometerIndication(const nlohmann::json& j);
+    void sendFuelIndication(const nlohmann::json& j);
+    void sendParkingBrakeIndication(const nlohmann::json& j);
+    void sendGearIndication(const nlohmann::json& j);
+    void sendEnvironmentIndication(const nlohmann::json& j);
+    void sendHvacIndication(const nlohmann::json& j);
+    void sendDeadReckoningIndication(const nlohmann::json& j);
+    void sendPassengerIndication(const nlohmann::json& j);
+    void sendDoorIndication(const nlohmann::json& j);
+    void sendLightIndication(const nlohmann::json& j);
+    void sendTirePressureIndication(const nlohmann::json& j);
+    void sendAccelerometerIndication(const nlohmann::json& j);
+    void sendGyroscopeIndication(const nlohmann::json& j);
+    void sendGpsSatelliteIndication(const nlohmann::json& j);
+    void sendTollCardIndication(const nlohmann::json& j);
 
     void sendProto(messenger::ChannelId ch,
                    messenger::EncryptionType enc,

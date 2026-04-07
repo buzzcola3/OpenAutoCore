@@ -33,7 +33,7 @@
 #include <fstream>
 #include <limits>
 #include <string>
-#include <unordered_map>
+#include <nlohmann/json.hpp>
 
 namespace {
 
@@ -74,60 +74,48 @@ void InputSourceHandler::operator()(const InMessage& msg) {
 }
 
 void InputSourceHandler::resolveTouchscreenResolution() {
-    constexpr const char* kConfigPath = "configuration/ServiceDiscoveryResponse.textproto";
+    constexpr const char* kUserConfig    = "configuration/UserServiceDiscoveryResponse.json";
+    constexpr const char* kDefaultConfig = "configuration/ServiceDiscoveryResponse.default.json";
 
-    uint32_t width = 0;
-    uint32_t height = 0;
-
-    const auto trim = [](std::string value) {
-        const auto first = value.find_first_not_of(" \t");
-        if (first == std::string::npos) return std::string{};
-        const auto last = value.find_last_not_of(" \t");
-        return value.substr(first, last - first + 1);
-    };
-
-    if (std::ifstream file(kConfigPath); file.good()) {
-        std::string line;
-        while (std::getline(file, line)) {
-            if (line.find("codec_resolution") == std::string::npos) continue;
-            const auto colonPos = line.find(':');
-            if (colonPos == std::string::npos) continue;
-
-            const auto token = trim(line.substr(colonPos + 1));
-
-            static const std::unordered_map<std::string, std::pair<uint32_t, uint32_t>> kResolutionLookup = {
-                {"VIDEO_800x480",   {800, 480}},
-                {"VIDEO_1280x720",  {1280, 720}},
-                {"VIDEO_1920x1080", {1920, 1080}},
-                {"VIDEO_2560x1440", {2560, 1440}},
-                {"VIDEO_3840x2160", {3840, 2160}},
-                {"VIDEO_720x1280",  {720, 1280}},
-                {"VIDEO_1080x1920", {1080, 1920}},
-                {"VIDEO_1440x2560", {1440, 2560}},
-                {"VIDEO_2160x3840", {2160, 3840}},
-            };
-
-            const auto it = kResolutionLookup.find(token);
-            if (it != kResolutionLookup.end()) {
-                width = it->second.first;
-                height = it->second.second;
-                break;
-            }
-
-            AASDK_LOG(error) << "[LiteInputSource] Unknown codec_resolution '" << token << "'";
-            break;
-        }
+    const char* path = kUserConfig;
+    std::ifstream file(path);
+    if (!file.good()) {
+        path = kDefaultConfig;
+        file.open(path);
     }
-
-    if (width == 0 || height == 0) {
-        AASDK_LOG(error) << "[LiteInputSource] Failed to resolve resolution; using "
+    if (!file.good()) {
+        AASDK_LOG(error) << "[LiteInputSource] No config found; using "
                          << touchWidth_ << "x" << touchHeight_;
         return;
     }
 
-    touchWidth_ = width;
-    touchHeight_ = height;
-    AASDK_LOG(debug) << "[LiteInputSource] Touch resolution: " << touchWidth_ << "x" << touchHeight_;
+    try {
+        const auto root = nlohmann::json::parse(file);
+        for (const auto& ch : root.at("channels")) {
+            if (ch.contains("media_sink_service")) {
+                const auto& ms = ch["media_sink_service"];
+                if (ms.contains("video_configs")) {
+                    const auto& vc = ms["video_configs"];
+                    const auto& entry = vc.is_array() ? vc.at(0) : vc;
+                    marginX_ = entry.value("width_margin", 0u);
+                    marginY_ = entry.value("height_margin", 0u);
+                }
+            }
+            if (!ch.contains("input_source_service")) continue;
+            const auto& ts = ch["input_source_service"]["touchscreen"];
+            const auto& entry = ts.is_array() ? ts.at(0) : ts;
+            touchWidth_  = entry.at("width").get<uint32_t>();
+            touchHeight_ = entry.at("height").get<uint32_t>();
+            AASDK_LOG(debug) << "[LiteInputSource] Touch resolution: "
+                             << touchWidth_ << "x" << touchHeight_
+                             << " margin=(" << marginX_ << ", " << marginY_ << ")"
+                             << " (from " << path << ")";
+            return;
+        }
+        AASDK_LOG(error) << "[LiteInputSource] No input_source_service found in " << path;
+    } catch (const std::exception& e) {
+        AASDK_LOG(error) << "[LiteInputSource] Failed to parse " << path << ": " << e.what();
+    }
 }
 
 void InputSourceHandler::handleChannelOpenRequest(const InMessage& msg,
@@ -194,13 +182,19 @@ void InputSourceHandler::onTouchEvent(uint64_t timestamp,
     const float normX = clamp01(x);
     const float normY = clamp01(y);
 
-    const auto toPixel = [](float norm, uint32_t dim) -> uint32_t {
-        auto scaled = static_cast<int64_t>(std::lround(norm * static_cast<float>(dim - 1)));
-        return static_cast<uint32_t>(std::max<int64_t>(0, std::min<int64_t>(scaled, dim - 1)));
+    const auto toPixel = [](float norm, uint32_t dim, uint32_t margin) -> uint32_t {
+        auto screen = static_cast<int64_t>(std::lround(norm * static_cast<float>(dim - 1)));
+        auto video  = screen - static_cast<int64_t>(margin / 2);
+        auto maxVal = static_cast<int64_t>(dim - margin - 1);
+        return static_cast<uint32_t>(std::max<int64_t>(0, std::min(video, maxVal)));
     };
 
-    uint32_t px = toPixel(normX, touchWidth_);
-    uint32_t py = toPixel(normY, touchHeight_);
+    uint32_t px = toPixel(normX, touchWidth_,  marginX_);
+    uint32_t py = toPixel(normY, touchHeight_, marginY_);
+
+    AASDK_LOG(info) << "[LiteInputSource] TOUCH norm=(" << normX << ", " << normY
+                    << ") px=(" << px << ", " << py << ") action=" << action
+                    << " ptr=" << pointerId;
 
     aap_protobuf::service::inputsource::message::InputReport inputReport;
     inputReport.set_timestamp(timestamp);
