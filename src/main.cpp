@@ -201,10 +201,11 @@ int main(int argc, char* argv[])
     autoapp::configuration::RecentAddressesList recentAddressesList(7);
     recentAddressesList.read();
 
-    autoapp::configuration::ServiceConfig serviceConfig(
-        "configuration/ServiceDiscoveryResponse.default.json",
-        "configuration/UserServiceDiscoveryResponse.json");
-    serviceConfig.load();
+    autoapp::configuration::ServiceConfig serviceConfig;
+
+    std::mutex configMutex;
+    std::condition_variable configCv;
+    std::atomic<bool> configReady{false};
 
     auto transport = std::make_shared<buzz::autoapp::Transport::Transport>();
     if (transport && !transport->isRunning()) {
@@ -215,6 +216,9 @@ int main(int argc, char* argv[])
         }
     }
     auto app = std::make_shared<App>(serviceConfig, transport);
+    app->setOnSessionStarted([&serviceConfig](aasdk::FrameRouter& router) {
+        router.inputSourceHandler().setConfig(serviceConfig.getJson());
+    });
 
     if (transport) {
         // Transport type handlers dereference through app->router() at call time.
@@ -239,31 +243,34 @@ int main(int argc, char* argv[])
 
         transport->addTypeHandler(
             buzz::wire::MsgType::CONFIGURATION,
-            [&serviceConfig, transport](uint64_t, const void* data, std::size_t size) {
-                auto req = nlohmann::json::parse(
-                    static_cast<const char*>(data),
-                    static_cast<const char*>(data) + size,
-                    nullptr, false);
-                if (req.is_discarded()) return;
-
-                auto action = req.value("action", "");
-                if (action == "get") {
-                    auto cfg = serviceConfig.getJson();
-                    transport->send(buzz::wire::MsgType::CONFIGURATION, 0,
-                                    cfg.data(), cfg.size());
-                } else if (action == "set") {
-                    if (req.contains("config")) {
-                        auto err = serviceConfig.setJson(req["config"].dump());
-                        if (err.empty()) {
-                            serviceConfig.save();
-                        }
+            [&serviceConfig, &configMutex, &configCv, &configReady]
+            (uint64_t, const void* data, std::size_t size) {
+                auto err = serviceConfig.setJson(
+                    std::string(static_cast<const char*>(data), size));
+                if (err.empty()) {
+                    OPENAUTO_LOG(info) << "[AutoApp] Received config from frontend.";
+                    {
+                        std::lock_guard<std::mutex> lk(configMutex);
+                        configReady.store(true);
                     }
-                } else if (action == "reset") {
-                    serviceConfig.reset();
-                    serviceConfig.save();
+                    configCv.notify_one();
+                } else {
+                    OPENAUTO_LOG(error) << "[AutoApp] Frontend config rejected: " << err;
                 }
             });
     }
+
+    // Ask frontend for config, then block until it arrives.
+    OPENAUTO_LOG(info) << "[AutoApp] Requesting configuration from frontend...";
+    if (transport && transport->isRunning()) {
+        static constexpr std::string_view req = R"({"action":"request_config"})";
+        transport->send(buzz::wire::MsgType::CONFIGURATION, 0, req.data(), req.size());
+    }
+    {
+        std::unique_lock<std::mutex> lk(configMutex);
+        configCv.wait(lk, [&configReady] { return configReady.load(); });
+    }
+    OPENAUTO_LOG(info) << "[AutoApp] Configuration received, starting device manager.";
 
     deviceManager.onDeviceReady = [app](const std::string& deviceId,
                                         DeviceConnection::Pointer connection) {

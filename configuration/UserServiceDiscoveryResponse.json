@@ -1,0 +1,131 @@
+{
+  "can_play_native_media_during_vr": false,
+  "channels": [
+    {
+      "id": 3,
+      "media_sink_service": {
+        "available_type": "MEDIA_CODEC_VIDEO_H264_BP",
+        "available_while_in_call": true,
+        "video_configs": [
+          {
+            "codec_resolution": "VIDEO_800x480",
+            "density": 122,
+            "frame_rate": "VIDEO_FPS_60",
+            "height_margin": 196,
+            "width_margin": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "media_source_service": {
+        "audio_config": {
+          "number_of_bits": 16,
+          "number_of_channels": 1,
+          "sampling_rate": 16000
+        },
+        "available_type": "MEDIA_CODEC_AUDIO_PCM"
+      }
+    },
+    {
+      "id": 1,
+      "sensor_source_service": {
+        "sensors": [
+          {
+            "sensor_type": "SENSOR_NIGHT_MODE"
+          },
+          {
+            "sensor_type": "SENSOR_DRIVING_STATUS_DATA"
+          }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "input_source_service": {
+        "touchscreen": [
+          {
+            "height": 480,
+            "width": 800
+          }
+        ]
+      }
+    },
+    {
+      "bluetooth_service": {
+        "car_address": "",
+        "supported_pairing_methods": [
+          "BLUETOOTH_PAIRING_UNAVAILABLE"
+        ]
+      },
+      "id": 10
+    },
+    {
+      "id": 4,
+      "media_sink_service": {
+        "audio_configs": [
+          {
+            "number_of_bits": 16,
+            "number_of_channels": 2,
+            "sampling_rate": 48000
+          }
+        ],
+        "audio_type": "AUDIO_STREAM_MEDIA",
+        "available_type": "MEDIA_CODEC_AUDIO_PCM",
+        "available_while_in_call": true
+      }
+    },
+    {
+      "id": 6,
+      "media_sink_service": {
+        "audio_configs": [
+          {
+            "number_of_bits": 16,
+            "number_of_channels": 1,
+            "sampling_rate": 16000
+          }
+        ],
+        "audio_type": "AUDIO_STREAM_SYSTEM_AUDIO",
+        "available_type": "MEDIA_CODEC_AUDIO_PCM",
+        "available_while_in_call": true
+      }
+    },
+    {
+      "id": 5,
+      "media_sink_service": {
+        "audio_configs": [
+          {
+            "number_of_bits": 16,
+            "number_of_channels": 1,
+            "sampling_rate": 16000
+          }
+        ],
+        "audio_type": "AUDIO_STREAM_GUIDANCE",
+        "available_type": "MEDIA_CODEC_AUDIO_PCM",
+        "available_while_in_call": true
+      }
+    }
+  ],
+  "connection_configuration": {
+    "ping_configuration": {
+      "high_latency_threshold_ms": 200,
+      "interval_ms": 1000,
+      "timeout_ms": 3000,
+      "tracked_ping_count": 5
+    }
+  },
+  "display_name": "OpenAutoCore",
+  "driver_position": "DRIVER_POSITION_RIGHT",
+  "headunit_info": {
+    "head_unit_make": "blank",
+    "head_unit_model": "blank",
+    "head_unit_software_build": "1",
+    "head_unit_software_version": "1.0",
+    "make": "blank",
+    "model": "blank",
+    "vehicle_id": "blank",
+    "year": "blank"
+  },
+  "probe_for_support": false
+}

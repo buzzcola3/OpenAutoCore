@@ -18,9 +18,6 @@
 #include <Configuration/ServiceConfig.hpp>
 #include <Common/Log.hpp>
 
-#include <cstdio>
-#include <fstream>
-
 #include <google/protobuf/text_format.h>
 
 // Proto enum headers for _Parse helpers
@@ -306,93 +303,9 @@ std::string buildHeadUnitInfo(
 // ServiceConfig public API
 // ---------------------------------------------------------------------------
 
-ServiceConfig::ServiceConfig(std::string defaultPath, std::string userPath)
-    : defaultPath_(std::move(defaultPath)),
-      userPath_(std::move(userPath)) {}
-
-bool ServiceConfig::load() {
-    std::lock_guard lk(mu_);
-
-    // Load defaults
-    std::ifstream defFile(defaultPath_);
-    if (!defFile) {
-        OPENAUTO_LOG(error) << "[ServiceConfig] cannot open default config: "
-                            << defaultPath_;
-        return false;
-    }
-    try {
-        config_ = json::parse(defFile);
-    } catch (const json::exception& e) {
-        OPENAUTO_LOG(error) << "[ServiceConfig] default JSON parse error: "
-                            << e.what();
-        return false;
-    }
-
-    // Overlay user config if present
-    std::ifstream userFile(userPath_);
-    if (userFile) {
-        try {
-            config_ = json::parse(userFile);
-            OPENAUTO_LOG(info) << "[ServiceConfig] loaded user config from "
-                               << userPath_;
-        } catch (const json::exception& e) {
-            OPENAUTO_LOG(warning)
-                << "[ServiceConfig] user JSON parse error, using defaults: "
-                << e.what();
-        }
-    }
-
-    // Validate by building proto
-    SDR proto;
-    auto err = buildProto(config_, proto);
-    if (!err.empty()) {
-        OPENAUTO_LOG(error) << "[ServiceConfig] config validation failed: "
-                            << err;
-        return false;
-    }
-
-    OPENAUTO_LOG(info) << "[ServiceConfig] config loaded successfully";
-    return true;
-}
-
-bool ServiceConfig::save() {
-    std::lock_guard lk(mu_);
-
-    std::ofstream out(userPath_);
-    if (!out) {
-        OPENAUTO_LOG(error) << "[ServiceConfig] cannot write user config: "
-                            << userPath_;
-        return false;
-    }
-    out << config_.dump(2) << '\n';
-    OPENAUTO_LOG(info) << "[ServiceConfig] saved user config to " << userPath_;
-    return true;
-}
-
-bool ServiceConfig::reset() {
-    std::lock_guard lk(mu_);
-
-    // Remove user file
-    std::remove(userPath_.c_str());
-
-    // Reload from defaults
-    std::ifstream defFile(defaultPath_);
-    if (!defFile) {
-        OPENAUTO_LOG(error) << "[ServiceConfig] cannot open default config: "
-                            << defaultPath_;
-        return false;
-    }
-    try {
-        config_ = json::parse(defFile);
-    } catch (const json::exception& e) {
-        OPENAUTO_LOG(error) << "[ServiceConfig] default JSON parse error: "
-                            << e.what();
-        return false;
-    }
-
-    OPENAUTO_LOG(info) << "[ServiceConfig] reset to defaults";
-    return true;
-}
+// ---------------------------------------------------------------------------
+// ServiceConfig public API
+// ---------------------------------------------------------------------------
 
 std::string ServiceConfig::getJson() const {
     std::lock_guard lk(mu_);

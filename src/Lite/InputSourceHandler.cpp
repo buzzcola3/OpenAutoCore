@@ -30,7 +30,6 @@
 #include <aap_protobuf/shared/MessageStatus.pb.h>
 #include <cmath>
 #include <cstring>
-#include <fstream>
 #include <limits>
 #include <string>
 #include <nlohmann/json.hpp>
@@ -73,24 +72,9 @@ void InputSourceHandler::operator()(const InMessage& msg) {
     }
 }
 
-void InputSourceHandler::resolveTouchscreenResolution() {
-    constexpr const char* kUserConfig    = "configuration/UserServiceDiscoveryResponse.json";
-    constexpr const char* kDefaultConfig = "configuration/ServiceDiscoveryResponse.default.json";
-
-    const char* path = kUserConfig;
-    std::ifstream file(path);
-    if (!file.good()) {
-        path = kDefaultConfig;
-        file.open(path);
-    }
-    if (!file.good()) {
-        AASDK_LOG(error) << "[LiteInputSource] No config found; using "
-                         << touchWidth_ << "x" << touchHeight_;
-        return;
-    }
-
+void InputSourceHandler::setConfig(const std::string& jsonStr) {
     try {
-        const auto root = nlohmann::json::parse(file);
+        const auto root = nlohmann::json::parse(jsonStr);
         for (const auto& ch : root.at("channels")) {
             if (ch.contains("media_sink_service")) {
                 const auto& ms = ch["media_sink_service"];
@@ -108,13 +92,12 @@ void InputSourceHandler::resolveTouchscreenResolution() {
             touchHeight_ = entry.at("height").get<uint32_t>();
             AASDK_LOG(debug) << "[LiteInputSource] Touch resolution: "
                              << touchWidth_ << "x" << touchHeight_
-                             << " margin=(" << marginX_ << ", " << marginY_ << ")"
-                             << " (from " << path << ")";
+                             << " margin=(" << marginX_ << ", " << marginY_ << ")";
             return;
         }
-        AASDK_LOG(error) << "[LiteInputSource] No input_source_service found in " << path;
+        AASDK_LOG(error) << "[LiteInputSource] No input_source_service found in config";
     } catch (const std::exception& e) {
-        AASDK_LOG(error) << "[LiteInputSource] Failed to parse " << path << ": " << e.what();
+        AASDK_LOG(error) << "[LiteInputSource] Failed to parse config: " << e.what();
     }
 }
 
@@ -129,7 +112,6 @@ void InputSourceHandler::handleChannelOpenRequest(const InMessage& msg,
 
     touchChannelId_ = msg.channelId;
     touchEncryptionType_ = msg.encryptionType;
-    resolveTouchscreenResolution();
 
     aap_protobuf::service::control::message::ChannelOpenResponse response;
     response.set_status(aap_protobuf::shared::MessageStatus::STATUS_SUCCESS);

@@ -20,7 +20,7 @@ Communication between OpenAutoCore and the frontend uses shared memory (Shm). Bo
 | `TOUCH` | Frontend → Core | Touchscreen coordinates + timestamp |
 | `SENSOR` | Frontend → Core | JSON: location, night mode, driving status |
 | `MICROPHONE_AUDIO` | Frontend → Core | Microphone PCM capture |
-| `CONFIGURATION` | Frontend → Core | JSON config get/set/reset commands |
+| `CONFIGURATION` | Bidirectional | Core sends `{"action":"request_config"}` at startup; FE responds with full config JSON |
 | `CONTROL` | Frontend → Core | JSON device management commands |
 
 ## Sending (Core → Frontend)

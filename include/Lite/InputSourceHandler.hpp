@@ -46,6 +46,10 @@ public:
     /// Called from transport when a touch event arrives (HU → Phone).
     void onTouchEvent(uint64_t timestamp, const void* data, size_t size);
 
+    /// Apply config JSON (from ServiceConfig::getJson()) — extracts
+    /// touchscreen resolution and video margins.
+    void setConfig(const std::string& jsonStr);
+
 private:
     void handleChannelOpenRequest(const InMessage& msg,
                                   const uint8_t* data, size_t size);
@@ -57,8 +61,6 @@ private:
                    messenger::MessageType mt,
                    uint16_t messageId,
                    const google::protobuf::MessageLite& proto);
-
-    void resolveTouchscreenResolution();
 
     SendFn send_;
     uint32_t touchWidth_{1920};

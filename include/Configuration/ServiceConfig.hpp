@@ -26,16 +26,7 @@ namespace f1x::openauto::autoapp::configuration {
 
 class ServiceConfig {
 public:
-    ServiceConfig(std::string defaultPath, std::string userPath);
-
-    /// Load config from default JSON + optional user JSON overlay.
-    bool load();
-
-    /// Save current config to user JSON file.
-    bool save();
-
-    /// Delete user JSON and reload from defaults only.
-    bool reset();
+    ServiceConfig() = default;
 
     /// Return current config as a JSON string (pretty-printed).
     std::string getJson() const;
@@ -59,8 +50,6 @@ private:
         const nlohmann::json& j,
         aap_protobuf::service::control::message::ServiceDiscoveryResponse& out);
 
-    std::string defaultPath_;
-    std::string userPath_;
     mutable std::mutex mu_;
     nlohmann::json config_;
 };
