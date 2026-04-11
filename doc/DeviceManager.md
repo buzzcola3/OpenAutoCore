@@ -35,7 +35,7 @@ std::function<void()> onDeviceListChanged;
 
 `onDeviceReady` fires when a device connection is ready for an Android Auto session. The `App` receives the `DeviceConnection` and creates a `FrameRouter` to begin the protocol.
 
-`onDeviceListChanged` fires when devices appear/disappear/change status, so the frontend can refresh its device list.
+`onDeviceListChanged` fires on every device list mutation — devices appearing, disappearing, or changing status — so the frontend can refresh its device list. Every internal callback that modifies the device registry (`onUSBDeviceAvailable`, `onUSBPhoneDetected`, `onBtDeviceAvailable`, `onWifiClientConnected`) as well as `connectDevice()` and `disconnectDevice()` triggers this notification.
 
 ## Device Connection Flow
 
@@ -45,7 +45,7 @@ std::function<void()> onDeviceListChanged;
 3. AOAP device opens bulk endpoints → `onDeviceReady` fires
 
 **Wireless:**
-1. Phone connects via BlueZ Bluetooth profile → added to device registry
+1. Phone connects via BlueZ Bluetooth profile → added to device registry (if not already connected/connecting — BT may reconnect while WiFi session is active)
 2. `connectDevice()` → BT handshake negotiates WiFi AP details (SSID, IP, port)
 3. Phone connects over TCP → `onDeviceReady` fires
 

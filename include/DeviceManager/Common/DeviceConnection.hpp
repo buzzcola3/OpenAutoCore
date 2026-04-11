@@ -52,8 +52,15 @@ public:
 
     void setReadCallback(ReadCallback cb) { readCallback_ = std::move(cb); }
     void setErrorCallback(ErrorCallback cb) { errorCallback_ = std::move(cb); }
+    void setDisconnectCallback(ErrorCallback cb) { disconnectCallback_ = std::move(cb); }
 
 protected:
+    void fireError(const std::string& error) {
+        if (errorCallback_) errorCallback_(error);
+        if (disconnectCallback_) disconnectCallback_(error);
+    }
+
     ReadCallback readCallback_;
     ErrorCallback errorCallback_;
+    ErrorCallback disconnectCallback_;
 };

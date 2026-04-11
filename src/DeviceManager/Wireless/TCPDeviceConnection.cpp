@@ -56,7 +56,7 @@ void TCPDeviceConnection::send(const uint8_t* data, size_t len) {
         if (n < 0) {
             if (errno == EINTR) continue;
             DM_LOG(error) << "TCPDeviceConnection: write error: " << strerror(errno);
-            if (errorCallback_) errorCallback_(strerror(errno));
+            fireError(strerror(errno));
             return;
         }
         offset += static_cast<size_t>(n);
@@ -76,7 +76,7 @@ void TCPDeviceConnection::readLoop() {
         if (rc < 0) {
             if (errno == EINTR) continue;
             DM_LOG(error) << "TCPDeviceConnection: poll error: " << strerror(errno);
-            if (errorCallback_) errorCallback_(strerror(errno));
+            fireError(strerror(errno));
             break;
         }
         if (rc == 0) continue;
@@ -85,12 +85,12 @@ void TCPDeviceConnection::readLoop() {
         if (n < 0) {
             if (errno == EINTR || errno == EAGAIN) continue;
             DM_LOG(error) << "TCPDeviceConnection: read error: " << strerror(errno);
-            if (errorCallback_) errorCallback_(strerror(errno));
+            fireError(strerror(errno));
             break;
         }
         if (n == 0) {
             DM_LOG(info) << "TCPDeviceConnection: peer closed";
-            if (errorCallback_) errorCallback_("peer closed");
+            fireError("peer closed");
             break;
         }
         if (readCallback_) {

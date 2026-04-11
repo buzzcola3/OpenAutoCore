@@ -107,6 +107,7 @@ void DeviceManager::connectDevice(const std::string& deviceId) {
                 }
             }
             DM_LOG(info) << "Connecting USB device " << deviceId;
+            wireErrorCallback(deviceId, connection);
             if (onDeviceReady) onDeviceReady(deviceId, std::move(connection));
             if (onDeviceListChanged) onDeviceListChanged();
         } else {
@@ -137,6 +138,7 @@ void DeviceManager::connectDevice(const std::string& deviceId) {
                 }
             }
             DM_LOG(info) << "Connecting wireless device " << deviceId;
+            wireErrorCallback(deviceId, connection);
             if (onDeviceReady) onDeviceReady(deviceId, std::move(connection));
             if (onDeviceListChanged) onDeviceListChanged();
         } else {
@@ -203,6 +205,7 @@ void DeviceManager::onUSBDeviceAvailable(uint8_t bus, uint8_t port, uint16_t vid
                     devices_.push_back({id, "Android Auto (USB)", "usb", "connected",
                                        vid, pid, bus, port, true, nullptr, ""});
                 }
+                wireErrorCallback(id, connection);
                 if (onDeviceReady) onDeviceReady(id, std::move(connection));
                 if (onDeviceListChanged) onDeviceListChanged();
             } else {
@@ -223,6 +226,7 @@ void DeviceManager::onUSBDeviceAvailable(uint8_t bus, uint8_t port, uint16_t vid
         devices_.push_back({id, "Android Auto (USB)", "usb", "available",
                            vid, pid, bus, port, true, nullptr, ""});
     }
+    if (onDeviceListChanged) onDeviceListChanged();
 }
 
 void DeviceManager::onUSBPhoneDetected(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid) {
@@ -239,6 +243,7 @@ void DeviceManager::onUSBPhoneDetected(uint8_t bus, uint8_t port, uint16_t vid, 
         devices_.push_back({id, "Android Phone (USB)", "usb", "available",
                            vid, pid, bus, port, false, nullptr, ""});
     }
+    if (onDeviceListChanged) onDeviceListChanged();
 }
 
 void DeviceManager::onBtDeviceAvailable(const std::string& deviceId, const std::string& btAddress) {
@@ -264,6 +269,7 @@ void DeviceManager::onBtDeviceAvailable(const std::string& deviceId, const std::
         devices_.push_back({deviceId, "Android Auto (Wireless - " + btAddress + ")",
                            "wireless", "available", 0, 0, 0, 0, false, nullptr, ""});
     }
+    if (onDeviceListChanged) onDeviceListChanged();
 }
 
 void DeviceManager::onWifiClientConnected(const std::string& deviceId,
@@ -282,6 +288,7 @@ void DeviceManager::onWifiClientConnected(const std::string& deviceId,
                 }
             }
         }
+        wireErrorCallback(deviceId, connection);
         if (onDeviceReady) onDeviceReady(deviceId, std::move(connection));
         if (onDeviceListChanged) onDeviceListChanged();
         return;
@@ -297,6 +304,31 @@ void DeviceManager::onWifiClientConnected(const std::string& deviceId,
             }
         }
     }
+}
+
+// ── Connection error handling ──
+
+void DeviceManager::wireErrorCallback(const std::string& deviceId,
+                                      DeviceConnection::Pointer& connection) {
+    connection->setDisconnectCallback([this, deviceId](const std::string& error) {
+        onConnectionError(deviceId, error);
+    });
+}
+
+void DeviceManager::onConnectionError(const std::string& deviceId,
+                                      const std::string& error) {
+    DM_LOG(info) << "Connection error for " << deviceId << ": " << error;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        for (auto& d : devices_) {
+            if (d.id == deviceId) {
+                d.status = "available";
+                d.pendingConnection = nullptr;
+                break;
+            }
+        }
+    }
+    if (onDeviceListChanged) onDeviceListChanged();
 }
 
 // ── pollDevices / timers ──

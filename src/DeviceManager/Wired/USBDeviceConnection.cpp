@@ -103,7 +103,7 @@ void USBDeviceConnection::send(const uint8_t* data, size_t len) {
     if (rc != 0 && rc != LIBUSB_ERROR_TIMEOUT) {
         DM_LOG(error) << "USBDeviceConnection: send failed: "
                       << libusb_strerror(static_cast<libusb_error>(rc));
-        if (errorCallback_) errorCallback_(libusb_strerror(static_cast<libusb_error>(rc)));
+        fireError(libusb_strerror(static_cast<libusb_error>(rc)));
     }
 }
 
@@ -119,7 +119,7 @@ void USBDeviceConnection::readLoop() {
         if (rc != 0) {
             DM_LOG(error) << "USBDeviceConnection: read error: "
                           << libusb_strerror(static_cast<libusb_error>(rc));
-            if (errorCallback_) errorCallback_(libusb_strerror(static_cast<libusb_error>(rc)));
+            fireError(libusb_strerror(static_cast<libusb_error>(rc)));
             break;
         }
         if (transferred > 0 && readCallback_) {

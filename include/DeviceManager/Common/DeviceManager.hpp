@@ -92,6 +92,8 @@ private:
     void onBtDeviceAvailable(const std::string& deviceId, const std::string& btAddress);
     void onWifiClientConnected(const std::string& deviceId,
                                DeviceConnection::Pointer connection);
+    void onConnectionError(const std::string& deviceId, const std::string& error);
+    void wireErrorCallback(const std::string& deviceId, DeviceConnection::Pointer& connection);
 
     // Timer support (replaces ELL l_timeout)
     using TimerCallback = std::function<void()>;
