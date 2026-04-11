@@ -246,6 +246,17 @@ void DeviceManager::onBtDeviceAvailable(const std::string& deviceId, const std::
 
     {
         std::lock_guard<std::mutex> lock(mutex_);
+
+        // If this device is already connected or connecting, don't overwrite it.
+        // BT can reconnect while WiFi is still active.
+        for (const auto& d : devices_) {
+            if (d.id == deviceId && (d.status == "connected" || d.status == "connecting")) {
+                DM_LOG(info) << "Wireless device " << deviceId
+                             << " already " << d.status << ", ignoring BT re-announce";
+                return;
+            }
+        }
+
         devices_.erase(
             std::remove_if(devices_.begin(), devices_.end(),
                            [](const DeviceEntry& d) { return d.transport == "wireless"; }),
