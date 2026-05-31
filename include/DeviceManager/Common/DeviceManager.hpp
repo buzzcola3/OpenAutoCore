@@ -24,6 +24,7 @@
 // and receive a ready-to-use DeviceConnection via the onDeviceReady callback.
 
 #include <atomic>
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <functional>
@@ -87,13 +88,31 @@ private:
         std::string peerAddress;
     };
 
-    void onUSBDeviceAvailable(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid);
-    void onUSBPhoneDetected(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid);
-    void onBtDeviceAvailable(const std::string& deviceId, const std::string& btAddress);
+    void onUSBDeviceAvailable(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid,
+                              const std::string& name);
+    void onUSBPhoneDetected(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid,
+                            const std::string& name);
+    void onBtDeviceAvailable(const std::string& deviceId, const std::string& btAddress,
+                             const std::string& name);
     void onWifiClientConnected(const std::string& deviceId,
                                DeviceConnection::Pointer connection);
     void onConnectionError(const std::string& deviceId, const std::string& error);
-    void wireErrorCallback(const std::string& deviceId, DeviceConnection::Pointer& connection);
+
+    // ── Registry helpers (find/setStatus/removeWhere require mutex_ held) ──
+    DeviceEntry* find(const std::string& deviceId);
+    void setStatus(const std::string& deviceId, const std::string& status);
+    template <class Pred> void removeWhere(Pred pred) {
+        devices_.erase(std::remove_if(devices_.begin(), devices_.end(), pred), devices_.end());
+    }
+    void notifyListChanged();
+    // Wire the disconnect callback then hand the connection to the consumer.
+    void deliverConnection(const std::string& deviceId, DeviceConnection::Pointer connection);
+
+    static DeviceEntry makeUsbEntry(const std::string& id, const std::string& name,
+                                    const std::string& status, uint16_t vid, uint16_t pid,
+                                    uint8_t bus, uint8_t port, bool aoapReady);
+    static DeviceEntry makeWirelessEntry(const std::string& id, const std::string& name,
+                                         const std::string& status);
 
     // Timer support (replaces ELL l_timeout)
     using TimerCallback = std::function<void()>;

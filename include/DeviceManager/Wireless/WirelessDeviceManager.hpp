@@ -70,7 +70,9 @@ public:
     // Bluetooth device paired and connected (before WiFi handshake).
     // deviceId: stable reproducible ID ("wireless:<BT_MAC>").
     // btAddress: colon-separated BT MAC (e.g. "AA:BB:CC:DD:EE:FF").
-    std::function<void(const std::string& deviceId, const std::string& btAddress)> onBtDeviceAvailable;
+    // name: friendly device name from BlueZ (may be empty).
+    std::function<void(const std::string& deviceId, const std::string& btAddress,
+                       const std::string& name)> onBtDeviceAvailable;
 
 private:
     // ── Command queue ──
@@ -93,6 +95,8 @@ private:
     std::string resolveAdapterPath(const std::string& address);
     bool setAdapterProperty(const std::string& path, const std::string& name,
                             char sig, const void* value);
+    // Query the BlueZ friendly name (Alias, falling back to Name) for a device path.
+    std::string getDeviceName(const std::string& devicePath);
     void onBtNewConnection(int fd, const std::string& devicePath);
     void onBtDisconnection(const std::string& devicePath);
     void startBtReadLoop();

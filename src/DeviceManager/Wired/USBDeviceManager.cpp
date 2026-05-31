@@ -255,13 +255,14 @@ void USBDeviceManager::handleUSBDevice(libusb_device* device) {
     uint8_t bus = libusb_get_bus_number(device);
     uint8_t port = libusb_get_port_number(device);
     std::string id = "usb:" + std::to_string(bus) + ":" + std::to_string(port);
+    std::string name = readUsbDeviceName(device, desc);
 
     if (isAOAPDevice(desc)) {
         DM_LOG(info) << "USBDeviceManager: AOAP device ready: " << id
                      << " (" << std::hex << desc.idVendor << ":"
                      << desc.idProduct << std::dec << ")";
         if (onUSBDeviceAvailable) {
-            onUSBDeviceAvailable(bus, port, desc.idVendor, desc.idProduct);
+            onUSBDeviceAvailable(bus, port, desc.idVendor, desc.idProduct, name);
         }
     } else {
         DM_LOG(info) << "USBDeviceManager: non-AOAP phone detected (" << std::hex
@@ -270,9 +271,31 @@ void USBDeviceManager::handleUSBDevice(libusb_device* device) {
         if (onUSBPhoneDetected) {
             libusb_ref_device(device);
             pendingPhones_[id] = device;
-            onUSBPhoneDetected(bus, port, desc.idVendor, desc.idProduct);
+            onUSBPhoneDetected(bus, port, desc.idVendor, desc.idProduct, name);
         }
     }
+}
+
+std::string USBDeviceManager::readUsbDeviceName(libusb_device* device,
+                                                const libusb_device_descriptor& desc) const {
+    libusb_device_handle* handle = nullptr;
+    if (libusb_open(device, &handle) != 0 || !handle) return {};
+
+    unsigned char buf[256];
+    std::string manufacturer, product;
+    if (desc.iManufacturer &&
+        libusb_get_string_descriptor_ascii(handle, desc.iManufacturer, buf, sizeof(buf)) > 0) {
+        manufacturer = reinterpret_cast<char*>(buf);
+    }
+    if (desc.iProduct &&
+        libusb_get_string_descriptor_ascii(handle, desc.iProduct, buf, sizeof(buf)) > 0) {
+        product = reinterpret_cast<char*>(buf);
+    }
+    libusb_close(handle);
+
+    if (manufacturer.empty()) return product;
+    if (product.empty()) return manufacturer;
+    return manufacturer + " " + product;
 }
 
 // Classes that indicate a device is not an Android phone.

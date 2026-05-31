@@ -63,10 +63,12 @@ public:
     // ── Callbacks (set before start()) ──
 
     // AOAP-ready device appeared (after AOAP re-enumeration).
-    std::function<void(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid)> onUSBDeviceAvailable;
+    std::function<void(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid,
+                       const std::string& name)> onUSBDeviceAvailable;
 
     // Non-AOAP Android phone detected (scan only, no AOAP started).
-    std::function<void(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid)> onUSBPhoneDetected;
+    std::function<void(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid,
+                       const std::string& name)> onUSBPhoneDetected;
 
 private:
     // ── USB Hotplug ──
@@ -76,6 +78,10 @@ private:
     bool isAOAPDevice(const libusb_device_descriptor& desc) const;
     bool shouldSkipDevice(libusb_device* device, const libusb_device_descriptor& desc) const;
     void drainQueue();
+
+    // Read the USB string descriptors (manufacturer + product) into a display name.
+    std::string readUsbDeviceName(libusb_device* device,
+                                  const libusb_device_descriptor& desc) const;
 
     // ── AOAP Setup State Machine ──
     struct AoapSetup {

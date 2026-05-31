@@ -242,6 +242,7 @@ void btFrameWriteU16(std::vector<uint8_t>& buf, size_t off, uint16_t val) {
 constexpr int kDbusTimeoutMs = 5000;
 constexpr const char* kBluezSvc         = "org.bluez";
 constexpr const char* kAdapterIface     = "org.bluez.Adapter1";
+constexpr const char* kDeviceIface      = "org.bluez.Device1";
 constexpr const char* kProfileIface     = "org.bluez.Profile1";
 constexpr const char* kPropsIface       = "org.freedesktop.DBus.Properties";
 constexpr const char* kObjMgrIface      = "org.freedesktop.DBus.ObjectManager";
@@ -755,6 +756,37 @@ std::string WirelessDeviceManager::resolveAdapterPath(const std::string& address
     return "/org/bluez/hci0";
 }
 
+std::string WirelessDeviceManager::getDeviceName(const std::string& devicePath) {
+    if (!bus_ || devicePath.empty()) return {};
+
+    for (const char* prop : {"Alias", "Name"}) {
+        auto* msg = l_dbus_message_new_method_call(bus_, kBluezSvc, devicePath.c_str(),
+                                                   kPropsIface, "Get");
+        auto* b = l_dbus_message_builder_new(msg);
+        l_dbus_message_builder_append_basic(b, 's', kDeviceIface);
+        l_dbus_message_builder_append_basic(b, 's', prop);
+        l_dbus_message_builder_finalize(b);
+        l_dbus_message_builder_destroy(b);
+
+        auto* reply = dmDbusSendSync(bus_, msg, kDbusTimeoutMs);
+        if (!reply || l_dbus_message_is_error(reply)) {
+            if (reply) l_dbus_message_unref(reply);
+            continue;
+        }
+
+        struct l_dbus_message_iter variant;
+        const char* value = nullptr;
+        if (l_dbus_message_get_arguments(reply, "v", &variant) &&
+            l_dbus_message_iter_get_variant(&variant, "s", &value) && value && *value) {
+            std::string name = value;
+            l_dbus_message_unref(reply);
+            return name;
+        }
+        l_dbus_message_unref(reply);
+    }
+    return {};
+}
+
 bool WirelessDeviceManager::setAdapterProperty(const std::string& path, const std::string& name,
                                                 char sig, const void* value) {
     if (!bus_) return false;
@@ -806,7 +838,7 @@ void WirelessDeviceManager::onBtNewConnection(int fd, const std::string& deviceP
     deviceId_ = "wireless:" + btAddress_;
 
     if (onBtDeviceAvailable) {
-        onBtDeviceAvailable(deviceId_, btAddress_);
+        onBtDeviceAvailable(deviceId_, btAddress_, getDeviceName(devicePath));
     } else {
         doBeginWifiProjection();
     }
