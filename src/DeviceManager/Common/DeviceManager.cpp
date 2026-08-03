@@ -44,9 +44,15 @@ void DeviceManager::start() {
                                      const std::string& name) {
         onUSBPhoneDetected(bus, port, vid, pid, name);
     };
+    usb_.onUSBDeviceRemoved = [this](uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid) {
+        onUSBDeviceRemoved(bus, port, vid, pid);
+    };
     wireless_.onBtDeviceAvailable = [this](const std::string& deviceId, const std::string& btAddress,
                                            const std::string& name) {
         onBtDeviceAvailable(deviceId, btAddress, name);
+    };
+    wireless_.onBtDeviceDisconnected = [this](const std::string& deviceId) {
+        onBtDeviceDisconnected(deviceId);
     };
     wireless_.onWifiClientConnected = [this](const std::string& deviceId,
                                               DeviceConnection::Pointer connection) {
@@ -158,6 +164,18 @@ void DeviceManager::disconnectDevice(const std::string& deviceId) {
     }
 }
 
+void DeviceManager::sessionEnded(const std::string& deviceId) {
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        DeviceEntry* d = find(deviceId);
+        if (!d || d->status != "connected") return;
+        d->status = "available";
+        d->pendingConnection = nullptr;
+    }
+    DM_LOG(info) << "Session ended for " << deviceId;
+    notifyListChanged();
+}
+
 // ── Sub-manager callbacks ── (all fire on the ELL thread)
 
 void DeviceManager::onUSBDeviceAvailable(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid,
@@ -217,6 +235,33 @@ void DeviceManager::onUSBPhoneDetected(uint8_t bus, uint8_t port, uint16_t vid, 
     notifyListChanged();
 }
 
+void DeviceManager::onUSBDeviceRemoved(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid) {
+    std::string id = "usb:" + std::to_string(bus) + ":" + std::to_string(port);
+    bool removed = false;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        DeviceEntry* d = find(id);
+        if (!d) return;   // a hub, an unrelated device, or already gone
+
+        // A phone switching into AOAP mode leaves and comes back on the same
+        // bus/port; that departure is part of connecting, not an unplug.
+        if (d->status == "connecting") {
+            DM_LOG(info) << "USB device " << id << " left while connecting"
+                         << " (AOAP re-enumeration expected), keeping entry";
+            return;
+        }
+
+        removeWhere([&id](const DeviceEntry& e) { return e.id == id; });
+        removed = true;
+    }
+
+    if (removed) {
+        DM_LOG(info) << "USB device unplugged: " << id
+                     << " " << std::hex << vid << ":" << pid << std::dec;
+        notifyListChanged();
+    }
+}
+
 void DeviceManager::onBtDeviceAvailable(const std::string& deviceId, const std::string& btAddress,
                                         const std::string& name) {
     DM_LOG(info) << "Wireless device available: " << deviceId;
@@ -241,6 +286,32 @@ void DeviceManager::onBtDeviceAvailable(const std::string& deviceId, const std::
         devices_.push_back(makeWirelessEntry(deviceId, displayName, "available"));
     }
     notifyListChanged();
+}
+
+void DeviceManager::onBtDeviceDisconnected(const std::string& deviceId) {
+    bool removed = false;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        DeviceEntry* d = find(deviceId);
+        if (!d) return;
+
+        // Phones drop the Bluetooth link once projection is running over WiFi,
+        // so a live session outlives its BT link. Only the TCP connection going
+        // away ends that session (onConnectionError).
+        if (d->status == "connected") {
+            DM_LOG(info) << "Wireless device " << deviceId
+                         << " lost BT while connected, WiFi session still active";
+            return;
+        }
+
+        removeWhere([&deviceId](const DeviceEntry& e) { return e.id == deviceId; });
+        removed = true;
+    }
+
+    if (removed) {
+        DM_LOG(info) << "Wireless device disconnected: " << deviceId;
+        notifyListChanged();
+    }
 }
 
 void DeviceManager::onWifiClientConnected(const std::string& deviceId,

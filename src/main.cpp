@@ -103,9 +103,12 @@ public:
     /// Check for and handle asynchronous session-end events.
     void poll() {
         if (sessionEndPending_.exchange(false)) {
-            std::lock_guard<std::mutex> lock(mutex_);
-            OPENAUTO_LOG(info) << "[App] Session ended.";
-            doStop();
+            {
+                std::lock_guard<std::mutex> lock(mutex_);
+                OPENAUTO_LOG(info) << "[App] Session ended.";
+                doStop();
+            }
+            if (onSessionEnded_) onSessionEnded_();
         }
     }
 
@@ -115,6 +118,11 @@ public:
     /// Callback invoked right after a new router/session is created.
     void setOnSessionStarted(std::function<void(aasdk::FrameRouter&)> cb) {
         onSessionStarted_ = std::move(cb);
+    }
+
+    /// Callback invoked from poll() once a session has torn itself down.
+    void setOnSessionEnded(std::function<void()> cb) {
+        onSessionEnded_ = std::move(cb);
     }
 
 private:
@@ -138,6 +146,7 @@ private:
     aasdk::messenger::ICryptor::Pointer cryptor_;
     aasdk::FrameRouter::Pointer router_;
     std::function<void(aasdk::FrameRouter&)> onSessionStarted_;
+    std::function<void()> onSessionEnded_;
 };
 
 // ── Helpers ──
@@ -272,11 +281,21 @@ int main(int argc, char* argv[])
     }
     OPENAUTO_LOG(info) << "[AutoApp] Configuration received, starting device manager.";
 
-    deviceManager.onDeviceReady = [app](const std::string& deviceId,
-                                        DeviceConnection::Pointer connection) {
+    // Device currently owning the session, so its end can be reported back to
+    // the DeviceManager. Only ever touched from the main loop.
+    std::string activeDeviceId;
+
+    deviceManager.onDeviceReady = [app, &activeDeviceId](const std::string& deviceId,
+                                                         DeviceConnection::Pointer connection) {
         OPENAUTO_LOG(info) << "[AutoApp] Device ready: " << deviceId;
+        activeDeviceId = deviceId;
         app->start(std::move(connection));
     };
+    app->setOnSessionEnded([&deviceManager, &activeDeviceId]() {
+        if (activeDeviceId.empty()) return;
+        deviceManager.sessionEnded(activeDeviceId);
+        activeDeviceId.clear();
+    });
     deviceManager.onDeviceListChanged = [transport, &deviceManager]() {
         if (!transport || !transport->isRunning()) return;
         std::string s = "{\"action\":\"device_list\",\"devices\":" + deviceManager.getDeviceListJson() + "}";

@@ -50,16 +50,28 @@ enum BtWifiMsgId : uint16_t {
     BT_WIFI_START_RESPONSE    = 7,
 };
 
-static constexpr int32_t kWPA2Personal       = 2;
-static constexpr int32_t kAccessPointStatic  = 1;
+// These frames are hand-rolled rather than built from the generated protobuf
+// code, so the enum values are mirrored from the .proto definitions. Keep them
+// in step with:
+//   protobuf/aap_protobuf/service/wifiprojection/message/WifiSecurityMode.proto
+//   protobuf/aap_protobuf/service/wifiprojection/message/AccessPointType.proto
+//   protobuf/aap_protobuf/aaw/Status.proto
+static constexpr int32_t kWPA2Personal       = 5;  // WPA2_PERSONAL (2 is WEP_64)
+static constexpr int32_t kAccessPointStatic  = 0;  // STATIC (1 is DYNAMIC)
 
 static const char* wifiStatusName(int32_t s) {
     switch (s) {
+        case 1:   return "STATUS_UNSOLICITED_MESSAGE";
         case 0:   return "STATUS_SUCCESS";
         case -1:  return "STATUS_NO_COMPATIBLE_VERSION";
         case -2:  return "STATUS_WIFI_INACCESSIBLE_CHANNEL";
         case -3:  return "STATUS_WIFI_INCORRECT_CREDENTIALS";
+        case -4:  return "STATUS_PROJECTION_ALREADY_STARTED";
         case -5:  return "STATUS_WIFI_DISABLED";
+        case -6:  return "STATUS_WIFI_NOT_YET_STARTED";
+        case -7:  return "STATUS_INVALID_HOST";
+        case -8:  return "STATUS_NO_SUPPORTED_WIFI_CHANNELS";
+        case -9:  return "STATUS_INSTRUCT_USER_TO_CHECK_THE_PHONE";
         case -10: return "STATUS_PHONE_WIFI_DISABLED";
         case -11: return "STATUS_WIFI_NETWORK_UNAVAILABLE";
         default:  return "UNKNOWN";
@@ -329,8 +341,22 @@ void WirelessDeviceManager::drainCommands() {
         switch (cmd.type) {
             case Command::BeginWifi:   doBeginWifiProjection(); break;
             case Command::ReconnectBt: doReconnectBluetooth(); break;
+            case Command::BtDisconnected:
+                if (onBtDeviceDisconnected && !cmd.arg.empty()) onBtDeviceDisconnected(cmd.arg);
+                break;
         }
     }
+}
+
+// Called from the BT reader thread as well as the D-Bus thread, so the
+// notification is marshalled onto the polling thread like every other command.
+void WirelessDeviceManager::queueBtDisconnected() {
+    if (deviceId_.empty()) return;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        commandQueue_.push_back({Command::BtDisconnected, deviceId_});
+    }
+    wakeEventFd();
 }
 
 void WirelessDeviceManager::beginWifiProjection() {
@@ -511,10 +537,16 @@ void WirelessDeviceManager::pollDevices() {
 
 // ── D-Bus Profile callbacks (static) ──
 
+// ELL reads one parameter name per complete type in the return and parameter
+// signatures — first the return names, then the parameter names. Omitting them
+// makes it walk off the end of the varargs and strlen() a garbage pointer, which
+// kills the process before the profile is ever registered.
 void WirelessDeviceManager::setupProfileInterface(struct l_dbus_interface* iface) {
     l_dbus_interface_method(iface, "Release", 0, onProfileRelease, "", "");
-    l_dbus_interface_method(iface, "NewConnection", 0, onProfileNewConnection, "", "oha{sv}");
-    l_dbus_interface_method(iface, "RequestDisconnection", 0, onProfileDisconnection, "", "o");
+    l_dbus_interface_method(iface, "NewConnection", 0, onProfileNewConnection, "", "oha{sv}",
+                            "device", "fd", "fd_properties");
+    l_dbus_interface_method(iface, "RequestDisconnection", 0, onProfileDisconnection, "", "o",
+                            "device");
 }
 
 l_dbus_message* WirelessDeviceManager::onProfileRelease(struct l_dbus*, struct l_dbus_message* msg, void*) {
@@ -847,6 +879,7 @@ void WirelessDeviceManager::onBtNewConnection(int fd, const std::string& deviceP
 void WirelessDeviceManager::onBtDisconnection(const std::string& devicePath) {
     DM_LOG(info) << "WirelessDeviceManager: BT disconnected " << devicePath;
     stopBtReadLoop(false);
+    queueBtDisconnected();
 }
 
 // ── BT read loop (dedicated thread) ──
@@ -918,8 +951,14 @@ void WirelessDeviceManager::btReadLoop() {
             btBuffer_.erase(btBuffer_.begin(), btBuffer_.begin() + length + 4);
         }
     }
+    // Still flagged as reading means the loop ended because the peer went away
+    // rather than because stopBtReadLoop() asked it to quit.
+    const bool peerGone = btReading_.load();
+
     DM_LOG(info) << "WirelessDeviceManager: BT read loop exiting";
     stopBtReadLoop(true);
+
+    if (peerGone) queueBtDisconnected();
 }
 
 // ── BT message framing ──

@@ -70,11 +70,20 @@ public:
     std::function<void(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid,
                        const std::string& name)> onUSBPhoneDetected;
 
+    // Device unplugged. Fires for every non-hub device that leaves, including
+    // the transient departure a phone makes when it re-enumerates into AOAP
+    // mode, so the consumer decides what is worth acting on.
+    std::function<void(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid)> onUSBDeviceRemoved;
+
 private:
     // ── USB Hotplug ──
     static int onHotplugEvent(libusb_context* ctx, libusb_device* device,
                               libusb_hotplug_event event, void* userData);
     void handleUSBDevice(libusb_device* device);
+    // Identity of a departed device, captured in the hotplug callback: the
+    // libusb_device is unreferenced once that callback returns.
+    struct RemovedDevice { uint8_t bus; uint8_t port; uint16_t vid; uint16_t pid; };
+    void handleUSBDeviceRemoved(const RemovedDevice& removed);
     bool isAOAPDevice(const libusb_device_descriptor& desc) const;
     bool shouldSkipDevice(libusb_device* device, const libusb_device_descriptor& desc) const;
     void drainQueue();
@@ -120,6 +129,7 @@ private:
     int eventFd_ = -1;
     std::mutex mutex_;
     std::vector<libusb_device*> hotplugQueue_;
+    std::vector<RemovedDevice> removedQueue_;
     std::vector<AoapSetup*> completedAoapQueue_;
     std::vector<PendingCommand> commandQueue_;
 
@@ -128,6 +138,7 @@ private:
 
     AoapConfig aoapConfig_;
 
+    static constexpr uint16_t kLinuxRootHubVendorId = 0x1D6B;
     static constexpr uint16_t kGoogleVendorId = 0x18D1;
     static constexpr uint16_t kAOAPId         = 0x2D00;
     static constexpr uint16_t kAOAPWithAdbId  = 0x2D01;

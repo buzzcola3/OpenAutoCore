@@ -64,6 +64,11 @@ public:
     void connectDevice(const std::string& deviceId);
     void disconnectDevice(const std::string& deviceId);
 
+    /// The Android Auto session for this device ended on its own (protocol
+    /// teardown, not a transport failure). The device stays listed — it is
+    /// still plugged in or paired — but goes back to "available".
+    void sessionEnded(const std::string& deviceId);
+
     // ── Callbacks (set before start()) ──
 
     // Device is ready — connection is ready to use for Android Auto session.
@@ -92,8 +97,10 @@ private:
                               const std::string& name);
     void onUSBPhoneDetected(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid,
                             const std::string& name);
+    void onUSBDeviceRemoved(uint8_t bus, uint8_t port, uint16_t vid, uint16_t pid);
     void onBtDeviceAvailable(const std::string& deviceId, const std::string& btAddress,
                              const std::string& name);
+    void onBtDeviceDisconnected(const std::string& deviceId);
     void onWifiClientConnected(const std::string& deviceId,
                                DeviceConnection::Pointer connection);
     void onConnectionError(const std::string& deviceId, const std::string& error);

@@ -94,7 +94,8 @@ void USBDeviceManager::start() {
 
     int rc = libusb_hotplug_register_callback(
         usbContext_,
-        LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED,
+        static_cast<libusb_hotplug_event>(LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED |
+                                          LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT),
         LIBUSB_HOTPLUG_ENUMERATE,
         LIBUSB_HOTPLUG_MATCH_ANY,
         LIBUSB_HOTPLUG_MATCH_ANY,
@@ -181,6 +182,27 @@ void USBDeviceManager::stopEventThread() {
 
 int USBDeviceManager::onHotplugEvent(libusb_context*, libusb_device* device,
                                      libusb_hotplug_event event, void* userData) {
+    auto* self = static_cast<USBDeviceManager*>(userData);
+
+    if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT) {
+        // Only the cached descriptor and topology are readable now — the device
+        // is gone, so nothing that talks to it may be called here.
+        libusb_device_descriptor goneDesc;
+        if (libusb_get_device_descriptor(device, &goneDesc) != 0) return 0;
+        if (goneDesc.idVendor == kLinuxRootHubVendorId) return 0;
+
+        RemovedDevice removed{libusb_get_bus_number(device), libusb_get_port_number(device),
+                              goneDesc.idVendor, goneDesc.idProduct};
+        DM_LOG(info) << "USBDeviceManager: hotplug left " << std::hex
+                     << removed.vid << ":" << removed.pid << std::dec;
+        {
+            std::lock_guard<std::mutex> lock(self->mutex_);
+            self->removedQueue_.push_back(removed);
+        }
+        self->wakeEventFd();
+        return 0;
+    }
+
     if (event != LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED) return 0;
 
     libusb_device_descriptor desc;
@@ -189,7 +211,6 @@ int USBDeviceManager::onHotplugEvent(libusb_context*, libusb_device* device,
                      << desc.idVendor << ":" << desc.idProduct << std::dec;
     }
 
-    auto* self = static_cast<USBDeviceManager*>(userData);
     libusb_ref_device(device);
     {
         std::lock_guard<std::mutex> lock(self->mutex_);
@@ -216,11 +237,13 @@ void USBDeviceManager::pollDevices() {
 
 void USBDeviceManager::drainQueue() {
     std::vector<libusb_device*> batch;
+    std::vector<RemovedDevice> removals;
     std::vector<AoapSetup*> completedSetups;
     std::vector<PendingCommand> commands;
     {
         std::lock_guard<std::mutex> lock(mutex_);
         batch.swap(hotplugQueue_);
+        removals.swap(removedQueue_);
         completedSetups.swap(completedAoapQueue_);
         commands.swap(commandQueue_);
     }
@@ -231,6 +254,9 @@ void USBDeviceManager::drainQueue() {
     for (auto* dev : batch) {
         handleUSBDevice(dev);
         libusb_unref_device(dev);
+    }
+    for (const auto& removed : removals) {
+        handleUSBDeviceRemoved(removed);
     }
     for (auto& cmd : commands) {
         switch (cmd.type) {
@@ -273,6 +299,26 @@ void USBDeviceManager::handleUSBDevice(libusb_device* device) {
             pendingPhones_[id] = device;
             onUSBPhoneDetected(bus, port, desc.idVendor, desc.idProduct, name);
         }
+    }
+}
+
+void USBDeviceManager::handleUSBDeviceRemoved(const RemovedDevice& removed) {
+    if (!running_) return;
+
+    std::string id = "usb:" + std::to_string(removed.bus) + ":" + std::to_string(removed.port);
+
+    // Drop the reference held for a phone awaiting AOAP setup — the handle is
+    // dead now, and a re-plug queues a fresh one.
+    if (auto it = pendingPhones_.find(id); it != pendingPhones_.end()) {
+        libusb_unref_device(it->second);
+        pendingPhones_.erase(it);
+    }
+
+    DM_LOG(info) << "USBDeviceManager: device removed: " << id
+                 << " (" << std::hex << removed.vid << ":" << removed.pid << std::dec << ")";
+
+    if (onUSBDeviceRemoved) {
+        onUSBDeviceRemoved(removed.bus, removed.port, removed.vid, removed.pid);
     }
 }
 
@@ -326,7 +372,7 @@ static bool isAndroidInterface(const libusb_interface_descriptor& alt) {
 
 bool USBDeviceManager::shouldSkipDevice(libusb_device* device,
                                         const libusb_device_descriptor& desc) const {
-    if (desc.idVendor == 0x1d6b) return true;
+    if (desc.idVendor == kLinuxRootHubVendorId) return true;
     if (isAOAPDevice(desc)) return false;
     if (desc.bDeviceClass != 0) return isSkippedClass(desc.bDeviceClass);
 

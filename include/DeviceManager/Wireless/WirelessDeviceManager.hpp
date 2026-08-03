@@ -74,15 +74,23 @@ public:
     std::function<void(const std::string& deviceId, const std::string& btAddress,
                        const std::string& name)> onBtDeviceAvailable;
 
+    // Bluetooth link to the phone went away — BlueZ asked us to disconnect, or
+    // the RFCOMM socket closed on its own. Phones routinely drop BT once the
+    // WiFi session is up, so this is not by itself the end of a session.
+    // Delivered on the polling thread.
+    std::function<void(const std::string& deviceId)> onBtDeviceDisconnected;
+
 private:
     // ── Command queue ──
-    enum class Command { BeginWifi, ReconnectBt };
-    struct PendingCommand { Command type; };
+    enum class Command { BeginWifi, ReconnectBt, BtDisconnected };
+    struct PendingCommand { Command type; std::string arg; };
     void drainCommands();
     void wakeEventFd();
 
     void doBeginWifiProjection();
     void doReconnectBluetooth();
+    // Queue a BT-loss notification for delivery on the polling thread.
+    void queueBtDisconnected();
 
     // ── TCP Listener ──
     void setupTCPListener(uint16_t port);

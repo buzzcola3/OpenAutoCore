@@ -174,9 +174,13 @@ void InputSourceHandler::onTouchEvent(uint64_t timestamp,
     uint32_t px = toPixel(normX, touchWidth_,  marginX_);
     uint32_t py = toPixel(normY, touchHeight_, marginY_);
 
-    AASDK_LOG(info) << "[LiteInputSource] TOUCH norm=(" << normX << ", " << normY
-                    << ") px=(" << px << ", " << py << ") action=" << action
-                    << " ptr=" << pointerId;
+    // ACTION_MOVED arrives for every frame of a drag, which floods the log with
+    // nothing useful — only the transitions are worth recording.
+    if (action != aap_protobuf::service::inputsource::message::PointerAction::ACTION_MOVED) {
+        AASDK_LOG(debug) << "[LiteInputSource] TOUCH norm=(" << normX << ", " << normY
+                         << ") px=(" << px << ", " << py << ") action=" << action
+                         << " ptr=" << pointerId;
+    }
 
     aap_protobuf::service::inputsource::message::InputReport inputReport;
     inputReport.set_timestamp(timestamp);
